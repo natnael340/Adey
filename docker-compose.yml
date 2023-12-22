@@ -1,0 +1,62 @@
+version: "3.9"
+
+volumes:
+  adey_backend_db_data: {}
+
+
+services:
+  db:
+    container_name: adey_db
+    image: adey_db
+    build: ./devops/docker/postgres
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    ports:
+      - "${DOCKER_POSTGRES_PORT}:5434"
+    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_locks_per_transaction=1024
+    volumes:
+      - adey_backend_db_data:/var/lib/postgresql/data
+    networks:
+      - adey_network
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  
+  adey_backend:
+    image: adey_backend
+    container_name: adey_backend
+    build:
+      dockerfile: ./devops/docker/python/Dockerfile
+      context: ./
+    restart: on-failure
+    ports:
+      - "${DOCKER_BACKEND_PORT}:8000"
+    working_dir: /usr/src/app
+    environment:
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=*
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DB_NAME=print_avenue
+      - DJANGO_SECRET_KEY=django-insecure--&)201ee(0tbxek5224g(v^opym^lx0lt)m%qacjh*rmxqth0e
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - adey_network
+    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    stdin_open: true
+    tty: true
+
+networks:
+  adey_network:
+    ipam:
+      driver: default
+
