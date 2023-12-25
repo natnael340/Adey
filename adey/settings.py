@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 import environ
 
 env = environ.Env()
@@ -18,18 +19,21 @@ env = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str("DJANGO_SECRET_KEY", "")
-
+SECRET_KEY = env.str("DJANGO_SECRET_KEY", "djangosimplesecreatkey")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [env.str("ALLOWED_HOSTS", "*")]
 
+OPENAI_API_KEY = env.str("OPENAI_API_KEY", "")
+PG_VECTOR_DB_URL = env.str("PG_VECTOR_DB_URL", "")
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 
 # Application definition
 
@@ -41,11 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "adey_apps.users",
+    "adey_apps.rag",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "drf_yasg",
+    "django_celery_results",
 ]
+CELERY_RESULT_BACKEND = 'django-db'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

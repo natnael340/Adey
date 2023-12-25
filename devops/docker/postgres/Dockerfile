@@ -1,3 +1,3 @@
-FROM postgres:15
+FROM ankane/pgvector
 
 HEALTHCHECK CMD pg_isready -U postgres

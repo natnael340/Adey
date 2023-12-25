@@ -22,11 +22,21 @@ services:
     networks:
       - adey_network
   
-  rabbitmq:
+  broker:
     image: rabbitmq:3-management
+    hostname: rabbit1
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=/
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL} 
     ports:
       - "5672:5672"
       - "15672:15672"
+    expose:
+      - "5672"
+    networks:
+      - adey_network
   
   adey_backend:
     image: adey_backend
