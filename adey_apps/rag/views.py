@@ -104,6 +104,7 @@ class MessageListCreateViewSet(ListCreateAPIView):
 
 
 class MessageResponseViewSet(GenericViewSet):
+    serializer_class = MessageSerializer
     @action(methods=["GET"], detail=False, url_path="status")
     def get_status(self, *args, **kwargs):
         task_id = kwargs.get("task_id", None)
