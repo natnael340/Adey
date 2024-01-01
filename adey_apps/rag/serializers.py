@@ -5,12 +5,15 @@ from adey_apps.rag.models import Chat, Resource, Message
 
 
 class ChatSerializer(serializers.ModelSerializer):
+    identifier = serializers.UUIDField(read_only=True)
     class Meta:
         model = Chat
-        fields = ('name', 'slug', 'assistant_name', 'assistant_description')
+        fields = ('identifier', 'name', 'slug', 'assistant_name', 'assistant_description')
     def validate(self, attrs):
         attrs['user'] = self.context.get('request').user
         return super().validate(attrs)
+    
+
     
 
 class ResourceSerializer(serializers.ModelSerializer):

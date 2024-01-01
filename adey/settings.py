@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "adey_apps.users",
     "adey_apps.rag",
+    "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
@@ -58,6 +59,7 @@ CELERY_RESULT_BACKEND = 'django-db'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -133,6 +135,10 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS512"
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000"
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

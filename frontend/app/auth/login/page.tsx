@@ -3,10 +3,14 @@
 import React, { FormEventHandler, useRef, useState } from "react";
 import Image from "next/image";
 import { NextPage } from "next";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { Alert } from "flowbite-react";
+import { HiInformationCircle } from "react-icons/hi";
 
 const login: NextPage = (props): JSX.Element => {
+  const { data: session, status } = useSession();
   const [userInfo, setUserInfo] = useState({ email: "", password: "" });
+  const [showAlert, setShowAlert] = useState({ show: false, message: "" });
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -30,13 +34,27 @@ const login: NextPage = (props): JSX.Element => {
         email: _email,
         password: _password,
         redirect: false,
+        callbackUrl: "/dashboard",
       });
+      if (response?.error) {
+        setShowAlert({ show: true, message: response.error });
+        setTimeout(() => setShowAlert({ show: false, message: "" }), 3000);
+      }
+      if (response?.status == 200) {
+        // @ts-ignore
+        window.location = "http://localhost:3000/dashboard";
+      }
     } catch (e) {
       console.error(e);
     }
 
     console.log("");
   };
+
+  if (session) {
+    // @ts-ignore
+    window.location = "http://localhost:3000/dashboard";
+  }
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -58,6 +76,14 @@ const login: NextPage = (props): JSX.Element => {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Sign in to your account
             </h1>
+            {showAlert.show ? (
+              <Alert color="failure" icon={HiInformationCircle}>
+                <span className="font-medium">Login failed!</span>{" "}
+                {showAlert.message}
+              </Alert>
+            ) : (
+              <></>
+            )}
             <form
               className="space-y-4 md:space-y-6"
               action="#"

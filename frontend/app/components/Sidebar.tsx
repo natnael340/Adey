@@ -18,7 +18,14 @@ type PropTypes = {
 };
 const sidebar = ({ page }: PropTypes) => {
   return (
-    <Sidebar aria-label="Default sidebar example" className="h-screen">
+    <Sidebar
+      aria-label="Default sidebar example"
+      className="h-full min-h-screen pt-5 px-2"
+      theme={{ root: { inner: "bg-white" } }}
+    >
+      <Sidebar.Logo href="/" img="/adey_logo.png" imgAlt="Adey logo">
+        Adey
+      </Sidebar.Logo>
       <Sidebar.Items>
         <Sidebar.ItemGroup>
           <Sidebar.Item

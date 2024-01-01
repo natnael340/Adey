@@ -3,6 +3,9 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const ALLOWED_PROVIDERS = ["credentials"];
+const getCurrentEpoch = () => {
+  return Math.floor(new Date().getTime() / 1000);
+};
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -26,7 +29,7 @@ const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         try {
           const { data } = await axios({
-            url: "http://localhost:8000/api/v1/auth/login",
+            url: `${process.env.NEXTAUTH_BACKEND_URL}auth/login`,
             method: "POST",
             data: credentials,
           });
@@ -56,7 +59,30 @@ const authOptions: NextAuthOptions = {
         // @ts-ignore
         token.accessToken = user.token;
         // @ts-ignore
-        token.refresh_token = user.refresh_token;
+        token.refresh_token = user.refresh;
+        token["ref"] =
+          getCurrentEpoch() +
+          parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME || "0");
+        return token;
+      }
+      // @ts-ignore
+      if (getCurrentEpoch() > token.ref) {
+        try {
+          const { data } = await axios({
+            method: "POST",
+            url: `${process.env.NEXTAUTH_BACKEND_URL}token/refresh/`,
+            data: {
+              refresh: token.refresh_token,
+            },
+          });
+          token.accessToken = data.access;
+          token.ref =
+            getCurrentEpoch() +
+            parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME || "0");
+        } catch (error: any) {
+          const x: AxiosError = error;
+          console.error(x.response?.data);
+        }
       }
       return token;
     },

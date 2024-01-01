@@ -61,7 +61,7 @@ class MessageListCreateViewSet(ListCreateAPIView):
             chat = Chat.objects.get(identifier=chat_id)
             if not user_session_id:
                 user_session_id = uuid4().hex
-                Message.objects.create(chat=chat, session_id=user_session_id, response="Hello!")
+                Message.objects.create(chat=chat, session_id=user_session_id, response="Hello there! We're glad you're here. How may we help you?")
             self.kwargs["user_session_id"] = user_session_id
             return  Message.objects.filter(chat=chat, session_id=user_session_id)
         except Chat.DoesNotExist:

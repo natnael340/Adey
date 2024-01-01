@@ -29,6 +29,10 @@ const config: Config = {
           "900": "#1e3a8a",
           "950": "#172554",
         },
+        chat: {
+          query: "#4180DD",
+          response: "#EDD447",
+        },
       },
     },
   },

@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 type PropTypes = {
+  slug: string;
   name: string;
   characters: string[];
   description: string;
@@ -10,6 +11,7 @@ type PropTypes = {
   image: string;
 };
 const ChatCard = ({
+  slug,
   name,
   characters,
   description,
@@ -20,14 +22,16 @@ const ChatCard = ({
   return (
     <a
       className="rounded-lg shadow-lg flex flex-row gap-x-2 w-[500px] cursor-pointer"
-      href="#"
+      href={`chats/${slug}`}
     >
       <div className="pl-5 py-5">
-        <h1 className="text-lg font-bold">{name}</h1>
+        <h1 className="text-lg font-bold capitalize">{name}</h1>
         <span className="text-sm text-gray-400 capitalize">
           {characters.join(" | ")}
         </span>
-        <p className="text-sm text-gray-400 leading-none my-2">{description}</p>
+        <p className="text-sm text-gray-400 leading-none my-2 text-ellipsis line-clamp-3">
+          {description}
+        </p>
         <div className="flex flex-row gap-x-2 mt-5">
           <div className="flex rounded-full flex-row gap-x-2 items-center bg-[#EDD447]">
             <p className="pl-3 text-sm">Resources</p>
