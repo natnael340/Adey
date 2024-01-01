@@ -3,7 +3,6 @@ version: "3.9"
 volumes:
   adey_backend_db_data: {}
 
-
 services:
   db:
     container_name: adey_db
@@ -21,7 +20,7 @@ services:
       - adey_backend_db_data:/var/lib/postgresql/data
     networks:
       - adey_network
-  
+
   broker:
     image: rabbitmq:3-management
     hostname: rabbit1
@@ -29,7 +28,7 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
       - RABBITMQ_DEFAULT_VHOST=/
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL} 
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -37,7 +36,7 @@ services:
       - "5672"
     networks:
       - adey_network
-  
+
   adey_backend:
     image: adey_backend
     container_name: adey_backend
@@ -55,6 +54,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - DB_NAME=print_avenue
       - DJANGO_SECRET_KEY=django-insecure--&)201ee(0tbxek5224g(v^opym^lx0lt)m%qacjh*rmxqth0e
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - db
     volumes:
@@ -69,4 +69,3 @@ networks:
   adey_network:
     ipam:
       driver: default
-
