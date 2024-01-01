@@ -36,6 +36,7 @@ const ChatBox = ({ hidden, set_chat_hidden, identifier }: PropTypes) => {
           const { data } = await axios<MessageType[]>({
             url: `http://127.0.0.1:8000/api/v1/rag/${identifier}/messages/`,
             method: "GET",
+            withCredentials: true,
           });
           setMessage(data);
         } catch (error) {
