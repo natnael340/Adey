@@ -3,6 +3,7 @@ import json
 from django.urls import reverse
 
 from adey_apps.rag.serializers import ChatCreateSerializer
+from adey_apps.rag.models import Chat
 from adey_apps.rag.views import ChatUpdateAPIView
 from adey_apps.rag.tests.conftest import CHAT_DATA
 
@@ -24,6 +25,9 @@ def chat_request(rf, user):
 def test_chat_create_view_set_create_chat_instance(logged_in_client ):
     response = logged_in_client.post(reverse(CHAT_CREATE_URL_NAME), data=CHAT_DATA)
     assert response.status_code == 201
+
+    chat = Chat.objects.last()
+    assert chat.name == CHAT_DATA["name"]
 
 def test_chat_update_view_set_get_query_set_returns_only_chats_for_the_user(chat_request, user, chat_factory):
     chats = chat_factory.create_batch(3, user=user)

@@ -33,6 +33,9 @@ class ChatSerializer(serializers.ModelSerializer):
 
     def get_assistant_picture_url(self, instance):
         if instance.assistant_picture:
+            request = self.context.get("request", None)
+            if request:
+                return request.build_absolute_uri(instance.assistant_picture.url)
             return instance.assistant_picture.url
 
         return ""
@@ -49,7 +52,14 @@ class ChatCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = (
-            'identifier', 'name', 'slug', 'assistant_name', 'business_description', 'assistant_picture_data', 'business_name', 'assistant_characters',
+            'identifier', 
+            'name', 
+            'slug', 
+            'assistant_name', 
+            'business_description', 
+            'assistant_picture_data', 
+            'business_name', 
+            'assistant_characters',
         )
 
     def get_assistant_picture_url(self, instance):
@@ -66,18 +76,18 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         else:
             return value 
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        attrs['user'] = self.context.get('request').user
-        picture = attrs.pop("assistant_picture_data", None)
+    def create(self, validated_data):
+
+        validated_data['user'] = self.context.get('request').user
+        picture = validated_data.pop("assistant_picture_data", None)
+        import pdb
+        pdb.set_trace()
         if picture:
             file_format, data = picture.split(";base64,")
             file_name = str(int(time.time()))
             extension = file_format.split("/")[1]
-            attrs["assistant_picture"] = ContentFile(base64.b64decode(data))
-        return attrs
-
-    def create(self, validated_data):
+            validated_data["assistant_picture"] = ContentFile(base64.b64decode(data), f"{file_name}.{extension}")
+        
         assistant_characters = validated_data.pop("assistant_characters")
         instance = super().create(validated_data)
         characters = []
