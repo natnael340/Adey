@@ -1,0 +1,99 @@
+import openai
+
+from langchain.document_loaders import DirectoryLoader, TextLoader
+from langchain.schema import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores.chroma import Chroma
+from langchain.vectorstores.pgvector import PGVector
+from langchain.prompts import PromptTemplate
+from langchain.chat_models.openai import ChatOpenAI
+from langchain.chains import ConversationalRetrievalChain, LLMChain
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory, PostgresChatMessageHistory
+from adey_apps.rag.models import Chat
+from django.utils.encoding import force_str
+from django.conf import settings
+
+openai.api_key = settings.OPENAI_API_KEY
+
+
+class Agent:
+    def __init__(self, chat: Chat):
+        self.chat = chat
+        PROMPT_TEMPLATE = """You're a PrintAvenue customer support bot and your name is Adey.
+        As a PrintAvenue customer support bot, your goal is to provide accurate 
+        and helpful information about PrintAvenue, a print on demand businsess which desing, 
+        and print unique design. You should answer user inquiries based on the 
+        context provided and history also avoid making up answers. If you don't know the answer, 
+        simply state that you don't know and kindly ask if they have another question. Remember to provide relevant information 
+        about PrintAvenue's features, benefits, and use cases to assist the user in 
+        understanding its value for designing unique print on demand product.
+        You're the only customer support team, do not refer to other customer support teams.
+        You only provide short and accurate answers
+
+        Context:
+        {context}
+
+        Chat History:
+        {chat_history}
+
+
+        Human: {question}
+        AI: """
+        self.prompt = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "chat_history", "question"])
+
+    def build_agent(self):
+        resources = self.chat.resource_set.all()
+        documents: Document = []
+        for resource in resources:
+            loader = TextLoader(resource.document.path)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+            docs = loader.load_and_split(text_splitter)
+            documents.extend(docs)
+        embedding = OpenAIEmbeddings()
+        db = PGVector.from_documents(
+                    embedding=embedding,
+                    documents=docs,
+                    collection_name=force_str(self.chat.identifier),
+                    connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+            )
+        if db:
+            return {"status": "SUCCESS"}
+        
+        return {"status": "FAILURE"}
+    
+    def get_db_from_collection(self):
+        return PGVector(
+            collection_name=force_str(self.chat.identifier),
+            connection_string=settings.PG_VECTOR_DB_URL,
+            embedding_function=OpenAIEmbeddings()
+        )
+    
+    def setup_chain(self, user_session_id: str, new_chat: bool = False):
+        db = self.get_db_from_collection()
+        self.chain = ConversationalRetrievalChain.from_llm(
+            llm= ChatOpenAI(), 
+            retriever=db.as_retriever(search_kwargs={'k': 3}), 
+            combine_docs_chain_kwargs={"prompt": self.prompt},
+        )
+        self.history = PostgresChatMessageHistory(
+            connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+            session_id=user_session_id,
+        )
+        if new_chat:
+            self.history.add_ai_message("Hello! How can I assist you today?")
+
+    def query(self, question: str):
+        if not self.chain:
+            raise ValueError("Chain not initialized.")
+
+        response = self.chain({"question": question, "chat_history": self.history.messages})
+        self.history.add_user_message(question)
+        self.history.add_ai_message(response["answer"])
+
+        return response["answer"]
+        
+
+        
+
+    

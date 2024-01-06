@@ -4,6 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 ENV PYTHONUNBUFFERED 1
 
+
 #install and use pipenv
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip

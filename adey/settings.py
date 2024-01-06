@@ -39,6 +39,7 @@ CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,8 +54,22 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "django_celery_results",
+    "channels",
 ]
 CELERY_RESULT_BACKEND = 'django-db'
+
+
+# ASGI
+ASGI_APPLICATION = "adey.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",
+        "CONFIG": {
+            "host": env.str("RABBITMQ_ASGI_URL", "amqp://adey_backend:secret@broker:5672/asgi"),
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,3 +179,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.User"
+
+ALLOWED_IMAGE_EXTENSIONS = ["jpg", "png", "jpeg"]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

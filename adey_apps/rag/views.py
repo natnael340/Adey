@@ -4,9 +4,9 @@ from django.utils import timezone
 from django.http import Http404
 from django.conf import settings
 
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
@@ -15,14 +15,29 @@ from rest_framework.response import Response
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
-from adey_apps.rag.serializers import ChatSerializer, MessageSerializer, ResourceSerializer
-from adey_apps.rag.models import Chat, Resource, Message
+from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer
+from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
 
 # Create your views here.
 
-class ChatViewSet(ModelViewSet):
+class ChatViewSet(ReadOnlyModelViewSet):
     serializer_class = ChatSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "slug"
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        return Chat.objects.filter(user=self.request.user)
+    
+
+class ChatCreateAPIView(CreateAPIView):
+    serializer_class = ChatCreateSerializer
+    permission_classes = (IsAuthenticated,)
+    
+
+class ChatUpdateAPIView(UpdateAPIView):
+    serializer_class = ChatCreateSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
@@ -61,9 +76,9 @@ class MessageListCreateViewSet(ListCreateAPIView):
             chat = Chat.objects.get(identifier=chat_id)
             if not user_session_id:
                 user_session_id = uuid4().hex
-                Message.objects.create(chat=chat, session_id=user_session_id, response="Hello there! We're glad you're here. How may we help you?")
+                Message.objects.create(chat=chat, session_id=user_session_id, message="Hello there! We're glad you're here. How may we help you?", message_type=MessageTypeChoices.AI)
             self.kwargs["user_session_id"] = user_session_id
-            return  Message.objects.filter(chat=chat, session_id=user_session_id)
+            return  Message.objects.filter(chat=chat, session_id=user_session_id).order_by("created")
         except Chat.DoesNotExist:
             raise Http404
    
@@ -74,8 +89,8 @@ class MessageListCreateViewSet(ListCreateAPIView):
         user_session_id = self.request.COOKIES.get("user_session_id", uuid4())
         try:
             chat = Chat.objects.filter(identifier=chat_id).first()
-            serializer.save(chat=chat, session_id=user_session_id)
-            result = get_rag_response.delay(chat_id, user_session_id, self.request.data["inquiry"])
+            serializer.save(chat=chat, session_id=user_session_id, message_type=MessageTypeChoices.HUMAN)
+            result = get_rag_response.delay(chat_id, user_session_id, self.request.data["message"])
             self.kwargs["user_session_id"] = user_session_id
             self.kwargs["task_id"] = result.task_id
         except Chat.DoesNotExist:
