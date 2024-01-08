@@ -20,32 +20,35 @@ class ChatConsumer(JsonWebsocketConsumer):
         res_headers = {}
         
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        self.user_session_id = headers.get(b"cookie", None)
+        user_session_id = headers.get(b"cookie", None)
+        if not user_session_id:
+            raise DenyConnection("Session ID not set")
+        self.session_id = user_session_id.decode("utf-8").split("=")[1]
 
         try:
             chat = Chat.objects.get(identifier=self.chat_id)
             self.chat = chat
             self.agent = Agent(chat)
-
-            if not self.user_session_id:
-                self.user_session_id = uuid4().hex
-                res_headers["Set-Cookie"] = f"user_session_id={self.user_session_id}"
-                self.accept(subprotocol=(None, res_headers))
+            initial_message_exists = Message.objects.filter(chat=chat, session_id=self.session_id).exists()
+            if not initial_message_exists and self.session_id:
+                self.accept()
                 initial_message = "Hello! How can I assist you today?"
                 Message.objects.create(
                     chat=chat, 
-                    session_id=self.user_session_id, 
+                    session_id=self.session_id, 
                     message=initial_message,
                     message_type=MessageTypeChoices.AI,
                 )
-                self.agent.setup_chain(self.user_session_id, new_chat=True)
+                self.agent.setup_chain(self.session_id, new_chat=True)
                 self.send_json({
                     "message_type": MessageTypeChoices.AI,
                     "message": initial_message,
                 })
+            elif not self.session_id:
+                raise DenyConnection("Session ID not set")
             else:
-                self.user_session_id = self.user_session_id.decode("utf-8").split("=")[1]
-                self.agent.setup_chain(self.user_session_id)
+                self.session_id = self.session_id
+                self.agent.setup_chain(self.session_id)
                 self.accept()        
         except Chat.DoesNotExist:
             raise DenyConnection("Chat with this identifier does not exist.")
@@ -53,7 +56,7 @@ class ChatConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs):
         Message.objects.create(
             chat=self.chat, 
-            session_id=self.user_session_id, 
+            session_id=self.session_id, 
             message=content["message"],
             message_type=MessageTypeChoices.HUMAN,
         )
@@ -61,7 +64,7 @@ class ChatConsumer(JsonWebsocketConsumer):
 
         Message.objects.create(
             chat=self.chat, 
-            session_id=self.user_session_id, 
+            session_id=self.session_id, 
             message=res,
             message_type=MessageTypeChoices.AI,
         )

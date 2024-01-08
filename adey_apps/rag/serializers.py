@@ -18,6 +18,9 @@ class ChatSerializer(serializers.ModelSerializer):
     identifier = serializers.UUIDField(read_only=True)
     assistant_picture_url = serializers.SerializerMethodField()
     assistant_characters = AssistantCharacterSerializer(many=True)
+    resources = serializers.SerializerMethodField(read_only=True)
+    conversations = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Chat
         fields = (
@@ -28,7 +31,9 @@ class ChatSerializer(serializers.ModelSerializer):
             'business_description',
             'assistant_name', 
             "assistant_characters",
-            "assistant_picture_url"
+            "assistant_picture_url",
+            "resources",
+            "conversations",
         )
 
     def get_assistant_picture_url(self, instance):
@@ -39,6 +44,13 @@ class ChatSerializer(serializers.ModelSerializer):
             return instance.assistant_picture.url
 
         return ""
+    
+    def get_resources(self, instance):
+        return instance.resource_set.count()
+    
+    def get_conversations(self, instance):
+        return instance.message_set.count()
+    
     def validate(self, attrs):
         attrs['user'] = self.context.get('request').user
         return super().validate(attrs)
@@ -80,8 +92,6 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 
         validated_data['user'] = self.context.get('request').user
         picture = validated_data.pop("assistant_picture_data", None)
-        import pdb
-        pdb.set_trace()
         if picture:
             file_format, data = picture.split(";base64,")
             file_name = str(int(time.time()))
@@ -126,6 +136,57 @@ class ResourceSerializer(serializers.ModelSerializer):
    
 class MessageSerializer(serializers.ModelSerializer):
     message_type = serializers.CharField(read_only=True)
+    assistant_name = serializers.SerializerMethodField(read_only=True)
+    assistant_role = serializers.SerializerMethodField(read_only=True)
+    assistant_pic = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Message
-        fields = ('username', 'message', 'message_type')
+        fields = ('username', 'message', 'message_type', "assistant_name", "assistant_role", "assistant_pic")
+
+    def get_assistant_name(self, obj):
+        return obj.chat.assistant_name
+    
+    def get_assistant_role(self, obj):
+        return obj.chat.assistant_role
+    
+    def get_assistant_pic(self, obj):
+        if obj.chat.assistant_picture:
+            request = self.context.get("request", None)
+            if request:
+                return request.build_absolute_uri(obj.chat.assistant_picture.url)
+            return obj.chat.assistant_picture.url
+        return ""
+    
+
+class ChatBotSerializer(serializers.Serializer):
+    messages = serializers.SerializerMethodField(read_only=True)
+    assistant_name = serializers.SerializerMethodField(read_only=True)
+    assistant_role = serializers.SerializerMethodField(read_only=True)
+    assistant_pic = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Chat
+        fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic',)
+
+    def get_messages(self, obj):
+        request = self.context.get('request')
+        if request:
+            user_session_id = request.COOKIES.get("user_session_id", "")
+            messages = obj.message_set.all().filter(session_id=user_session_id)
+
+            return MessageSerializer(instance=messages, many=True).data
+        return []
+
+    def get_assistant_name(self, obj):
+        return obj.assistant_name
+    
+    def get_assistant_role(self, obj):
+        return obj.assistant_role
+    
+    def get_assistant_pic(self, obj):
+        if obj.assistant_picture:
+            request = self.context.get("request", None)
+            if request:
+                return request.build_absolute_uri(obj.assistant_picture.url)
+            return obj.assistant_picture.url
+        return ""

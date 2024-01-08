@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
-from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer
+from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer, ChatBotSerializer
 from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
 
@@ -81,8 +81,6 @@ class MessageListCreateViewSet(ListCreateAPIView):
             return  Message.objects.filter(chat=chat, session_id=user_session_id).order_by("created")
         except Chat.DoesNotExist:
             raise Http404
-   
-
     
     def perform_create(self, serializer):
         chat_id = self.kwargs.get('chat_id')
@@ -130,3 +128,20 @@ class MessageResponseViewSet(GenericViewSet):
             "task_id": task_id,
             "progress": info
         }, status=status.HTTP_200_OK)
+
+
+class ChatBotApiView(RetrieveAPIView):
+    serializer_class = ChatBotSerializer
+    permission_classes = (AllowAny,)
+    queryset = Chat.objects.all()
+    lookup_field="identifier"
+    lookup_url_kwarg="identifier"
+
+    def retrieve(self, request, *args, **kwargs):
+        response =  super().retrieve(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            user_session_id = uuid4().hex
+            if not self.request.COOKIES.get("user_session_id", None):
+                response.set_cookie("user_session_id", user_session_id, max_age=604800)
+            
+        return response

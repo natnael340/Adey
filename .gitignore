@@ -2,3 +2,4 @@ venv
 .env
 
 ./frontend/node_modules/
+./chat_widget/node_modules/

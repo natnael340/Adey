@@ -45,6 +45,7 @@ class Chat(BaseModel):
     assistant_name = models.CharField("Assistant name", max_length=256)
     assistant_picture = models.ImageField("Assistant picture", null=True, blank=True)
     assistant_characters = models.ManyToManyField(verbose_name="Assistant Characters", to=AssistantCharacter, blank=True)
+    assistant_role = models.CharField(max_length=256, blank=True)
     user = models.ForeignKey(to="users.User", on_delete=models.CASCADE)
 
     class Meta:
