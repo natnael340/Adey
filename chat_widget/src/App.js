@@ -12,6 +12,12 @@ function App() {
   const [online, setOnline] = useState(false);
   const [messages, setMessages] = useState([]);
   const [unseenCount, setUnseenCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [chatProfile, setChatProfile] = useState({
+    assistant_name: "",
+    assistant_role: "",
+    assistant_pic: null,
+  });
   useEffect(() => {
     if (chat_window.current) {
       chat_window.current.scrollTop = chat_window.current.scrollHeight;
@@ -27,21 +33,39 @@ function App() {
   }, [showChatBot]);
   useEffect(() => {
     (async () => {
-      const response = await fetch(
-        `http://192.168.51.172:8000/api/v1/rag/${CHAT_ID}/messages/`
-      );
-      if (!response.ok) throw new Error("Request failed");
-      const data = await response.json();
-      const msgs = data.map((msg) => ({
-        message: msg.message,
-        message_type: msg.message_type,
-        seen: showChatBot,
-      }));
-      setMessages(msgs);
+      try {
+        const response = await fetch(
+          `http://192.168.51.172:8000/api/v1/rag/chat_bot/${CHAT_ID}/`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+        if (!response.ok) throw new Error("Request failed");
+        const data = await response.json();
+
+        const msgs = data.messages.map((msg) => ({
+          message: msg.message,
+          message_type: msg.message_type,
+          seen: showChatBot,
+        }));
+
+        setChatProfile({
+          assistant_name: data.assistant_name,
+          assistant_role: data.assistant_role,
+          assistant_pic: data.assistant_pic,
+        });
+        setMessages(msgs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
+
   const { readyState, sendJsonMessage } = useWebSocket(
-    `ws://127.0.0.1:8000/rag/${CHAT_ID}/messages/`,
+    `ws://192.168.51.172:8000/rag/${CHAT_ID}/messages/`,
     {
       onOpen: () => {
         setOnline(true);
@@ -60,7 +84,8 @@ function App() {
           },
         ]);
       },
-    }
+    },
+    !loading && chatProfile.assistant_name !== ""
   );
   const sendMessage = () => {
     sendJsonMessage({
@@ -83,20 +108,33 @@ function App() {
             : "hidden"
         }`}
       >
-        <div className="flex flex-row items-center justify-between w-full rounded-lg bg-[#FFFF00] bg-opacity-25 px-3 py-2">
+        <div className="flex flex-row items-center justify-between w-full rounded-lg bg-[#FFFF00] bg-opacity-25 px-3 py-2 rounded-t-lg">
           <div className="flex flex-row items-center gap-x-2 py-1">
-            <img
-              src="http://192.168.51.172:8000/media/Xzh3R6N3.jpg"
-              width={100}
-              height={100}
-              className="rounded-full h-10 w-10"
-              alt="assistant"
-              quality={100}
-            />
+            {chatProfile.assistant_pic ? (
+              <img
+                src="http://192.168.51.172:8000/media/Xzh3R6N3.jpg"
+                width={100}
+                height={100}
+                className="rounded-full h-10 w-10"
+                alt="assistant"
+                quality={100}
+              />
+            ) : (
+              <div className="h-10 w-10 bg-orange-500 bg-opacity-30">
+                <span>
+                  {chatProfile.assistant_name !== ""
+                    ? chatProfile.assistant_name
+                    : "X"}
+                </span>
+              </div>
+            )}
+
             <div className="flex flex-col gap-y-0 justify-center">
-              <h3 className="text-base font-semibold  my-0 py-0">Henok</h3>
+              <h3 className="text-base font-semibold  my-0 py-0">
+                {chatProfile.assistant_name}
+              </h3>
               <span className="text-xs text-gray-500 my-0 py-0">
-                Customer Support
+                {chatProfile.assistant_role}
               </span>
             </div>
           </div>
@@ -120,7 +158,7 @@ function App() {
         </div>
         <div className="flex flex-row items-center bg-white h-12 rounded-b-lg">
           <input
-            className="flex-1 px-3 py-2 rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full"
+            className="flex-1 px-3 py-2  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full"
             type="text"
             name="message"
             placeholder="your question"
@@ -140,9 +178,19 @@ function App() {
       </div>
       <div
         className="relative bg-gradient-to-b from-[#FFA751] to-[#FFE259] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
-        onClick={() => setShowChatBot(!showChatBot)}
+        onClick={() => !loading && setShowChatBot(!showChatBot)}
       >
         <div>
+          {loading ? (
+            <IoMdChatbubbles
+              size={30}
+              color="#fff"
+              className={`animate-ping absolute`}
+            />
+          ) : (
+            <></>
+          )}
+
           <IoMdChatbubbles
             size={30}
             color="#fff"
@@ -158,12 +206,15 @@ function App() {
             }`}
           />
         </div>
-
-        <div className="absolute top-0 right-0 w-5 h-5 rounded-full bg-red-500 text-center text-white flex items-center justify-center">
-          <span className="text-white text-xs font-semibold">
-            {unseenCount}
-          </span>
-        </div>
+        {unseenCount !== 0 ? (
+          <div className="absolute top-0 right-0 w-5 h-5 rounded-full bg-red-500 text-center text-white flex items-center justify-center">
+            <span className="text-white text-xs font-semibold">
+              {unseenCount}
+            </span>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );
