@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Layout from "../../_layout";
-import { ChatDetailType } from "@/app/types/types";
+import { ChatDetailType, ChatType } from "@/app/types/types";
 import Api from "@/app/components/Api";
 import { Button, Dropdown, Spinner, Table, TextInput } from "flowbite-react";
 import Image from "next/image";
@@ -28,7 +28,7 @@ const DATA = {
   slug: "customer-support",
 };
 const page = ({ params: { slug } }: PropType) => {
-  const [chat, setChat] = useState<ChatDetailType | null>(null);
+  const [chat, setChat] = useState<ChatType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [chatHidden, setChatHidden] = useState<boolean>(true);
   const [api, setApi] = useState<Api | null>(null);
@@ -47,7 +47,7 @@ const page = ({ params: { slug } }: PropType) => {
     })();
   }, [api]);
   return (
-    <Layout page="chat_bots" set_api={setApi}>
+    <Layout page="chatbots" set_api={setApi}>
       <>
         {loading ? (
           <div className="w-full h-40 flex flex-1 justify-center items-center">
@@ -74,7 +74,7 @@ const page = ({ params: { slug } }: PropType) => {
               />
             </div>
             <div className="bg-white p-5 rounded-xl text-gray-400">
-              <p>{chat.assistant_description}</p>
+              <p>{chat.business_description}</p>
               <Button className="mt-4" onClick={() => setChatHidden(false)}>
                 Start Chat
               </Button>

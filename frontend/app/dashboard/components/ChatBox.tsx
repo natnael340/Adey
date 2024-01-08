@@ -2,11 +2,11 @@
 
 import { Modal, TextInput } from "flowbite-react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatMessage from "./ChatMessage";
 import { IoIosSend } from "react-icons/io";
 import axios from "axios";
-import { log } from "console";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 type PropTypes = {
   hidden: boolean;
@@ -15,19 +15,80 @@ type PropTypes = {
 };
 type MessageType = {
   username: string;
-  inquiry: string;
-  response: string;
+  message: string;
+  message_type: string;
+  task_id?: string;
 };
+const HUMAN = "HUMAN";
+const AI = "AI";
 const ChatBox = ({ hidden, set_chat_hidden, identifier }: PropTypes) => {
   const [messages, setMessage] = useState<MessageType[]>([]);
+  const [botActive, setBotActive] = useState(false);
   const [msg, setMsg] = useState("");
-  const sendMessage = () => {
-    const data: MessageType = {
-      inquiry: msg,
-      response: "",
+  const chat_window = useRef<HTMLDivElement>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const { readyState, sendJsonMessage } = useWebSocket(
+    `ws://127.0.0.1:8000/rag/${identifier}/messages/`,
+    {
+      onOpen: () => {
+        console.log("Connected");
+        setBotActive(true);
+      },
+      onClose: () => {
+        console.log("Closed");
+      },
+      onMessage: (e) => {
+        const data = JSON.parse(e.data);
+        setMessage([
+          ...messages,
+          {
+            username: "ANONYMOUS",
+            message: data.message,
+            message_type: AI,
+          },
+        ]);
+      },
+    }
+  );
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+  const sendMessage = async () => {
+    sendJsonMessage({
+      message: msg,
+    });
+    const d: MessageType = {
+      message: msg,
+      message_type: HUMAN,
       username: "Anonymous",
     };
-    setMessage([...messages, data]);
+    setMessage([...messages, d]);
+    return;
+    try {
+      const { data } = await axios<MessageType>({
+        url: `http://127.0.0.1:8000/api/v1/rag/${identifier}/messages/`,
+        method: "POST",
+        withCredentials: true,
+        data: {
+          message: msg,
+        },
+      });
+      const d: MessageType = {
+        message: msg,
+        message_type: HUMAN,
+        username: "Anonymous",
+        task_id: data.task_id,
+      };
+      setMessage([...messages, d]);
+      // @ts-ignore
+      setTaskId(data.task_id);
+    } catch (error) {
+      console.error(error);
+    }
   };
   useEffect(() => {
     (async () => {
@@ -45,12 +106,19 @@ const ChatBox = ({ hidden, set_chat_hidden, identifier }: PropTypes) => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (chat_window.current) {
+      chat_window.current.scrollTop = chat_window.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <Modal
       show={!hidden}
       position="bottom-right"
       onClose={set_chat_hidden}
-      size="sm"
+      size="md"
       theme={{ body: { base: "flex-1 overflow-auto" } }}
       dismissible
     >
@@ -67,25 +135,28 @@ const ChatBox = ({ hidden, set_chat_hidden, identifier }: PropTypes) => {
             />
             <h3>Henok</h3>
           </div>
-          <div className="w-3 h-3 bg-green-500 rounded-full" />
+          <div
+            className={`w-3 h-3 bg-green-500 rounded-full${
+              botActive ? "bg-green-500" : "bg-gray-500"
+            }`}
+          />
         </div>
-        <div className="bg-white px-5 h-96 overflow-y-scroll ">
+        <div className="bg-white px-5 h-96 overflow-y-scroll" ref={chat_window}>
           {messages.map((message, idx) => {
             let childrens: React.ReactElement[] = [];
-            if (message.inquiry) {
+            if (message.message_type == HUMAN) {
               childrens.push(
                 <ChatMessage
-                  message={message.inquiry}
-                  type="query"
+                  message={message.message}
+                  type={HUMAN}
                   key={`query_${idx}`}
                 />
               );
-            }
-            if (message.response) {
+            } else {
               childrens.push(
                 <ChatMessage
-                  message={message.response}
-                  type="response"
+                  message={message.message}
+                  type={AI}
                   key={`response_${idx}`}
                 />
               );
@@ -95,11 +166,12 @@ const ChatBox = ({ hidden, set_chat_hidden, identifier }: PropTypes) => {
         </div>
         <div className="flex flex-row">
           <TextInput
+            value={msg}
             className="flex-1 rounded-none"
             id="question"
             type="text"
             name="question"
-            placeholder="Type your question"
+            placeholder={connectionStatus}
             onChange={(e) => setMsg(e.target.value)}
             required
             onKeyDown={(e) => (e.key == "Enter" ? sendMessage() : null)}
