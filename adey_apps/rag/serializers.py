@@ -29,7 +29,8 @@ class ChatSerializer(serializers.ModelSerializer):
             'slug', 
             "business_name",
             'business_description',
-            'assistant_name', 
+            'assistant_name',
+            "assistant_role", 
             "assistant_characters",
             "assistant_picture_url",
             "resources",
@@ -68,6 +69,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
             'name', 
             'slug', 
             'assistant_name', 
+            "assistant_role",
             'business_description', 
             'assistant_picture_data', 
             'business_name', 
@@ -98,7 +100,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
             extension = file_format.split("/")[1]
             validated_data["assistant_picture"] = ContentFile(base64.b64decode(data), f"{file_name}.{extension}")
         
-        assistant_characters = validated_data.pop("assistant_characters")
+        assistant_characters = validated_data.pop("assistant_characters", [])
         instance = super().create(validated_data)
         characters = []
         for character in assistant_characters:
@@ -109,7 +111,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         return instance
     
     def update(self, instance, validated_data):
-        assistant_characters = validated_data.pop("assistant_characters")
+        assistant_characters = validated_data.pop("assistant_characters", [])
         characters = []
         for character in assistant_characters:
             characters.append(AssistantCharacter.objects.create(name=character))
@@ -122,7 +124,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = ('name', 'slug', 'document')
+        fields = ('name', 'slug', 'document', "document_type")
 
     def validate(self, attrs):
         chat = Chat.objects.filter(
@@ -136,26 +138,9 @@ class ResourceSerializer(serializers.ModelSerializer):
    
 class MessageSerializer(serializers.ModelSerializer):
     message_type = serializers.CharField(read_only=True)
-    assistant_name = serializers.SerializerMethodField(read_only=True)
-    assistant_role = serializers.SerializerMethodField(read_only=True)
-    assistant_pic = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Message
-        fields = ('username', 'message', 'message_type', "assistant_name", "assistant_role", "assistant_pic")
-
-    def get_assistant_name(self, obj):
-        return obj.chat.assistant_name
-    
-    def get_assistant_role(self, obj):
-        return obj.chat.assistant_role
-    
-    def get_assistant_pic(self, obj):
-        if obj.chat.assistant_picture:
-            request = self.context.get("request", None)
-            if request:
-                return request.build_absolute_uri(obj.chat.assistant_picture.url)
-            return obj.chat.assistant_picture.url
-        return ""
+        fields = ('username', 'message', 'message_type', "seen", "created")
     
 
 class ChatBotSerializer(serializers.Serializer):
@@ -163,10 +148,11 @@ class ChatBotSerializer(serializers.Serializer):
     assistant_name = serializers.SerializerMethodField(read_only=True)
     assistant_role = serializers.SerializerMethodField(read_only=True)
     assistant_pic = serializers.SerializerMethodField(read_only=True)
+    unread_messages_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Chat
-        fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic',)
+        fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic', "unread_messages_count")
 
     def get_messages(self, obj):
         request = self.context.get('request')
@@ -176,6 +162,9 @@ class ChatBotSerializer(serializers.Serializer):
 
             return MessageSerializer(instance=messages, many=True).data
         return []
+    
+    def get_unread_messages_count(self, obj):
+        return len(list(filter(lambda message: not message["seen"], self.get_messages(obj))))
 
     def get_assistant_name(self, obj):
         return obj.assistant_name

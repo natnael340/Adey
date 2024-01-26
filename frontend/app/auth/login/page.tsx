@@ -47,8 +47,6 @@ const login: NextPage = (props): JSX.Element => {
     } catch (e) {
       console.error(e);
     }
-
-    console.log("");
   };
 
   if (session) {

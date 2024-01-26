@@ -5,6 +5,7 @@ export type ChatType = {
   name: string;
   slug: string;
   assistant_name: string;
+  assistant_role: string;
   business_description: string;
   business_name: string;
   assistant_characters: {
@@ -28,6 +29,31 @@ export type ChatFormType = {
   assistant_picture_data: string | null;
   assistant_name: string;
   assistant_characters: string[];
+  assistant_role: string;
   business_name: string;
   business_description: string;
+};
+
+export type ResourceFormType = {
+  name: string;
+  document: string | File;
+};
+
+export type ResourceType = {
+  name: string;
+  slug: string;
+  document: string;
+  document_type: string;
+};
+export type ResourceDataTypeWithPagination = {
+  count: number;
+  next: null | string;
+  prev: null | string;
+  results: ResourceType[];
+};
+
+export type RegisterFormType = {
+  email: string;
+  password: string;
+  confirm_password: string;
 };

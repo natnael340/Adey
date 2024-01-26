@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Link from "next/link";
 import { IoArrowForward } from "react-icons/io5";
+import { NextRequest } from "next/server";
 
 export default function Home() {
   return (

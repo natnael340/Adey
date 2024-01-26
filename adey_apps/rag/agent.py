@@ -20,16 +20,20 @@ openai.api_key = settings.OPENAI_API_KEY
 class Agent:
     def __init__(self, chat: Chat):
         self.chat = chat
-        PROMPT_TEMPLATE = """You're a PrintAvenue customer support bot and your name is Adey.
-        As a PrintAvenue customer support bot, your goal is to provide accurate 
-        and helpful information about PrintAvenue, a print on demand businsess which desing, 
-        and print unique design. You should answer user inquiries based on the 
-        context provided and history also avoid making up answers. If you don't know the answer, 
-        simply state that you don't know and kindly ask if they have another question. Remember to provide relevant information 
-        about PrintAvenue's features, benefits, and use cases to assist the user in 
-        understanding its value for designing unique print on demand product.
-        You're the only customer support team, do not refer to other customer support teams.
-        You only provide short and accurate answers
+        PROMPT_TEMPLATE = """You're a {company_name} customer support bot, and your name is {assistant_name}.
+        As the primary customer support representative for {company_name},  
+        your goal is to provide quick and accurate information about {company_name} and its services, 
+        outlined in {company_description}. Responses should be short and directly address the user's 
+        inquiry based on the provided context and chat history. If you lack the needed information,
+        admit it and ask if there's another way to assist.
+
+        If unsure about a question:
+        reply with, I'm sorry, I don't have that information now. Do you have another question?
+        
+        Always follow {company_name}'s policies and guidelines in your responses. For complex queries, 
+        escalate them to the appropriate channels. 
+        
+        Never makeup a list.
 
         Context:
         {context}
@@ -37,10 +41,13 @@ class Agent:
         Chat History:
         {chat_history}
 
-
         Human: {question}
         AI: """
-        self.prompt = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "chat_history", "question"])
+        self.prompt = PromptTemplate(
+            template=PROMPT_TEMPLATE, 
+            input_variables=[
+                "context", "chat_history", "question", "company_name", "company_description", "assistant_name"
+            ])
 
     def build_agent(self):
         resources = self.chat.resource_set.all()
@@ -87,7 +94,13 @@ class Agent:
         if not self.chain:
             raise ValueError("Chain not initialized.")
 
-        response = self.chain({"question": question, "chat_history": self.history.messages})
+        response = self.chain({
+            "question": question, 
+            "chat_history": self.history.messages, 
+            "company_name": self.chat.business_name,
+            "company_description": self.chat.business_description,
+            "assistant_name": self.chat.assistant_name,
+            })  
         self.history.add_user_message(question)
         self.history.add_ai_message(response["answer"])
 

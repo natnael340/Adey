@@ -1,0 +1,41 @@
+	for the Serializer test follow:
+- Validate serialization and deserialization happening as expected with input schema and output schema (Basically testing the to_representation, to_internal_value)
+- Check all the validations in the serializer, like uniq, uniq_togheter, more than max or less than min, out of range, object does not exist
+- Test the creation and update to make sure the object is created or updated
+- Test the name and the number of the fields
+
+
+
+
+Issue: Although having tests like this is appreciated, this will be costly in the next refactor, and changes in the please follow the following points for testing a view
+
+    Always test the HTTP method response code for the views that have a limitation on the methods
+    Always test the queryset of the view if conditions are applied to the model query
+    Always test that the view has the correct permission
+    Always test the view actions (create, update, partial_update, list, retrieve, destroy)
+    Setup the view by yourself (view.setup), DO NOT use the client to test the view
+    Make sure the view is using the correct serializer
+    Make sure the view is using the correct filter class
+
+We have tested the filter class extensively and don't need these tests until we start writing integration tests.
+
+
+
+By Me[Views]:
+- Add test for anonymous and authnticated user
+
+
+It is better to have the complete log, especially since we are moving from sending emails to sending logs and problems to Sentry. However, there is something else that is better I describe here, the args used to pass parameters in Python. If you are working with wrappers and decorators, it is okay to access them; however, if not, python allows you to access them, but it is bad practice. They are set up in class as private scope attributes, if you want to access them better to use __set__ or __get__
+
+
+
+Suggestion: the model does not have an update action, so we don't need a test like this; please, for testing models, follow the guidelines
+Model
+
+    Test all the validation and limitations on the model
+    Test the constraint of the model like UniqueConstraint
+    Test the name and the number of the fields
+    If the model includes some translatable fields, test the field is registered for at least one language
+    Test the str method
+
+

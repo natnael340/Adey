@@ -2,6 +2,8 @@ import Image from "next/image";
 import React from "react";
 import { RxDashboard } from "react-icons/rx";
 import { FaRobot } from "react-icons/fa";
+import { CiLogout } from "react-icons/ci";
+import { signOut } from "next-auth/react";
 
 type PropTypes = {
   page: "dashboard" | "chatbots";
@@ -9,7 +11,7 @@ type PropTypes = {
 
 const Sidebar = ({ page }: PropTypes) => {
   return (
-    <div className="min-h-screen h-screen w-72 bg-white my-10 px-8">
+    <div className="flex flex-col h-screen w-72 bg-white py-10 px-8">
       <div className="w-full py-5 flex items-center justify-center">
         <Image
           className="w-6 h-6 sm:h-9 sm:w-9 mr-3"
@@ -22,29 +24,40 @@ const Sidebar = ({ page }: PropTypes) => {
           Adey
         </span>
       </div>
-      <div className="pt-10 space-y-3">
-        <a
-          href="/dashboard"
-          className={`flex items-center space-x-3 w-full p-5 rounded-full cursor-pointer ${
-            page == "dashboard"
-              ? "bg-[rgba(255,255,0,0.1)] text-black"
-              : "text-gray-500"
-          }`}
+      <div className="flex flex-1 flex-col justify-between">
+        <div className="pt-10 space-y-3">
+          <a
+            href="/dashboard"
+            className={`flex items-center space-x-3 w-full p-5 rounded-full cursor-pointer ${
+              page == "dashboard"
+                ? "bg-[rgba(255,255,0,0.1)] text-black"
+                : "text-gray-500"
+            }`}
+          >
+            <RxDashboard size={20} />
+            <span className="text-base">Dashboard</span>
+          </a>
+          <a
+            href="/dashboard/chats"
+            className={`flex items-center space-x-3 w-full p-5 rounded-full cursor-pointer ${
+              page == "chatbots"
+                ? "bg-[rgba(255,255,0,0.1)] text-black"
+                : "text-gray-500"
+            }`}
+          >
+            <FaRobot size={20} />
+            <span className="text-base">Chat Bots</span>
+          </a>
+        </div>
+        <button
+          className="w-full flex flex-row items-center space-x-2 justify-center border-t border-b py-2"
+          onClick={() =>
+            signOut({ redirect: true, callbackUrl: "/auth/login" })
+          }
         >
-          <RxDashboard size={20} />
-          <span className="text-base">Dashboard</span>
-        </a>
-        <a
-          href="/dashboard/chats"
-          className={`flex items-center space-x-3 w-full p-5 rounded-full cursor-pointer ${
-            page == "chatbots"
-              ? "bg-[rgba(255,255,0,0.1)] text-black"
-              : "text-gray-500"
-          }`}
-        >
-          <FaRobot size={20} />
-          <span className="text-base">Chat Bots</span>
-        </a>
+          <CiLogout />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );

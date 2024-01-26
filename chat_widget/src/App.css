@@ -1,0 +1,32 @@
+.loading > .ic1 {
+  animation-name: loading_animation;
+  animation-duration: 2s;
+  animation-delay: 0s;
+  animation-iteration-count: infinite;
+}
+
+.loading > .ic2 {
+  animation-name: loading_animation;
+  animation-duration: 2s;
+  animation-delay: 0.83s;
+  animation-iteration-count: infinite;
+}
+
+.loading > .ic3 {
+  animation-name: loading_animation;
+  animation-duration: 2s;
+  animation-delay: 1.6s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes loading_animation {
+  0% {
+    background-color: #c4c4c4;
+  }
+  50% {
+    background-color: #9a9a9a;
+  }
+  100% {
+    background-color: #c4c4c4;
+  }
+}

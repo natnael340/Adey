@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.template.defaultfilters import slugify
 from uuid import uuid4
 from adey_apps.adey_commons.models import BaseModel
@@ -11,15 +12,33 @@ class MessageTypeChoices(models.TextChoices):
 
 
 class Resource(BaseModel):
+    DOCUMENT_OPTIONS = (
+        ("PDF", "PDF"),
+        ("TXT", "TXT"),
+        ("CSV", "CSV"),
+        ("HTML", "HTML"),
+        ("JSON", "JSON"),
+        ("MD", "MD"),
+    )
     name = models.CharField(max_length=256)
-    document = models.FileField()
     slug = models.SlugField(max_length=256, blank=True)
+    document = models.FileField()
+    document_type = models.CharField(max_length=5, choices=DOCUMENT_OPTIONS, default="TXT")
     chat = models.ForeignKey(to="rag.Chat", on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("slug", "chat"), name="unique_together_slug_and_chat"
+            )
+        ]
+
 
     def save(self, **kwargs) -> None:
         if not self.slug:
             self.slug = slugify(self.name)
         return super().save(**kwargs)
+    
     
     def __str__(self) -> str:
         return f"{self.chat} - {self.slug}"
@@ -46,6 +65,8 @@ class Chat(BaseModel):
     assistant_picture = models.ImageField("Assistant picture", null=True, blank=True)
     assistant_characters = models.ManyToManyField(verbose_name="Assistant Characters", to=AssistantCharacter, blank=True)
     assistant_role = models.CharField(max_length=256, blank=True)
+    allowed_urls = ArrayField(models.URLField(max_length=255), blank=True, default=list)
+    intro_text = models.TextField(default="Hello! How can I assist you today?")
     user = models.ForeignKey(to="users.User", on_delete=models.CASCADE)
 
     class Meta:
@@ -71,7 +92,12 @@ class Message(BaseModel):
     message = models.TextField("Message")
     message_type = models.CharField("Message type", choices=MessageTypeChoices.choices, default=MessageTypeChoices.AI)
     chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False) 
 
     def __str__(self) -> str:
         return f"{self.username} - {self.session_id}"
+    
+    def save(self, **kwargs) -> None:
+        if self.message_type == MessageTypeChoices.HUMAN:
+            self.seen = True
+        return super().save(**kwargs)

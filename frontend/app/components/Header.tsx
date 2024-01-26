@@ -9,6 +9,10 @@ import {
   NavbarCollapse,
   NavbarLink,
 } from "flowbite-react";
+import { NextRequest } from "next/server";
+import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../pages/api/auth/[...nextauth]";
 
 type PropType = {
   activeList: {
@@ -17,7 +21,9 @@ type PropType = {
   };
 };
 
-const Header = ({ activeList }: PropType) => {
+const Header = async ({ activeList }: PropType) => {
+  const session = await getServerSession(authOptions);
+  console.log("home-header" + session);
   return (
     <Navbar rounded className="bg-[rgba(255,255,0,0.06)]">
       <NavbarBrand as={Link} href="/">
@@ -37,6 +43,13 @@ const Header = ({ activeList }: PropType) => {
         <NavbarLink as={Link} href="#" active={activeList["home"]}>
           Home
         </NavbarLink>
+        {session ? (
+          <NavbarLink as={Link} href="/dashboard">
+            Dashboard
+          </NavbarLink>
+        ) : (
+          <></>
+        )}
         <NavbarLink as={Link} href="#" active={activeList["about"]}>
           About
         </NavbarLink>

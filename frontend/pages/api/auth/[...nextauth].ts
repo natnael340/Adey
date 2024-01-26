@@ -7,7 +7,7 @@ const getCurrentEpoch = () => {
   return Math.floor(new Date().getTime() / 1000);
 };
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
@@ -65,6 +65,7 @@ const authOptions: NextAuthOptions = {
           parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME || "0");
         return token;
       }
+
       // @ts-ignore
       if (getCurrentEpoch() > token.ref) {
         try {
@@ -81,18 +82,21 @@ const authOptions: NextAuthOptions = {
             parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME || "0");
         } catch (error: any) {
           const x: AxiosError = error;
-          console.error(x.response?.data);
+          console.error("here", x.response?.data);
+          token.expired = true;
         }
       }
       return token;
     },
     // @ts-ignore
     async session({ token }) {
+      console.log("session" + token);
       return token;
     },
   },
   pages: {
     signIn: "/auth/login",
+    signOut: "/auth/login",
   },
 };
 

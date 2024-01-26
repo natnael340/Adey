@@ -18,6 +18,8 @@ from celery_progress.backend import Progress
 from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer, ChatBotSerializer
 from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
+from adey_apps.adey_commons.paginations import StandardResultsSetPagination
+from adey_apps.adey_commons.permissions import HasChatBotPermission
 
 # Create your views here.
 
@@ -49,6 +51,7 @@ class ChatUpdateAPIView(UpdateAPIView):
 class ResourceViewSet(ModelViewSet):
     serializer_class = ResourceSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = StandardResultsSetPagination
     lookup_field = "slug"
     lookup_url_kwarg="slug"
 
