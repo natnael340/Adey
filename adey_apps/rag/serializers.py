@@ -35,6 +35,7 @@ class ChatSerializer(serializers.ModelSerializer):
             "assistant_picture_url",
             "resources",
             "conversations",
+            "allowed_urls",
         )
 
     def get_assistant_picture_url(self, instance):

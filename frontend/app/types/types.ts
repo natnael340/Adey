@@ -14,6 +14,7 @@ export type ChatType = {
   assistant_picture_url: string;
   resources: number;
   conversations: number;
+  allowed_urls: string[] | [];
 };
 
 export type ChatDetailType = {
