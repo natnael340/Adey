@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
@@ -18,6 +19,7 @@ from celery_progress.backend import Progress
 from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer, ChatBotSerializer
 from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
+from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
 from adey_apps.adey_commons.permissions import HasChatBotPermission
 
@@ -141,6 +143,16 @@ class ChatBotApiView(RetrieveAPIView):
     lookup_url_kwarg="identifier"
 
     def retrieve(self, request, *args, **kwargs):
+        origin = request.headers.get("Origin", "")
+        if origin and not origin.endswith("/"):
+            origin += "/"
+        chat = self.get_object()
+        print(origin,",", chat.allowed_urls[0])
+        
+
+        if not any(Url(origin) == Url(url) for url in chat.allowed_urls):
+            raise PermissionDenied
+        
         response =  super().retrieve(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
             user_session_id = uuid4().hex

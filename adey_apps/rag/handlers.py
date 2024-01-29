@@ -14,12 +14,7 @@ def cors_allow_chatbot_request(sender, request, **kwargs):
     if origin in settings.FRONTEND_URLS:
         return True
     elif re.search(r"/rag/chat_bot/[0-9a-f-]+/$", request.path):
-        chat_id = request.path.split("/")[-2]
-        try:
-            chat = async_to_sync(get_chat)(identifier=chat_id)
-            return origin in chat.allowed_urls
-        except Exception:
-            pass
+        return True
 
     return False
     

@@ -6,6 +6,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms.openai import OpenAI
 from django.utils.encoding import force_str
+from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 from adey_apps.rag.models import Chat
 
@@ -28,3 +29,14 @@ def query_chat_vector_db(chat: Chat, query: str) -> str:
     return qa.run(query)
 
 
+class Url(object):
+    def __init__(self, url) -> None:
+        parts = urlparse(url)
+        _query = frozenset(parse_qsl(parts.query))
+        _path = unquote_plus(parts.path)
+        parts = parts._replace(query=_query, path=_path)
+        self.parts = parts
+    def __eq__(self, other):
+        return self.parts == other.parts
+    def __hash__(self):
+        return hash(self.parts)
