@@ -1,3 +1,5 @@
+import { Session, User } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import { ImageProps } from "next/image";
 
 export type ChatType = {
@@ -15,6 +17,7 @@ export type ChatType = {
   resources: number;
   conversations: number;
   allowed_urls: string[] | [];
+  status: string;
 };
 
 export type ChatDetailType = {
@@ -33,6 +36,7 @@ export type ChatFormType = {
   assistant_role: string;
   business_name: string;
   business_description: string;
+  allowed_urls: string[];
 };
 
 export type ResourceFormType = {
@@ -57,4 +61,35 @@ export type RegisterFormType = {
   email: string;
   password: string;
   confirm_password: string;
+};
+
+export interface AuthenticatedUser extends User {
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+export type AuthenticationResponseType = {
+  access: string;
+  refresh: string;
+};
+
+export interface AuthenticatedUserToken extends JWT {
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+export interface AuthenticatedUserSession extends Session {
+  accessToken?: string;
+}
+
+export type ProfileType = {
+  assistant_name: string;
+  assistant_role: string;
+  assistant_pic?: string;
+};
+
+export type MessageType = {
+  message: string;
+  message_type: string;
+  seen: boolean;
 };

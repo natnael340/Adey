@@ -107,6 +107,10 @@ class Api {
     );
     return data;
   }
+
+  async build_chatbot(chat_slug: string) {
+    await this.axios.get(`rag/chat/${chat_slug}/build`);
+  }
 }
 
 export default Api;

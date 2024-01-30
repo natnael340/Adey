@@ -55,9 +55,34 @@ INSTALLED_APPS = [
     "drf_yasg",
     "django_celery_results",
     "channels",
+    "dj_rest_auth",
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'dj_rest_auth.registration',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
 ]
 CELERY_RESULT_BACKEND = 'django-db'
+SITE_ID = 1
 
+# Social account
+REST_AUTH = {
+    'USE_JWT': True,
+    "USER_DETAILS_SERIALIZER": "adey_apps.users.serializers.UserSerializer",
+}
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        }
+    }
+}
 
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"
@@ -80,6 +105,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'adey.urls'
@@ -152,6 +178,7 @@ SIMPLE_JWT = {
 
 FRONTEND_URLS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -178,6 +205,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.User"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "email"
 
 ALLOWED_IMAGE_EXTENSIONS = ["jpg", "png", "jpeg"]
 

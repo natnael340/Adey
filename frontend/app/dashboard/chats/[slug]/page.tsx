@@ -17,6 +17,7 @@ import { FaCloudUploadAlt, FaTrash, FaEdit } from "react-icons/fa";
 import ChatBox from "../../components/ChatBox";
 import ChatForm from "../../components/ChatForm";
 import ResourceForm from "../../components/ResourceForm";
+import Code from "../../components/Code";
 
 type PropType = {
   params: {
@@ -52,6 +53,7 @@ const page = ({ params: { slug } }: PropType) => {
     assistant_role: "",
     business_description: "",
     business_name: "",
+    allowed_urls: [],
   });
   const [_chatForm, _setChatForm] = useState<ChatFormType>({
     name: "",
@@ -61,6 +63,7 @@ const page = ({ params: { slug } }: PropType) => {
     assistant_role: "",
     business_description: "",
     business_name: "",
+    allowed_urls: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [chatHidden, setChatHidden] = useState<boolean>(true);
@@ -81,6 +84,7 @@ const page = ({ params: { slug } }: PropType) => {
         business_description: data.business_description,
         business_name: data.business_name,
         name: data.name,
+        allowed_urls: data.allowed_urls,
       };
       setChatForm(form);
       _setChatForm(form);
@@ -138,7 +142,7 @@ const page = ({ params: { slug } }: PropType) => {
       try {
         const res = resources.filter((res) => res.slug !== resource_slug);
         setResources(res);
-        const data = api.remove_resource(slug, resource_slug);
+        const data = await api.remove_resource(slug, resource_slug);
         fetchResources(api);
       } catch (error) {
         console.error(error);
@@ -149,6 +153,16 @@ const page = ({ params: { slug } }: PropType) => {
     setResourceFormModal(true);
     setResourceEdit(resource_slug);
     setResourceForm({ ...resourceForm, name: name });
+  };
+  const buildChatBot = async () => {
+    if (api) {
+      try {
+        await api.build_chatbot(slug);
+        fetchChatBot(api);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
   return (
     <Layout page="chatbots" set_api={setApi}>
@@ -187,14 +201,18 @@ const page = ({ params: { slug } }: PropType) => {
                     .join(" | ")}
                 </span>
               </div>
-              <Image
-                src="/Xzh3R6N3.jpg"
-                width={500}
-                height={500}
-                className="rounded-full h-32 w-32"
-                alt="assistant image"
-                quality={100}
-              />
+              {chat.assistant_picture_url ? (
+                <Image
+                  src={chat.assistant_picture_url}
+                  width={500}
+                  height={500}
+                  className="rounded-full h-32 w-32"
+                  alt="assistant image"
+                  quality={100}
+                />
+              ) : (
+                <div className="h-32 w-32 rounded-full bg-slate-300" />
+              )}
             </div>
             <div className="bg-white p-5 rounded-xl text-gray-400">
               <p>{chat.business_description}</p>
@@ -209,7 +227,64 @@ const page = ({ params: { slug } }: PropType) => {
                 >
                   Edit Chat Bot
                 </Button>
+                {chat.status != "finished" ? (
+                  <Button className="mt-4" onClick={() => buildChatBot()}>
+                    {chat.status == "prepared" ? "Build" : "Rebuild"}
+                  </Button>
+                ) : (
+                  <></>
+                )}
               </div>
+            </div>
+            <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
+              <h3 className="font-bold text-xl mb-3">
+                Integration Guide: Chatbot Integration
+              </h3>
+              <p>
+                To integrate our chatbot into your website or web application,
+                please follow the steps below:
+              </p>
+              <h5 className="font-semibold text-lg">
+                Step 1: Add Your Chat Identifier
+              </h5>
+              <p>
+                In the &lt;head&gt; section of your HTML page, add the following
+                meta tag to specify the chat identifier:
+              </p>
+              <Code
+                code={`<meta name="adey_chat_id" content="${chat.identifier}" />`}
+              />
+              <h5 className="font-semibold text-lg">
+                Step 2: Add CSS for Widget
+              </h5>
+              <p>
+                To style the chatbot widget, add the following CSS link tag in
+                the &lt;head&gt; section of your HTML page:
+              </p>
+              <Code
+                code={`<link rel="stylesheet" crossorigin href="http://192.168.51.172:8000/media/chatbot/index.css" />`}
+              />
+              <p>
+                This link tag will load the CSS file required for the chatbot
+                widget. Ensure that the href attribute points to the correct
+                location of the CSS file.
+              </p>
+              <h5 className="font-semibold text-lg">
+                Step 3: Add Script for Widget
+              </h5>
+              <p>
+                At the end of your HTML page, just before the closing
+                &lt;/body&gt;tag, add the following script tag to load the
+                chatbot script:
+              </p>
+              <Code
+                code={`<script type="module" crossorigin src="http://192.168.51.172:8000/media/chatbot/index.js"></script>`}
+              />
+              <p>
+                This script tag will load the JavaScript code responsible for
+                initializing and displaying the chatbot. Make sure that the src
+                attribute points to the correct location of the JavaScript file.
+              </p>
             </div>
             <div className="bg-white p-5 rounded-xl">
               <h1 className="my-3 text-lg font-medium">Allowed urls</h1>
@@ -311,11 +386,10 @@ const page = ({ params: { slug } }: PropType) => {
                 </Table>
               </div>
             </div>
-            <ChatBox
-              hidden={chatHidden}
-              identifier={chat.identifier}
-              set_chat_hidden={() => setChatHidden(true)}
-            />
+            {chat.identifier ? (
+              <ChatBox chat_id={chat.identifier} />
+            ): <></>}
+            
           </div>
         ) : (
           <></>

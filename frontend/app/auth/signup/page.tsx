@@ -7,7 +7,7 @@ import { register } from "module";
 import { api } from "@/app/components/Api";
 import { AxiosError } from "axios";
 import { redirect } from "next/navigation";
-import { navigate } from "@/app/components/utils";
+import { navigate } from "@/app/components/handlers";
 import { Spinner } from "flowbite-react";
 
 type RegisterFormError = {

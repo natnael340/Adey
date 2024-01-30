@@ -56,8 +56,11 @@ class ChatConsumer(JsonWebsocketConsumer):
     
     def check_permission(self, headers, chat: Chat):
         origin = headers.get(b'origin', b"").decode()
+        if origin in settings.FRONTEND_URLS:
+            return True
         if origin and not origin.endswith("/"):
             origin += "/"
+            
         if origin in settings.FRONTEND_URLS:
             return True
         return origin in chat.allowed_urls

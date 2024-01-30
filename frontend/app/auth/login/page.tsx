@@ -5,6 +5,8 @@ import Image from "next/image";
 import { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
 import { Alert } from "flowbite-react";
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 import { HiInformationCircle } from "react-icons/hi";
 
 const login: NextPage = (props): JSX.Element => {
@@ -51,7 +53,7 @@ const login: NextPage = (props): JSX.Element => {
 
   if (session) {
     // @ts-ignore
-    window.location = "http://localhost:3000/dashboard";
+    window.location = "http://127.0.0.1:3000/dashboard";
   }
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -101,7 +103,6 @@ const login: NextPage = (props): JSX.Element => {
                   id="email"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="name@company.com"
-                  required={true}
                   onChange={({ target }) =>
                     setUserInfo({ ...userInfo, email: target.value })
                   }
@@ -121,7 +122,6 @@ const login: NextPage = (props): JSX.Element => {
                   id="password"
                   placeholder="••••••••"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required={true}
                   onChange={({ target }) =>
                     setUserInfo({ ...userInfo, password: target.value })
                   }
@@ -133,6 +133,7 @@ const login: NextPage = (props): JSX.Element => {
               >
                 Sign in
               </button>
+
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don’t have an account yet?{" "}
                 <a
@@ -143,6 +144,27 @@ const login: NextPage = (props): JSX.Element => {
                 </a>
               </p>
             </form>
+            <div className="flex flex-row w-full items-center">
+              <div className="flex-1 h-[1px] bg-gray-400"></div>
+              <p className="mx-3 text-gray-800">or</p>
+              <div className="flex-1 h-[1px] bg-gray-400"></div>
+            </div>
+            <div className="w-full space-y-2">
+              <button
+                onClick={() => signIn("google")}
+                className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
+              >
+                <FcGoogle />
+                Sign in with Google
+              </button>
+              <button
+                onClick={() => signIn("github")}
+                className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
+              >
+                <FaGithub />
+                Sign in with Github
+              </button>
+            </div>
           </div>
         </div>
       </div>

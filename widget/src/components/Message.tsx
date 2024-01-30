@@ -1,4 +1,3 @@
-import React from "react";
 import { AI } from "../App";
 
 type PropType = {

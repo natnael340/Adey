@@ -36,6 +36,7 @@ class ChatSerializer(serializers.ModelSerializer):
             "resources",
             "conversations",
             "allowed_urls",
+            "status",
         )
 
     def get_assistant_picture_url(self, instance):
@@ -75,6 +76,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
             'assistant_picture_data', 
             'business_name', 
             'assistant_characters',
+            "allowed_urls",
         )
 
     def get_assistant_picture_url(self, instance):
@@ -135,6 +137,12 @@ class ResourceSerializer(serializers.ModelSerializer):
             raise Http404
         attrs["chat"] = chat
         return super().validate(attrs)
+    
+    def create(self, validated_data):
+        chat = validated_data["chat"]
+        chat.status = "ready"
+        chat.save()
+        return super().create(validated_data)
 
    
 class MessageSerializer(serializers.ModelSerializer):

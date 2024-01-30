@@ -6,6 +6,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from adey_apps.users.models import User
 from adey_apps.users.serializers import UserLoginSerializer, UserSerializer
 
@@ -46,4 +49,11 @@ class SignUpView(GenericAPIView):
         serializer.save()
 
         return Response({"error": 0, "message": "User registered successfully."})
+
+
+
+class GoogleLogin(SocialLoginView): 
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://localhost:3000"
+    client_class = OAuth2Client
 

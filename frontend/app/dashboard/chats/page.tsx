@@ -20,6 +20,7 @@ const page = (props: any) => {
     assistant_role: "",
     business_description: "",
     business_name: "",
+    allowed_urls: [],
   });
   const [chats, setChats] = useState<ChatType[] | []>([]);
   const [_chatForm, _setChatForm] = useState<ChatFormType>({ ...chatForm });

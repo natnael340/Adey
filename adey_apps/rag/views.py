@@ -3,10 +3,16 @@ from uuid import uuid4
 from django.utils import timezone
 from django.http import Http404
 from django.conf import settings
+from django.utils.encoding import force_str
+
+from langchain.vectorstores.pgvector import PGVector
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
@@ -147,10 +153,11 @@ class ChatBotApiView(RetrieveAPIView):
         if origin and not origin.endswith("/"):
             origin += "/"
         chat = self.get_object()
-        print(origin,",", chat.allowed_urls[0])
+        print(request.headers.get("Origin", ""),",", settings.FRONTEND_URLS)
         
-
-        if not any(Url(origin) == Url(url) for url in chat.allowed_urls):
+        if request.headers.get("Origin", "") in settings.FRONTEND_URLS:
+            pass
+        elif not any(Url(origin) == Url(url) for url in chat.allowed_urls):
             raise PermissionDenied
         
         response =  super().retrieve(request, *args, **kwargs)
@@ -160,3 +167,39 @@ class ChatBotApiView(RetrieveAPIView):
                 response.set_cookie("user_session_id", user_session_id, max_age=604800)
             
         return response
+
+
+class ChatBotBuildApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        chat_slug = kwargs.get("slug")
+        user = request.user
+
+        try:
+            chat = Chat.objects.get(user=user, slug=chat_slug)
+            resources = chat.resource_set.all()
+            documents = []
+            if resources:
+                for resource in resources:
+                    loader = TextLoader(resource.document.path)
+                    documents.extend(loader.load())
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+            chunks = text_splitter.split_documents(documents)
+            embedding = OpenAIEmbeddings()
+            PGVector.from_documents(
+                embedding=embedding,
+                documents=chunks,
+                collection_name=force_str(chat.identifier),
+                connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+            )
+            chat.status = "finished"
+            chat.save()
+        except Chat.DoesNotExist:
+            return Response({"success": False, "message": "Chat does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            print(e.__str__())
+            return Response({"success": False, "message": "Server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response({"success": True}, status=status.HTTP_200_OK)
+

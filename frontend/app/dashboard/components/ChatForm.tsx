@@ -29,12 +29,17 @@ const ChatForm = ({
   const [characterInputActive, setCharacterInputActive] =
     useState<boolean>(false);
   const [character, setCharacter] = useState("");
+  const [url, setUrl] = useState("");
+  const [urlInputActive, setUrlInputActive] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [canSave, setCanSave] = useState(false);
 
   const handleCharacterInputFocus = (active: boolean) => {
     console.log("handleCharacterInputFocus " + active);
     setCharacterInputActive(active);
+  };
+  const handleUrlInputFocus = (active: boolean) => {
+    setUrlInputActive(active);
   };
   const handleImageUploadClick = () => {
     if (fileInputRef.current) {
@@ -60,6 +65,21 @@ const ChatForm = ({
     );
     setChatForm({ ...chatForm, assistant_characters: chars });
   };
+  const RemoveUrl = (char: string) => {
+    const chars = chatForm.allowed_urls.filter((pre: string) => pre !== char);
+    setChatForm({ ...chatForm, allowed_urls: chars });
+  };
+  const updateUrlState = (_url: string) => {
+    if (_url[_url.length - 1] == " ") {
+      setChatForm({
+        ...chatForm,
+        allowed_urls: [...chatForm.allowed_urls, url],
+      });
+      setUrl("");
+    } else {
+      setUrl(_url);
+    }
+  };
   const updateState = (char: string) => {
     if (char[char.length - 1] == " ") {
       setChatForm({
@@ -73,13 +93,8 @@ const ChatForm = ({
   };
   useEffect(() => {
     const { status, data } = formUpdated(chatForm, _chatForm);
+    console.log(chatForm, formUpdated(chatForm, _chatForm));
     if (status !== canSave) setCanSave(status);
-    console.log(
-      status,
-      data,
-      _chatForm.assistant_role,
-      chatForm.assistant_role
-    );
   }, [chatForm]);
   return (
     <Modal
@@ -231,6 +246,39 @@ const ChatForm = ({
             placeholder="Print Avenue is a leading printing solutions provider, offering a wide range of high-quality printing services ..."
             className="block text-sm w-full border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 ps-0 placeholder-gray-300"
           />
+        </div>
+        <div>
+          <label>Allowed urls</label>
+          <div className="flex flex-row">
+            <div
+              className={`h-10 flex flex-row items-center gap-x-1 ${
+                urlInputActive ? "border-b-blue-600" : "border-b-gray-300"
+              } border-b`}
+            >
+              {chatForm.allowed_urls.map((url, idx) => (
+                <div
+                  key={`character_${idx}`}
+                  className="py-1 px-2 bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full"
+                >
+                  <p className="text-sm">{url}</p>
+                  <button onClick={() => RemoveUrl(url)}>
+                    <IoIosClose />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => updateUrlState(e.target.value)}
+              onFocus={(e) => handleUrlInputFocus(true)}
+              onBlur={(e) => handleUrlInputFocus(false)}
+              placeholder="https://www.example.com/"
+              className={`${
+                chatForm.allowed_urls.length != 0 ? "ps-2" : "ps-0"
+              } text-sm flex-1 border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 placeholder-gray-300`}
+            />
+          </div>
         </div>
         <div className="flex justify-end mt-5">
           <button

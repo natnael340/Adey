@@ -8,8 +8,12 @@ import "./App.css";
 import { MessageType, ProfileType } from "./types";
 
 export const [HUMAN, AI] = ["HUMAN", "AI"];
-const CHAT_ID = "f7b9f25f-85d9-49d5-a006-1c48df546d8f";
+// @ts-expect-error  an erro due to meta
+const CHAT_ID: string = document.querySelector("meta[name='adey_chat_id']")?.content;
 const App = () => {
+  if (!CHAT_ID) {
+    throw new Error("adey_chat_id meta property is not set");
+  }
   const [showChatBot, setShowChatBot] = useState<boolean>(true);
   const chat_window = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<string>("");

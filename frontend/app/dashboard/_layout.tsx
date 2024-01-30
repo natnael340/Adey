@@ -51,7 +51,7 @@ const Layout = ({ children, page, data, set_api }: PropTypes) => {
     <div>
       <section className="flex flex-row p-0 m-0">
         <Sidebar page={page} />
-        <div className="container p-10 bg-[#F8F9FC]">
+        <div className="container p-10 bg-[#F8F9FC] h-screen overflow-y-scroll">
           {status == "loading" ? <Loading /> : children}
         </div>
       </section>
