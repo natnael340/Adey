@@ -23,7 +23,6 @@ type PropType = {
 
 const Header = async ({ activeList }: PropType) => {
   const session = await getServerSession(authOptions);
-  console.log("home-header" + session);
   return (
     <Navbar rounded className="bg-[rgba(255,255,0,0.06)]">
       <NavbarBrand as={Link} href="/">

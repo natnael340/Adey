@@ -93,3 +93,23 @@ export type MessageType = {
   message_type: string;
   seen: boolean;
 };
+export type DashboardMessageType = {
+  date: string;
+  count: number;
+};
+
+export type DashboardChatBotType = {
+  name: string;
+  message_count: number;
+  message_data: DashboardMessageType[];
+  user_session_count: number;
+};
+
+export type DashboardDataType = {
+  total_messages_count: number;
+  total_chats_count: number;
+  total_chat_bots_count: number;
+  total_sessions_count: number;
+  message_statistics: DashboardMessageType[];
+  chat_statistics: DashboardChatBotType[];
+};

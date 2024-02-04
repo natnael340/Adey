@@ -50,16 +50,16 @@ type SessionParamType = {
 namespace NextAuthUtils {
   export const refreshToken = async (refreshToken: string) => {
     try {
-      const { data } = await axios.post<AuthenticationResponseType>(
+      const { data } = await axios.post<{ access: string }>(
         `${process.env.NEXTAUTH_BACKEND_URL}token/refresh/`,
         {
           refresh: refreshToken,
         }
       );
-      const { access, refresh } = data;
-      return [access, refresh];
+      const { access } = data;
+      return access;
     } catch (error) {
-      return [null, null];
+      return null;
     }
   };
 }
@@ -173,7 +173,6 @@ export const authOptions: NextAuthOptions = {
             token.refreshToken = refreshToken;
             return token;
           } catch (error) {
-            console.error(error);
             return null;
           }
         } else if (account?.provider == "credentials") {
@@ -187,17 +186,18 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken &&
         JwtUtils.isJwtExpired(token.accessToken as string)
       ) {
-        const [_access_token, _refresh_token] =
-          await NextAuthUtils.refreshToken(token.refreshToken);
-        if (_access_token && _refresh_token) {
+        const _access_token = await NextAuthUtils.refreshToken(
+          token.refreshToken
+        );
+        if (_access_token) {
           token.accessToken = _access_token;
-          token.refreshToken = _refresh_token;
           token.iat = Math.floor(Date.now() / 1000);
           token.exp = Math.floor(Date.now() / 1000 + 2 * 60 * 60);
 
           return token;
+        } else {
+          token.exp = 0;
         }
-        return (token.exp = 0);
       }
       return token;
 
@@ -240,7 +240,7 @@ export const authOptions: NextAuthOptions = {
     },
     // @ts-ignore
     async session({ token, session, user }: SessionParamType) {
-      if (token?.accessToken) {
+      if (token?.accessToken && token.exp != 0) {
         session.accessToken = token?.accessToken;
         return session;
       }

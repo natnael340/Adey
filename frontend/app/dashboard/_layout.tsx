@@ -17,8 +17,9 @@ type PropTypes = {
     chats: number;
   };
   set_api?: (api: Api) => void;
+  loading?: boolean;
 };
-const Layout = ({ children, page, data, set_api }: PropTypes) => {
+const Layout = ({ children, page, data, set_api, loading }: PropTypes) => {
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated: () => {
@@ -29,6 +30,7 @@ const Layout = ({ children, page, data, set_api }: PropTypes) => {
       });
     },
   });
+  console.log("fuck you");
   /*
   const { data: session, status } = useSession({
     required: true,
@@ -39,7 +41,9 @@ const Layout = ({ children, page, data, set_api }: PropTypes) => {
   });
   */
   useEffect(() => {
+    console.log("no session");
     if (session) {
+      console.log("here session");
       // @ts-ignore
       //if (session?.expired) signOut();
       if (set_api)
@@ -49,11 +53,17 @@ const Layout = ({ children, page, data, set_api }: PropTypes) => {
   }, [session]);
   return (
     <div>
-      <section className="flex flex-row p-0 m-0">
-        <Sidebar page={page} />
-        <div className="container p-10 bg-[#F8F9FC] h-screen overflow-y-scroll">
-          {status == "loading" ? <Loading /> : children}
-        </div>
+      <section className="flex flex-row p-0 m-0 h-screen">
+        {status == "loading" || loading ? (
+          <Loading />
+        ) : (
+          <>
+            <Sidebar page={page} />
+            <div className="container p-10 bg-[#F8F9FC] h-screen overflow-y-scroll">
+              {children}
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

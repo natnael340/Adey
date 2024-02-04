@@ -3,6 +3,7 @@ import {
   ChatDetailType,
   ChatFormType,
   ChatType,
+  DashboardDataType,
   ResourceDataTypeWithPagination,
   ResourceFormType,
 } from "../types/types";
@@ -110,6 +111,12 @@ class Api {
 
   async build_chatbot(chat_slug: string) {
     await this.axios.get(`rag/chat/${chat_slug}/build`);
+  }
+
+  async get_dashboard() {
+    const { data } = await this.axios.get<DashboardDataType>("rag/dashboard/");
+
+    return data;
   }
 }
 

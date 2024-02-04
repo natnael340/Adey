@@ -14,7 +14,7 @@ export namespace JwtUtils {
       console.log("Token not expired");
       return false;
     }
-    console.log("no Token exp");
+    console.log("No Token exp");
     return true;
   };
 }

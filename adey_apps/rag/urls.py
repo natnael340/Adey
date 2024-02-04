@@ -9,6 +9,7 @@ from adey_apps.rag.views import (
     ChatUpdateAPIView,
     ChatBotApiView,
     ChatBotBuildApiView,
+    ChatBotAnalytics,
 )
 
 router = routers.DefaultRouter()
@@ -18,7 +19,8 @@ urlpatterns = [
     path("chat/", ChatCreateAPIView.as_view(), name="chat-create"),
     path("chat/<slug:slug>/", ChatUpdateAPIView.as_view(), name="chat-update"),
     path("chat/<slug:slug>/build", ChatBotBuildApiView.as_view(), name="chat-bot-build"),
-    re_path(r"^chat_bot/(?P<identifier>[0-9a-f-]+)/$", ChatBotApiView.as_view(), name="chat-bot")
+    re_path(r"^chat_bot/(?P<identifier>[0-9a-f-]+)/$", ChatBotApiView.as_view(), name="chat-bot"),
+    path("dashboard/", ChatBotAnalytics.as_view(), name="dashboard"),
 ]
 
 router.register("chats", ChatViewSet, "chat")

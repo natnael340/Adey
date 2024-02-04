@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import environ
 from datetime import timedelta
+from django.contrib.staticfiles import handlers
 
 env = environ.Env()
 
@@ -179,6 +180,10 @@ SIMPLE_JWT = {
 FRONTEND_URLS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+]
+CHATBOT_ALLOWED_PATH = [
+    "/media/chatbot/index.js",
+    "/media/chatbot/index.css",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

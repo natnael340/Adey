@@ -1,12 +1,15 @@
 import time
 import base64
+from datetime import datetime
 
 from rest_framework import serializers
 from django.http import Http404
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db.models.functions import TruncDate
+from django.db.models import Count
 
-from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter
+from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices
 from adey_apps.adey_commons.serializers import ManyToManyListField
 
 class AssistantCharacterSerializer(serializers.ModelSerializer):
@@ -150,7 +153,58 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ('username', 'message', 'message_type', "seen", "created")
+
+
+class MessageAnalyticsSerializer(serializers.Serializer):
+    date = serializers.SerializerMethodField(read_only=True)
+    count = serializers.SerializerMethodField(read_only=True)
+
+
+    def get_date(self, instance):
+        if instance.get("date"):
+            date = instance["date"]
+            # date_obj = datetime.strptime(date, "%Y-%m-%d")
+
+            return date.strftime("%b %d, %Y")
+        
+        return None
+
+    def get_count(self, instance):
+        return instance["count"] if instance.get("count") else 0
     
+    @classmethod
+    def setup_eager_loading(cls, queryset):
+        queryset = queryset.annotate(date=TruncDate('created'))
+        queryset = queryset.values('date').annotate(count=Count('id')).order_by('date')
+        return queryset
+        
+
+
+class ChatBotAnalyticsSerializer(serializers.ModelSerializer):
+    message_count = serializers.SerializerMethodField( read_only=True)
+    message_data = serializers.SerializerMethodField( read_only=True)
+    user_session_count = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = Chat
+        fields = ("name", "message_count", "message_data", "user_session_count")
+
+
+    def get_message_count(self, instance):
+        return instance.message_set.filter(message_type=MessageTypeChoices.HUMAN).count()
+
+    def get_message_data(self, instance):
+        qs = MessageAnalyticsSerializer.setup_eager_loading(
+            instance.message_set.all().filter(message_type=MessageTypeChoices.HUMAN)
+            )
+        return MessageAnalyticsSerializer(qs, many=True).data
+
+    def get_user_session_count(self, instance):
+        return instance.message_set.all().values(
+            'session_id'
+        ).annotate(count=Count('session_id')).count()
+
+    
+
 
 class ChatBotSerializer(serializers.Serializer):
     messages = serializers.SerializerMethodField(read_only=True)

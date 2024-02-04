@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.http import Http404
 from django.conf import settings
 from django.utils.encoding import force_str
+from django.db.models import Count
 
 from langchain.vectorstores.pgvector import PGVector
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -22,7 +23,15 @@ from rest_framework.exceptions import PermissionDenied
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
-from adey_apps.rag.serializers import ChatSerializer, ChatCreateSerializer, MessageSerializer, ResourceSerializer, ChatBotSerializer
+from adey_apps.rag.serializers import (
+    ChatSerializer, 
+    ChatCreateSerializer, 
+    MessageSerializer, 
+    ResourceSerializer, 
+    ChatBotSerializer,
+    MessageAnalyticsSerializer,
+    ChatBotAnalyticsSerializer,
+)
 from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
@@ -58,7 +67,7 @@ class ChatUpdateAPIView(UpdateAPIView):
 
 class ResourceViewSet(ModelViewSet):
     serializer_class = ResourceSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     pagination_class = StandardResultsSetPagination
     lookup_field = "slug"
     lookup_url_kwarg="slug"
@@ -143,23 +152,12 @@ class MessageResponseViewSet(GenericViewSet):
 
 class ChatBotApiView(RetrieveAPIView):
     serializer_class = ChatBotSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (HasChatBotPermission,)
     queryset = Chat.objects.all()
     lookup_field="identifier"
     lookup_url_kwarg="identifier"
 
-    def retrieve(self, request, *args, **kwargs):
-        origin = request.headers.get("Origin", "")
-        if origin and not origin.endswith("/"):
-            origin += "/"
-        chat = self.get_object()
-        print(request.headers.get("Origin", ""),",", settings.FRONTEND_URLS)
-        
-        if request.headers.get("Origin", "") in settings.FRONTEND_URLS:
-            pass
-        elif not any(Url(origin) == Url(url) for url in chat.allowed_urls):
-            raise PermissionDenied
-        
+    def retrieve(self, request, *args, **kwargs):        
         response =  super().retrieve(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
             user_session_id = uuid4().hex
@@ -203,3 +201,28 @@ class ChatBotBuildApiView(APIView):
         
         return Response({"success": True}, status=status.HTTP_200_OK)
 
+
+
+class ChatBotAnalytics(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        chats = user.chat_set.all()
+
+        messages = Message.objects.filter(chat__in=chats)
+        user_messages = messages.filter(message_type=MessageTypeChoices.HUMAN)
+        qs = MessageAnalyticsSerializer.setup_eager_loading(user_messages)
+        messages_data = MessageAnalyticsSerializer(qs, many=True).data
+        chats_data = ChatBotAnalyticsSerializer(chats, many=True).data
+        
+        return Response({
+            "total_messages_count": user_messages.count(),
+            "message_statistics": messages_data,
+            "chat_statistics": chats_data,
+            "total_chat_bots_count": chats.count(),
+            "total_chats_count": messages.count(),
+            "total_sessions_count": messages.values(
+                'session_id'
+            ).annotate(count=Count('session_id')).count()
+        })

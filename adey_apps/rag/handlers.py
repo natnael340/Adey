@@ -11,9 +11,10 @@ async def get_chat(identifier):
 
 def cors_allow_chatbot_request(sender, request, **kwargs):
     origin = request.headers.get("Origin", "")
-    if origin in settings.FRONTEND_URLS:
+    if origin in settings.FRONTEND_URLS or request.path in settings.CHATBOT_ALLOWED_PATH:
         return True
     elif re.search(r"/rag/chat_bot/[0-9a-f-]+/$", request.path):
+        print(request.path)
         return True
 
     return False
