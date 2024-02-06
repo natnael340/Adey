@@ -13,7 +13,7 @@ from adey_apps.adey_commons.models import BaseModel
 # Create your models here.
 
 def get_default_subscription():
-    return Subscription.objects.get().pk
+    return Subscription.objects.first().pk
 
 
 class UserManager(BaseUserManager["User"]):
@@ -46,12 +46,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("Email", max_length=255, unique=True)
     is_staff = models.BooleanField("IsStaff", default=False)
     is_superuser = models.BooleanField("IsSuperuser", default=False)
-    subscription = models.ForeignKey(
-        "Subscription", 
-        verbose_name="Subscription", 
-        on_delete=models.CASCADE, 
-        default=get_default_subscription
-    )
     
     objects = UserManager()
 
@@ -69,7 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Plan(BaseModel):
     YEARLY, MONTHLY = "yearly", "monthly"
     PERIOD_OPTIONS = ((YEARLY, YEARLY), (MONTHLY, MONTHLY))
-    
+
     name = models.CharField("Plan Name", max_length=256)
     period = models.CharField("Plan Period", choices=PERIOD_OPTIONS)
     max_chatbot = models.IntegerField()
@@ -79,7 +73,7 @@ class Plan(BaseModel):
     price = models.DecimalField(decimal_places=2, max_digits=5)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.period}"
     
     class Meta:
         constraints = [
@@ -92,9 +86,13 @@ class Plan(BaseModel):
 class Subscription(BaseModel):
     CANCELED, ACTIVE = "canceled", "active"
     PLAN_OPTIONS = ((CANCELED, CANCELED), (ACTIVE, ACTIVE))
-    
+
+    user = models.OneToOneField(User, related_name="subscription", on_delete=models.CASCADE)
     plan = models.ForeignKey(verbose_name="Plan", to=Plan, on_delete=models.CASCADE)
     end_at = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=8, choices=PLAN_OPTIONS, default=ACTIVE)
     stripe_customer_id = models.CharField(max_length=256, blank=True, null=True)
     stripe_subscription_id = models.CharField(max_length=256, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.user} : {self.plan}"

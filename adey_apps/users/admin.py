@@ -13,7 +13,7 @@ class PlanAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("plan", "status", "end_at")
+    list_display = ("user", "plan", "status", "end_at")
 
 
         
