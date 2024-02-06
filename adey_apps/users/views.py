@@ -1,17 +1,18 @@
 from typing import Any, List
 
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from django_filters import rest_framework as filters
 from adey_apps.users.models import User, Plan
-from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer
+from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
 
 
 # Create your views here.
@@ -62,6 +63,18 @@ class GoogleLogin(SocialLoginView):
 class PlanViewSet(ReadOnlyModelViewSet):
     serializer_class = PlanSerializer
     permission_classes = (AllowAny,)
-    queryset = Plan.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('period',)
+    queryset = Plan.objects.all().order_by("price")
     lookup_field = "name"
     lookup_url_kwarg = "name"
+
+class SubscriptionApiView(RetrieveAPIView, GenericAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = SubscriptionSerializer
+
+    def get_object(self):
+        return self.request.user.subscription
+        
+
+

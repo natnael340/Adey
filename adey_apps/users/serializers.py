@@ -63,3 +63,12 @@ class PlanSerializer(serializers.ModelSerializer):
         )
 
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    plan = PlanSerializer()
+    class Meta:
+        model = Subscription
+        fields = (
+            "plan",
+            "end_at",
+            "status",
+        )
