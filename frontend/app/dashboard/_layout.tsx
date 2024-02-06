@@ -30,7 +30,6 @@ const Layout = ({ children, page, data, set_api, loading }: PropTypes) => {
       });
     },
   });
-  console.log("fuck you");
   /*
   const { data: session, status } = useSession({
     required: true,
@@ -41,9 +40,7 @@ const Layout = ({ children, page, data, set_api, loading }: PropTypes) => {
   });
   */
   useEffect(() => {
-    console.log("no session");
     if (session) {
-      console.log("here session");
       // @ts-ignore
       //if (session?.expired) signOut();
       if (set_api)

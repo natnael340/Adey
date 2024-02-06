@@ -133,7 +133,7 @@ const Page = () => {
                   <Metric>
                     {chartKey == "All"
                       ? data?.total_messages_count
-                      : chat?.message_count}
+                      : chat?.message_count}{" "}
                     Requests
                   </Metric>
                 </div>
@@ -148,11 +148,24 @@ const Page = () => {
               </div>
 
               <Flex className="mt-4">
-                <Text>68% of total usage</Text>
-                <Text>500</Text>
+                <Text>
+                  {(
+                    (data?.total_messages_count || 0) /
+                    (data?.user_plan.max_request_per_month || 0)
+                  ).toFixed(2)}
+                  % of total usage
+                </Text>
+                <Text>{data?.user_plan.max_request_per_month}</Text>
               </Flex>
-              {/* @ts-ignore*/}
-              <ProgressBar value={68} className="mt-2" color={"amber-300"} />
+              <ProgressBar
+                value={Math.floor(
+                  (data?.total_messages_count || 0) /
+                    (data?.user_plan.max_request_per_month || 0)
+                )}
+                className="mt-2"
+                // @ts-ignore
+                color={"amber-300"}
+              />
               <div className="h-2" />
               <LineChart
                 className="mt-6"
@@ -219,10 +232,14 @@ const Page = () => {
                     </div>
                     <div className="flex flex-col justify-evenly">
                       <div>
-                        <p className="text-[#15192C]">Standard Plan</p>
+                        <p className="text-[#15192C]">
+                          {data?.user_plan.name} Plan
+                        </p>
                       </div>
                       <div>
-                        <p className="text-[#15192C]">$99/mo</p>
+                        <p className="text-[#15192C]">
+                          ${data?.user_plan.price}/mo
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -232,10 +249,18 @@ const Page = () => {
                   <div className="space-y-1">
                     <Flex>
                       <Text>Chat Bots</Text>
-                      <Text>1/3</Text>
+                      <Text>
+                        {data?.total_chat_bots_count}/
+                        {data?.user_plan.max_chatbot}
+                      </Text>
                     </Flex>
                     <ProgressBar
-                      value={33}
+                      value={
+                        Math.floor(
+                          (data?.total_chat_bots_count || 0) /
+                            (data?.user_plan.max_chatbot || 0)
+                        ) * 100
+                      }
                       // @ts-ignore
                       color="orange-500"
                       className="bg-[#FFF7F0]"
@@ -244,7 +269,11 @@ const Page = () => {
                   <div className="space-y-1">
                     <Flex>
                       <Text>Allowed Urls</Text>
-                      <Text>4/5</Text>
+                      <Text>
+                        4/
+                        {(data?.user_plan.max_webapp_per_bot || 0) *
+                          (data?.user_plan.max_chatbot || 0)}
+                      </Text>
                     </Flex>
                     <ProgressBar
                       value={Math.floor((4 / 5) * 100)}
@@ -256,10 +285,17 @@ const Page = () => {
                   <div className="space-y-1">
                     <Flex>
                       <Text>Request/mo</Text>
-                      <Text>3.5k/5k</Text>
+                      <Text>
+                        {data?.total_messages_count}/
+                        {data?.user_plan.max_request_per_month}
+                      </Text>
                     </Flex>
                     <ProgressBar
-                      value={Math.floor((3500 / 5000) * 100)}
+                      value={Math.floor(
+                        ((data?.total_messages_count || 0) /
+                          (data?.user_plan.max_request_per_month || 0)) *
+                          100
+                      )}
                       // @ts-ignore
                       color="rose-600"
                       className="bg-[#FFF2F5]"

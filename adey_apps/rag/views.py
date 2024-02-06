@@ -37,6 +37,7 @@ from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
 from adey_apps.adey_commons.permissions import HasChatBotPermission
+from adey_apps.users.serializers import PlanSerializer
 
 # Create your views here.
 
@@ -217,6 +218,7 @@ class ChatBotAnalytics(APIView):
         chats_data = ChatBotAnalyticsSerializer(chats, many=True).data
         
         return Response({
+            "user_plan": PlanSerializer(user.subscription.plan).data,
             "total_messages_count": user_messages.count(),
             "message_statistics": messages_data,
             "chat_statistics": chats_data,

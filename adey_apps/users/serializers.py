@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator
 from django.urls import reverse
 
 from rest_framework import serializers
-from adey_apps.users.models import User
+from adey_apps.users.models import User, Plan, Subscription
 
 
 
@@ -46,3 +46,20 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = (
+            "name", 
+            "period", 
+            "max_chatbot", 
+            "max_webapp_per_bot", 
+            "max_request_per_month", 
+            "max_user_session", 
+            "price",
+        )
+
+

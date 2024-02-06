@@ -3,14 +3,11 @@ import React from "react";
 import Link from "next/link";
 import {
   Navbar,
-  Button,
   NavbarBrand,
   NavbarToggle,
   NavbarCollapse,
   NavbarLink,
 } from "flowbite-react";
-import { NextRequest } from "next/server";
-import { useSession } from "next-auth/react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../pages/api/auth/[...nextauth]";
 
@@ -19,10 +16,14 @@ type PropType = {
     home?: boolean;
     about?: boolean;
   };
+  set_session?: (session: any) => void;
 };
 
-const Header = async ({ activeList }: PropType) => {
+const Header = async ({ activeList, set_session }: PropType) => {
   const session = await getServerSession(authOptions);
+  if (set_session && session) {
+    set_session(session);
+  }
   return (
     <Navbar rounded className="bg-[rgba(255,255,0,0.06)]">
       <NavbarBrand as={Link} href="/">

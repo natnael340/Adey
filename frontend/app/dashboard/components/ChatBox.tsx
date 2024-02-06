@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { IoMdChatbubbles, IoMdClose, IoMdSend } from "react-icons/io";
+import {
+  IoMdChatbubbles,
+  IoMdClose,
+  IoMdSend,
+  IoMdWarning,
+} from "react-icons/io";
 import { MdMicNone } from "react-icons/md";
 import { FaPhone } from "react-icons/fa";
 import Message from "./ChatMessage";
@@ -23,6 +28,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
     assistant_name: "",
     assistant_role: "",
   });
+  const [error, setError] = useState<string>("");
   const [thinking, setThinking] = useState<boolean>(false);
 
   const { sendJsonMessage } = useWebSocket(
@@ -37,14 +43,19 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
       onMessage: (e) => {
         const data = JSON.parse(e.data);
         setThinking(false);
-        setMessages([
-          ...messages,
-          {
-            message: data.message,
-            message_type: AI,
-            seen: showChatBot,
-          },
-        ]);
+        if (data.type === "message") {
+          setMessages([
+            ...messages,
+            {
+              message: data.message,
+              message_type: AI,
+              seen: showChatBot,
+            },
+          ]);
+        } else if (data.type === "error") {
+          setError(data.message);
+        }
+
         if (showChatBot) {
           sendJsonMessage({
             type: "instruction",
@@ -188,33 +199,41 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             <></>
           )}
         </div>
-        <div className="flex flex-row items-center bg-white h-12 rounded-b-lg">
-          <textarea
-            className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full placeholder:text-[#959595]"
-            name="message"
-            placeholder="Type your question"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
-            aria-multiline
-          />
-          <button
-            onClick={sendMessage}
-            className={` justify-center items-center mr-2 ${
-              message.length > 0 ? "flex" : "hidden "
-            }`}
-          >
-            <IoMdSend className={`text-[#EDD447]`} size={26} />
-          </button>
-          <button
-            onClick={sendMessage}
-            className={`justify-center items-center mr-2 ${
-              message.length > 0 ? "hidden" : "flex"
-            }`}
-          >
-            <MdMicNone className="text-[#959595]" size={26} />
-          </button>
-        </div>
+        {error ? (
+          <div className="flex w-full py-5 justify-center items-center bg-[#F8F9FC]">
+            <div className="py-3 px-4 rounded-xl bg-red-500 text-white flex flex-row items-center justify-center space-x-2">
+              <IoMdWarning color="#FFFFFF" /> <span>{error}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-row items-center bg-white h-12 rounded-b-lg">
+            <textarea
+              className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full placeholder:text-[#959595]"
+              name="message"
+              placeholder="Type your question"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
+              aria-multiline
+            />
+            <button
+              onClick={sendMessage}
+              className={` justify-center items-center mr-2 ${
+                message.length > 0 ? "flex" : "hidden "
+              }`}
+            >
+              <IoMdSend className={`text-[#EDD447]`} size={26} />
+            </button>
+            <button
+              onClick={sendMessage}
+              className={`justify-center items-center mr-2 ${
+                message.length > 0 ? "hidden" : "flex"
+              }`}
+            >
+              <MdMicNone className="text-[#959595]" size={26} />
+            </button>
+          </div>
+        )}
       </div>
       <div
         className="relative bg-gradient-to-b from-[#FFA751] to-[#FFE259] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"

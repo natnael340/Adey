@@ -4,6 +4,7 @@ from channels.exceptions import DenyConnection
 from django.conf import settings
 from adey_apps.rag.agent import Agent
 from adey_apps.rag.models import Chat, Message, MessageTypeChoices
+from adey_apps.adey_commons.permissions import has_chat_request_permission
 
 
 CONVERSATION_STAGE =  {
@@ -67,8 +68,14 @@ class ChatConsumer(JsonWebsocketConsumer):
 
 
     def receive_json(self, content, **kwargs):
-        print(content)
         if content["type"] == "message":
+            if not has_chat_request_permission(self.chat.user):
+               self.send_json({
+                "type": "error",
+                "message": "Request quota limit reached!"
+               })
+               self.close()
+
             Message.objects.create(
                 chat=self.chat, 
                 session_id=self.session_id, 
@@ -85,6 +92,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
             self.send_json({
+                "type": "message",
                 "message_type": MessageTypeChoices.AI,
                 "message": res,
             })

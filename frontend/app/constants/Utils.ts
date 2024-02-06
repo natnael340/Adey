@@ -8,13 +8,10 @@ export namespace JwtUtils {
     if (decoded?.exp) {
       const adjustedExpiry = decoded.exp;
       if (adjustedExpiry < currentTime) {
-        console.log("Token expired");
         return true;
       }
-      console.log("Token not expired");
       return false;
     }
-    console.log("No Token exp");
     return true;
   };
 }

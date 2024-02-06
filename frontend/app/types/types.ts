@@ -105,7 +105,18 @@ export type DashboardChatBotType = {
   user_session_count: number;
 };
 
+export type UserPlanType = {
+  name: string;
+  period: string;
+  max_chatbot: number;
+  max_webapp_per_bot: number;
+  max_request_per_month: number;
+  max_user_session: number;
+  price: string;
+};
+
 export type DashboardDataType = {
+  user_plan: UserPlanType;
   total_messages_count: number;
   total_chats_count: number;
   total_chat_bots_count: number;
