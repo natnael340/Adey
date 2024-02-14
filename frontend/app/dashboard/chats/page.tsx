@@ -53,7 +53,7 @@ const page = (props: any) => {
   }, [api]);
 
   return (
-    <Layout page="chatbots" set_api={setApi}>
+    <Layout page="chatbots" set_api={setApi} loading={loading}>
       <div className="mx-10 my-5">
         <ChatForm
           CreateChatBot={CreateChatBot}
@@ -81,7 +81,7 @@ const page = (props: any) => {
           ) : (
             <></>
           )}
-          <div className="grid grid-cols-3 gap-x-5">
+          <div className="grid md:grid-cols-3 gap-x-5 sm:grid-cols-1 gap-y-5">
             {chats.map((chat, idx) => (
               <ChatCard
                 key={chat.slug}

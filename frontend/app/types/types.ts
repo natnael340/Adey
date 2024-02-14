@@ -124,3 +124,16 @@ export type DashboardDataType = {
   message_statistics: DashboardMessageType[];
   chat_statistics: DashboardChatBotType[];
 };
+
+export type PlanResponseType = {
+  plan: {
+    name: string;
+    period: string;
+  };
+  redirect_url: string;
+};
+
+export type VerifySubType = {
+  message: string;
+  error: boolean;
+};

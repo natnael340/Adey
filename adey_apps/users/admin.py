@@ -8,7 +8,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ("name", "period", "price")
+    list_display = ("identifier", "name", "period", "price")
 
 
 @admin.register(Subscription)

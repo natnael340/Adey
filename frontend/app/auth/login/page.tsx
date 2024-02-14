@@ -4,12 +4,15 @@ import React, { FormEventHandler, useRef, useState } from "react";
 import Image from "next/image";
 import { NextPage } from "next";
 import { signIn, useSession } from "next-auth/react";
-import { Alert } from "flowbite-react";
+import { Alert, Spinner } from "flowbite-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { HiInformationCircle } from "react-icons/hi";
+import { useRouter } from "next/navigation";
+import { isSafePath } from "@/app/components/utils";
 
 const login: NextPage = (props): JSX.Element => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [userInfo, setUserInfo] = useState({ email: "", password: "" });
   const [showAlert, setShowAlert] = useState({ show: false, message: "" });
@@ -42,10 +45,6 @@ const login: NextPage = (props): JSX.Element => {
         setShowAlert({ show: true, message: response.error });
         setTimeout(() => setShowAlert({ show: false, message: "" }), 3000);
       }
-      if (response?.status == 200) {
-        // @ts-ignore
-        window.location = "http://localhost:3000/dashboard";
-      }
     } catch (e) {
       console.error(e);
     }
@@ -53,8 +52,31 @@ const login: NextPage = (props): JSX.Element => {
 
   if (session) {
     // @ts-ignore
-    window.location = "http://127.0.0.1:3000/dashboard";
+    const redirect_url = new URLSearchParams(window.location.search).get(
+      "redirect_url"
+    );
+    if (redirect_url && isSafePath(redirect_url)) {
+      router.push(redirect_url);
+    } else {
+      router.push("/dashboard");
+    }
   }
+  const oauthSignIn = (provider: string) => {
+    const redirect_url = new URLSearchParams(window.location.search).get(
+      "redirect_url"
+    );
+    if (redirect_url && isSafePath(redirect_url)) {
+      signIn(provider, {
+        redirect: true,
+        callbackUrl: redirect_url,
+      });
+    } else {
+      signIn(provider, {
+        redirect: true,
+        callbackUrl: "/dashboard",
+      });
+    }
+  };
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -131,9 +153,8 @@ const login: NextPage = (props): JSX.Element => {
                 type="submit"
                 className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
               >
-                Sign in
+                {status == "loading" ? <Spinner />:"Sign in"}
               </button>
-
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don’t have an account yet?{" "}
                 <a

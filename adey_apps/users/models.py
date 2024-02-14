@@ -64,6 +64,9 @@ class Plan(BaseModel):
     YEARLY, MONTHLY = "yearly", "monthly"
     PERIOD_OPTIONS = ((YEARLY, YEARLY), (MONTHLY, MONTHLY))
 
+    identifier = models.UUIDField(
+        "Identifier", unique=True, db_index=True, editable=False, default=uuid4
+    )
     name = models.CharField("Plan Name", max_length=256)
     period = models.CharField("Plan Period", choices=PERIOD_OPTIONS)
     max_chatbot = models.IntegerField()
@@ -71,6 +74,7 @@ class Plan(BaseModel):
     max_request_per_month = models.IntegerField()
     max_user_session = models.IntegerField()
     price = models.DecimalField(decimal_places=2, max_digits=5)
+    stripe_price_id = models.CharField("Stripe price id", max_length=256, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.period}"

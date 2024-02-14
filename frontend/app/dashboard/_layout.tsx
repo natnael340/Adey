@@ -6,7 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import Header from "./components/Header";
 import Api from "../components/Api";
 import { ChatType } from "../types/types";
-import Loading from "./components/Loading";
+import Loading from "../components/Loading";
 
 type PropTypes = {
   children: React.ReactElement;
@@ -52,7 +52,7 @@ const Layout = ({ children, page, data, set_api, loading }: PropTypes) => {
     <div>
       <section className="flex flex-row p-0 m-0 h-screen">
         {status == "loading" || loading ? (
-          <Loading />
+          <Loading loading={true} />
         ) : (
           <>
             <Sidebar page={page} />

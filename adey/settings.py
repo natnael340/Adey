@@ -216,3 +216,6 @@ ALLOWED_IMAGE_EXTENSIONS = ["jpg", "png", "jpeg"]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Stripe Api keys
+STRIPE_SECRET_TEST_KEY = env.str("STRIPE_SECRET_TEST_KEY")

@@ -53,6 +53,7 @@ class PlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
         fields = (
+            "identifier",
             "name", 
             "period", 
             "max_chatbot", 

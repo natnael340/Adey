@@ -21,7 +21,7 @@ const ChatCard = ({
 }: PropTypes) => {
   return (
     <a
-      className="shadow-xl flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-5"
+      className="shadow-xl flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-5 min-w-72"
       href={`chats/${slug}`}
     >
       <div className="flex flex-col justify-between">

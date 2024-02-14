@@ -32,3 +32,10 @@ export const stringToColor = (str: string) => {
   const index = ((hash % range) + range) % range;
   return COLORS[index];
 };
+
+export const isSafePath = (path: string): boolean => {
+  if (/^\/[a-z0-9A-Z].$/.test(path)) {
+    return true;
+  }
+  return false;
+};

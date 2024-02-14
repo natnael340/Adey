@@ -4,8 +4,10 @@ import {
   ChatFormType,
   ChatType,
   DashboardDataType,
+  PlanResponseType,
   ResourceDataTypeWithPagination,
   ResourceFormType,
+  VerifySubType,
 } from "../types/types";
 
 export const api = Axios.create({
@@ -115,6 +117,22 @@ class Api {
 
   async get_dashboard() {
     const { data } = await this.axios.get<DashboardDataType>("rag/dashboard/");
+
+    return data;
+  }
+
+  async checkout(id: string) {
+    const { data } = await this.axios.get<PlanResponseType>(
+      `user/subscribe/${id}`
+    );
+
+    return data;
+  }
+
+  async check_status(id: string) {
+    const { data } = await this.axios.get<VerifySubType>(
+      `user/subscription/check/${id}`
+    );
 
     return data;
   }
