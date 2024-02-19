@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  overscroll-behavior: none;
+}
+
 .loading_fluid {
   box-shadow: inset 0 0 50px #555;
   overflow: hidden;
@@ -178,4 +182,10 @@
       100% 33.31%
     );
   }
+}
+
+.home {
+  background-image: url("/home_lg.jpg");
+  background-repeat: no-repeat;
+  background-size: 100%;
 }

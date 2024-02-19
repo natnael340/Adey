@@ -3,49 +3,54 @@ import Image from "next/image";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Link from "next/link";
-import { IoArrowForward } from "react-icons/io5";
+import { FaBullseye, FaCheck } from "react-icons/fa";
 import { NextRequest } from "next/server";
+import Pricing from "./components/Pricing";
+import { api } from "./components/Api";
+import { PlanType } from "./types/types";
 
-export default function Home() {
+export default async function Home() {
+  const { data: plan } = await api.get<PlanType[]>("plans/");
   return (
-    <main className="h-screen">
-      <section className="h-screen w-full bg-[rgba(255,255,0,0.15)] flex flex-col relative">
+    <main className="min-h-screen bg-gradient-to-br from-25% from-white via-[#FFFFB3] to-white">
+      <section className="home h-screen w-full bg-[rgba(255,255,0,0.15)] flex flex-col relative py-5 px-32">
         <Header activeList={{ home: true }} />
-        <div className="container flex-1 flex flex-row justify-evenly items-center w-full">
-          <div className=" pl-[10%] flex-1 z-10">
-            <h1 className="py-4 text-6xl font-bold">
+        <div className="container flex-1 grid grid-cols-2 items-center">
+          <div className="space-y-16">
+            <h1 className="text-6xl font-bold">
               Transform Your Company with AI-Powered Tools
             </h1>
-            <p className="py-2">
+            <p className="text-[#363636]">
               Enhance customer support with AI chat bots and boost sales with
               intelligent sales agents. Revolutionize your operations and
               deliver exceptional customer experiences with our advanced AI
               solutions.
             </p>
-            <Button
-              className="bg-[#EDD447] text-black my-2 w-36"
-              as={Link}
-              href="/auth/login"
-            >
-              Get Started
-              <span className="ml-1">
-                <IoArrowForward />
-              </span>
-            </Button>
-          </div>
-          <div className="flex-1 flex justify-end items-end">
-            <div className="absolute bottom-0 right-0 z-0">
-              <Image src="/ai_cs.png" alt="Logo" width={700} height={700} />
+            <div className="pt-5">
+              <a
+                role="button"
+                className="bg-[#EDD447] text-[#15192C] text-xl font-semibold px-10 py-3 rounded-lg"
+                href="/auth/login"
+              >
+                Get Started
+              </a>
             </div>
           </div>
         </div>
       </section>
-      <section className="flex flex-row justify-between items-center px-32 py-20 gap-x-10">
-        <div className="flex-1">
-          <h3 className="py-4 text-lg font-bold">
-            We Invented Ai Powered Customer service & Sales Agent.
+      <section className="grid grid-cols-2 items-center px-20 py-20 gap-x-20">
+        <Image
+          src="/robot_with_kid.png"
+          width={840}
+          height={931}
+          alt="Ai Sales"
+        />
+
+        <div>
+          <h3 className="py-4 text-3xl font-bold text-[#363636]">
+            We didn't reinvent the wheel.
           </h3>
-          <p>
+          <p className="text-justify text-[#797878]">
             Welcome to our website! We are proud to present our groundbreaking
             AI-powered customer service and sales agent solution. Our innovative
             technology has redefined the way businesses engage with their
@@ -62,62 +67,16 @@ export default function Home() {
             transform your customer service and sales operations.
           </p>
         </div>
-        <div className="flex flex-row gap-x-4 flex-1 justify-center items-center">
-          <div>
-            <Image
-              src="/ai_sales.jpg"
-              width={250}
-              height={580}
-              alt="Ai Sales"
-              className="rounded-lg bg-red-700"
-            />
-          </div>
-          <div className="pt-28">
-            <Image
-              src="/ai_customer_support.jpg"
-              width={250}
-              height={580}
-              alt="Ai Sales"
-              className="rounded-lg"
-            />
-          </div>
-        </div>
       </section>
-      <section>
-        <div className="flex w-full flex-col">
-          <div className="flex flex-col justify-center items-center gap-y-1 my-5">
-            <h3>Products</h3>
-            <div className="w-5 h-1 bg-slate-400"></div>
-          </div>
-          <div className="flex flex-row items-center justify-center gap-x-6">
-            <Card
-              className="max-w-sm"
-              renderImage={() => (
-                <Image
-                  width={500}
-                  height={500}
-                  src="/sales_cartoon.png"
-                  alt="Sales Cartoon"
-                />
-              )}
-            >
-              <h4 className="text-center font-semibold">Customer Support</h4>
-            </Card>
-            <Card
-              className="max-w-sm"
-              renderImage={() => (
-                <Image
-                  width={500}
-                  height={500}
-                  src="/sales_cartoon.png"
-                  alt="Sales Cartoon"
-                />
-              )}
-            >
-              <h4 className="text-center font-semibold">Sales Agent</h4>
-            </Card>
-          </div>
+      <section className="px-20 py-5 space-y-7">
+        <div className="flex w-full flex-col justify-center items-center space-y-5">
+          <h2 className="text-5xl">Find Your Perfect Plan</h2>
+          <p className="text-[#797878] text-center w-1/2">
+            Discover the ideal plan to fuel your business growth. Our pricing
+            options are carefully crafted to cater to businesses.
+          </p>
         </div>
+        <Pricing data={plan} />
       </section>
       <section className="mt-10">
         <Footer />

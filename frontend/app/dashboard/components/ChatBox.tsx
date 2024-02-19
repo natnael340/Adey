@@ -146,7 +146,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             {chatProfile.assistant_pic ? (
               <div className="w-10 h-10 relative">
                 <img
-                  src="http://192.168.51.172:8000/media/Xzh3R6N3.jpg"
+                  src={chatProfile.assistant_pic}
                   width={100}
                   height={100}
                   className="rounded-full h-10 w-10"

@@ -137,3 +137,14 @@ export type VerifySubType = {
   message: string;
   error: boolean;
 };
+
+export type PlanType = {
+  identifier: string;
+  name: string;
+  period: string;
+  max_chatbot: number;
+  max_webapp_per_bot: number;
+  max_request_per_month: number;
+  max_user_session: number;
+  price: number;
+};

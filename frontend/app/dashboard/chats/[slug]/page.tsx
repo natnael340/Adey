@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Layout from "../../_layout";
+import Layout from "../../_layout2";
 import {
   ChatDetailType,
   ChatFormType,
@@ -13,7 +13,7 @@ import Api from "@/app/components/Api";
 import { Button, Dropdown, Spinner, Table, TextInput } from "flowbite-react";
 import Image from "next/image";
 import { IoAdd } from "react-icons/io5";
-import { FaCloudUploadAlt, FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import ChatBox from "../../components/ChatBox";
 import ChatForm from "../../components/ChatForm";
 import ResourceForm from "../../components/ResourceForm";
@@ -24,18 +24,7 @@ type PropType = {
     slug: string;
   };
 };
-const DATA = {
-  assistant_name: "Julian Marqueze",
-  assistant_description:
-    "As a PrintAvenue customer support bot, your goal is to provide accurate and helpful information about PrintAvenue, " +
-    "a print on demand businsess which desing, and print unique design. You should answer user inquiries based on the " +
-    "context provided and history also avoid making up answers. If you don't know the answer, simply state that you don't " +
-    "know and kindly ask if they have another question. Remember to provide relevant information about PrintAvenue's features, " +
-    "benefits, and use cases to assist the user in understanding its value for designing unique print on demand product. " +
-    "You're the only customer support team, do not refer to other customer support teams.",
-  name: "Customer Support",
-  slug: "customer-support",
-};
+
 const page = ({ params: { slug } }: PropType) => {
   const [chat, setChat] = useState<ChatType | null>(null);
   const [resourceForm, setResourceForm] = useState<ResourceFormType>({
@@ -386,10 +375,7 @@ const page = ({ params: { slug } }: PropType) => {
                 </Table>
               </div>
             </div>
-            {chat.identifier ? (
-              <ChatBox chat_id={chat.identifier} />
-            ): <></>}
-            
+            {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : <></>}
           </div>
         ) : (
           <></>

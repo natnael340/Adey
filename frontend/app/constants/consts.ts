@@ -1,3 +1,5 @@
+import { PlanType } from "../types/types";
+
 export const [HUMAN, AI] = ["HUMAN", "AI"];
 export const COLORS = [
   "red-500",
@@ -18,4 +20,37 @@ export const COLORS = [
   "rose-500",
   "stone-500",
   "slate-800",
+];
+
+export const TEST_PLAN: PlanType[] = [
+  {
+    name: "Basic",
+    identifier: "1",
+    price: 300,
+    max_chatbot: 3,
+    max_user_session: 200,
+    max_request_per_month: 500,
+    max_webapp_per_bot: 1,
+    period: "monthly",
+  },
+  {
+    name: "Standard",
+    identifier: "1",
+    price: 300,
+    max_chatbot: 3,
+    max_user_session: 200,
+    max_request_per_month: 500,
+    max_webapp_per_bot: 1,
+    period: "monthly",
+  },
+  {
+    name: "Premium",
+    identifier: "1",
+    price: 300,
+    max_chatbot: 3,
+    max_user_session: 200,
+    max_request_per_month: 500,
+    max_webapp_per_bot: 1,
+    period: "monthly",
+  },
 ];

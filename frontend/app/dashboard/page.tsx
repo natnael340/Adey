@@ -1,82 +1,28 @@
-"use client";
-
 import Layout from "./_layout";
 import { FaRobot, FaUser, FaAngleRight } from "react-icons/fa";
 import { SiSalesforce } from "react-icons/si";
 import { IoIosChatboxes } from "react-icons/io";
 import { HiUsers } from "react-icons/hi2";
 import {
-  Card,
-  LineChart,
   Title,
   Text,
-  Metric,
   Flex,
   ProgressBar,
   Subtitle,
   DonutChart,
 } from "@tremor/react";
-import {
-  DashboardChatBotType,
-  DashboardDataType,
-  DashboardMessageType,
-} from "../types/types";
-import { useEffect, useState } from "react";
-import Api from "../components/Api";
-import LineChartToolTip from "./components/LineChartToolTip";
-import Dropdown from "../components/Dropdown";
+
+import React from "react";
 import { stringToColor } from "../components/utils";
+import Chart from "./components/Chart";
+import { authApi } from "../components/protected_api";
 
-const valueFormatter = (number: number) =>
-  new Intl.NumberFormat("us").format(number).toString();
-
-const Page = () => {
-  const [api, setApi] = useState<Api | null>(null);
-  const [data, setData] = useState<DashboardDataType>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [chartKey, setChartKey] = useState<string>("All");
-  const [chartData, setChartData] = useState<DashboardMessageType[]>([]);
-  const [chat, setChat] = useState<DashboardChatBotType>();
-
-  const fetchDashboardData = async (_api: Api) => {
-    console.log("fetchDashboardData");
-    try {
-      setLoading(true);
-      const data = await _api.get_dashboard();
-      setData(data);
-      setChartData(data.message_statistics);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    console.log("no api");
-    if (api) {
-      console.log("api");
-      fetchDashboardData(api);
-    }
-  }, [api]);
-
-  useEffect(() => {
-    if (data) {
-      if (chartKey === "All") {
-        setChartData(data.message_statistics);
-      } else {
-        const chat_statistics = data.chat_statistics.find(
-          (predicate) => predicate.name === chartKey
-        );
-        if (chat_statistics) {
-          setChat(chat_statistics);
-          setChartData(chat_statistics.message_data);
-        }
-      }
-    }
-  }, [chartKey]);
+const Page = async () => {
+  const api = await authApi();
+  const data = await api.get_dashboard();
 
   return (
-    <Layout page="dashboard" set_api={setApi} loading={loading}>
+    <Layout page="dashboard">
       <div className="container space-y-5">
         <div className="flex flex-row justify-between items-center">
           <div className="space-y-1">
@@ -126,59 +72,7 @@ const Page = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white px-7 py-6 rounded-lg">
-              <div className="flex flex-row justify-between w-full">
-                <div>
-                  <Text>Api Usage</Text>
-                  <Metric>
-                    {chartKey == "All"
-                      ? data?.total_messages_count
-                      : chat?.message_count}{" "}
-                    Requests
-                  </Metric>
-                </div>
-                <Dropdown
-                  value={chartKey}
-                  items={[
-                    "All",
-                    ...(data?.chat_statistics.map((cs) => cs.name) || []),
-                  ]}
-                  set_value={setChartKey}
-                />
-              </div>
-
-              <Flex className="mt-4">
-                <Text>
-                  {(
-                    (data?.total_messages_count || 0) /
-                    (data?.user_plan.max_request_per_month || 0)
-                  ).toFixed(2)}
-                  % of total usage
-                </Text>
-                <Text>{data?.user_plan.max_request_per_month}</Text>
-              </Flex>
-              <ProgressBar
-                value={Math.floor(
-                  (data?.total_messages_count || 0) /
-                    (data?.user_plan.max_request_per_month || 0)
-                )}
-                className="mt-2"
-                // @ts-ignore
-                color={"amber-300"}
-              />
-              <div className="h-2" />
-              <LineChart
-                className="mt-6"
-                data={chartData}
-                index="date"
-                categories={["count"]}
-                colors={["amber-300"]}
-                valueFormatter={valueFormatter}
-                yAxisWidth={40}
-                showLegend={false}
-                customTooltip={LineChartToolTip}
-              />
-            </div>
+            <Chart data={data} />
             <div className="grid grid-cols-2 gap-x-5">
               <div className="bg-white px-7 py-6 rounded-lg space-y-5">
                 <div>
@@ -211,7 +105,6 @@ const Page = () => {
                     data={data?.chat_statistics || []}
                     category="message_count"
                     index="name"
-                    valueFormatter={valueFormatter}
                     colors={
                       data?.chat_statistics.map((_chat) =>
                         stringToColor(_chat.name)

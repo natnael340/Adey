@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
-import Layout from "../_layout";
+import Layout from "../_layout2";
 import ChatCard from "../components/ChatCard";
 import { ChatFormType, ChatType } from "@/app/types/types";
 import Api from "@/app/components/Api";

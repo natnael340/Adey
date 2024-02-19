@@ -3,7 +3,7 @@ import { Bona_Nova } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./Providers";
 
-const inter = Bona_Nova({ subsets: ["latin"], weight: "400" });
+const inter = Bona_Nova({ subsets: ["greek"], weight: "400" });
 
 export const metadata: Metadata = {
   title: "Adey",
