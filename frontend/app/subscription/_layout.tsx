@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import Api from "../components/Api";
 import { signOut, useSession } from "next-auth/react";
+import Script from "next/script";
 
 type ParamList = {
   children: React.ReactElement;
@@ -26,7 +27,7 @@ const _layout = ({ children, setApi }: ParamList) => {
     }
   }, [session]);
 
-  return children;
+  return <>{children}</>;
 };
 
 export default _layout;

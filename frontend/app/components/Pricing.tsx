@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { FaBullseye, FaCheck } from "react-icons/fa";
+import { PiTarget } from "react-icons/pi";
 import { PlanType } from "../types/types";
 import { TEST_PLAN } from "../constants/consts";
 
@@ -22,7 +23,7 @@ const Pricing = ({ data: base }: PropsType) => {
     <div className="w-full space-y-10">
       <div className="flex items-start justify-center">
         <div className="flex flex-row items-center justify-center w-64 h-[60px] rounded-xl bg-[#EDD447] bg-opacity-20 shadow-inner">
-          <div
+          <button
             onClick={() => setPeriod("monthly")}
             className={`flex items-center justify-center w-[120px] h-[44px] ${
               period == "monthly"
@@ -31,8 +32,8 @@ const Pricing = ({ data: base }: PropsType) => {
             }`}
           >
             Monthly
-          </div>
-          <div
+          </button>
+          <button
             onClick={() => setPeriod("yearly")}
             className={`flex items-center justify-center w-[120px] h-[44px] ${
               period == "yearly"
@@ -41,13 +42,13 @@ const Pricing = ({ data: base }: PropsType) => {
             }`}
           >
             Yearly
-          </div>
+          </button>
         </div>
       </div>
-      <div className="w-full grid grid-cols-3 gap-x-10">
+      <div className="w-full grid grid-cols-1 md:gap-x-10 md:grid-cols-3">
         <div className="w-[344px] h-fit p-10 bg-white rounded-2xl space-y-4 shadow-lg mt-20 border border-white">
           <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-[#EDD447]">
-            <FaBullseye size={32} />
+            <PiTarget size={32} />
           </div>
           <h2 className="text-3xl font-bold">{data[0].name}</h2>
           <p className="text-[#797878]">
@@ -85,7 +86,7 @@ const Pricing = ({ data: base }: PropsType) => {
             <a
               role="button"
               className="w-full h-14 mt-7 bg-[#EDD447] rounded-xl shadow-lg flex items-center justify-center"
-              href="/"
+              href={`/subscription/${data[0].identifier}`}
             >
               <span className="text-lg">Get Started</span>
             </a>
@@ -96,7 +97,7 @@ const Pricing = ({ data: base }: PropsType) => {
           <div className="absolute w-[968px] -top-48 -left-[600px] h-[968px] rounded-full bg-gradient-to-b from-[rgba(237,212,71,0.7)] to-transparent border border-[#B5C2FB]" />
           <div className="absolute top-0 left-0 bottom-0 right-0 p-10 z-20 h-full space-y-4">
             <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-white">
-              <FaBullseye size={32} />
+              <PiTarget size={32} />
             </div>
             <h2 className="text-3xl font-bold">{data[2].name}</h2>
             <p className="text-[#797878]">
@@ -137,7 +138,7 @@ const Pricing = ({ data: base }: PropsType) => {
               <a
                 role="button"
                 className="w-full h-14 mt-7 bg-[#EDD447] rounded-xl shadow-lg flex items-center justify-center"
-                href="/"
+                href={`/subscription/${data[2].identifier}`}
               >
                 <span className="text-lg">Get Started</span>
               </a>
@@ -146,7 +147,7 @@ const Pricing = ({ data: base }: PropsType) => {
         </div>
         <div className="w-[344px] h-fit p-10 bg-white rounded-2xl space-y-4 shadow-lg mt-20 border border-white">
           <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-[#EDD447]">
-            <FaBullseye size={32} />
+            <PiTarget size={32} />
           </div>
           <h2 className="text-3xl font-bold">{data[1].name}</h2>
           <p className="text-[#797878]">
@@ -187,7 +188,7 @@ const Pricing = ({ data: base }: PropsType) => {
             <a
               role="button"
               className="w-full h-14 mt-7 bg-[#EDD447] rounded-xl shadow-lg flex items-center justify-center"
-              href="/"
+              href={`/subscription/${data[1].identifier}`}
             >
               <span className="text-lg">Get Started</span>
             </a>

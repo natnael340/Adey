@@ -54,3 +54,12 @@ export const TEST_PLAN: PlanType[] = [
     period: "monthly",
   },
 ];
+
+export const PaypalOptions = {
+  clientId: process.env.PAYPAL_CLIENT_ID || "test_id",
+  enableFunding: "paylater,card",
+  disableFunding: "",
+  dataSdkIntegrationSource: "integrationbuilder_sc",
+  vault: "true",
+  intent: "subscription",
+};

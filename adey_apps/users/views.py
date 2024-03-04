@@ -1,4 +1,7 @@
 import stripe
+import requests
+import base64
+import json
 from typing import Any, List
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -17,8 +20,9 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django_filters import rest_framework as filters
 from django.core.exceptions import BadRequest
 from django.conf import settings
-from adey_apps.users.models import User, Plan, Subscription
+from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder
 from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
+from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription
 
 
 stripe.api_key = settings.STRIPE_SECRET_TEST_KEY
@@ -72,8 +76,8 @@ class PlanViewSet(ReadOnlyModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('period',)
     queryset = Plan.objects.all().order_by("price")
-    lookup_field = "name"
-    lookup_url_kwarg = "name"
+    lookup_field = "identifier"
+    lookup_url_kwarg = "identifier"
 
 class SubscriptionApiView(RetrieveAPIView, GenericAPIView):
     permission_classes = (IsAuthenticated, )
@@ -91,28 +95,19 @@ class Subscribe(APIView):
 
         try:
             plan = Plan.objects.get(identifier=identifier)
-            checkout_session = stripe.checkout.Session.create(
-                line_items=[
-                    {
-                        "price": plan.stripe_price_id,
-                        "quantity": 1,
-                    }
-                ],
-                mode="subscription",
-                success_url="http://127.0.0.1:3000/subscription/success?checkout_id={CHECKOUT_SESSION_ID}",
-                cancel_url="http://127.0.0.1:3000/subscription/error",
-            )
+            token = generate_access_token(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET)
+            response, status_code = create_subscription(token, plan)
+            if response.get("id", None):
+                SubscriptionOrder.objects.create(order_id=response.get("id"), user=request.user)
 
-            """subscription = request.user.subscription
-            subscription.plan = plan
-            
-            subscription.save()"""
-            
-
-            return Response({"plan": {"name": plan.name, "period": plan.period}, "redirect_url": checkout_session.url}, status=status.HTTP_200_OK)
-        
+            return Response(response, status=status_code)
         except Plan.DoesNotExist:
             return Response({"message": f"Plan with this identifier does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+        except requests.RequestException as e:
+            return Response({"message": e.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"message": f"Other exception: {e.__str__()}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class VerifySubscription(APIView):
@@ -120,20 +115,23 @@ class VerifySubscription(APIView):
 
     def get(self, request, *args, **kwargs):
         checkout_id = kwargs.get('checkout_id')
-        checkout_session = stripe.checkout.Session.retrieve(checkout_id)
-
-        if checkout_session:
-            price_id = checkout_session.line_items[0].price.id
-            try:
-                plan = Plan.objects.get(stripe_price_id=price_id)
-                subscription = request.user.subscription
-                subscription.plan = plan
-                subscription.save(update_field=["plan"])
-
+        try:
+            token = generate_access_token(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET)
+            response, status_code = get_subscription(token, checkout_id)
+            
+            if status_code == 200:
+                plan = Plan.objects.get(paypal_price_id=response.get("plan_id"))
+                sub = request.user.subscription
+                sub.plan = plan
+                sub.paypal_order_id =  response.get("id")   
+                sub.save(update_fields=["plan", "paypal_order_id"])
+                
                 return Response({"message": f"Successfully subscribed to {plan.name} - {plan.period} plan.", "error": False}, status=status.HTTP_200_OK)
-            except Plan.DoesNotExist:
-                return Response({"message": "Server error.", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": True, "data": response}, status=status_code)
+        except requests.RequestException as e:
+            return Response({"message": e.__str__(), "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"message": f"Other exception: {e.__str__()}", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        return Response({"message": "Invalid checkout id.", "error": True}, status=status.HTTP_400_BAD_REQUEST)
 
 

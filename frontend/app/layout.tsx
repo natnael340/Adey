@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bona_Nova } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./Providers";
+import Script from "next/script";
 
 const inter = Bona_Nova({ subsets: ["greek"], weight: "400" });
 
@@ -17,6 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription"></Script>
       <body className={inter.className}>
         <AuthProvider>{children}</AuthProvider>
       </body>

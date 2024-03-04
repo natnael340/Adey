@@ -126,11 +126,19 @@ export type DashboardDataType = {
 };
 
 export type PlanResponseType = {
-  plan: {
-    name: string;
-    period: string;
-  };
-  redirect_url: string;
+  status: string;
+  status_update_time: string;
+  id: string;
+  plan_id: string;
+  start_time: string;
+  quantity: string;
+  create_time: string;
+  plan_overridden: boolean;
+  links: {
+    href: string;
+    rel: string;
+    method: string;
+  }[];
 };
 
 export type VerifySubType = {
@@ -147,4 +155,13 @@ export type PlanType = {
   max_request_per_month: number;
   max_user_session: number;
   price: number;
+};
+
+export type PaypalOptionsType = {
+  clientId: string;
+  enableFunding: string;
+  disableFunding: string;
+  dataSdkIntegrationSource: string;
+  vault: string;
+  intent: string;
 };

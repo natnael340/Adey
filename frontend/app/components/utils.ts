@@ -34,7 +34,7 @@ export const stringToColor = (str: string) => {
 };
 
 export const isSafePath = (path: string): boolean => {
-  if (/^\/[a-z0-9A-Z].$/.test(path)) {
+  if (/^\/[a-z0-9A-Z-/]+$/.test(path)) {
     return true;
   }
   return false;

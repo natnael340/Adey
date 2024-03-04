@@ -1,5 +1,5 @@
 from django.contrib import admin
-from adey_apps.users.models import User, Plan, Subscription
+from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder
 # Register your models here.
 
 @admin.register(User)
@@ -16,4 +16,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "plan", "status", "end_at")
 
 
-        
+@admin.register(SubscriptionOrder)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("order_id", "user", "verified", "canceled")

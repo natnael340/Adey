@@ -75,6 +75,7 @@ class Plan(BaseModel):
     max_user_session = models.IntegerField()
     price = models.DecimalField(decimal_places=2, max_digits=5)
     stripe_price_id = models.CharField("Stripe price id", max_length=256, blank=True, null=True)
+    paypal_price_id = models.CharField("Paypal price id", max_length=256, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.period}"
@@ -95,8 +96,14 @@ class Subscription(BaseModel):
     plan = models.ForeignKey(verbose_name="Plan", to=Plan, on_delete=models.CASCADE)
     end_at = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=8, choices=PLAN_OPTIONS, default=ACTIVE)
-    stripe_customer_id = models.CharField(max_length=256, blank=True, null=True)
-    stripe_subscription_id = models.CharField(max_length=256, blank=True, null=True)
+    paypal_order_id = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self) -> str:
         return f"{self.user} : {self.plan}"
+
+
+class SubscriptionOrder(BaseModel):
+    order_id = models.CharField(max_length=256, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    verified = models.BooleanField(default=False)
+    canceled = models.BooleanField(default=False)

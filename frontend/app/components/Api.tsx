@@ -5,6 +5,7 @@ import {
   ChatType,
   DashboardDataType,
   PlanResponseType,
+  PlanType,
   ResourceDataTypeWithPagination,
   ResourceFormType,
   VerifySubType,
@@ -26,6 +27,10 @@ class Api {
         Authorization: "Bearer " + this.token,
       },
     });
+  }
+
+  get_token() {
+    return this.token;
   }
 
   async get_chatbots() {
@@ -133,6 +138,11 @@ class Api {
     const { data } = await this.axios.get<VerifySubType>(
       `user/subscription/check/${id}`
     );
+
+    return data;
+  }
+  async get_plan(id: string) {
+    const { data } = await api.get<PlanType>(`plans/${id}/`);
 
     return data;
   }
