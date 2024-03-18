@@ -9,7 +9,9 @@ from adey_apps.users.views import (
     PlanViewSet, 
     SubscriptionApiView, 
     Subscribe,
-    VerifySubscription
+    VerifySubscription,
+    EmailVerificationRequestView,
+    EmailVerificationView,
 )
 
 
@@ -19,6 +21,8 @@ urlpatterns = [
     path("auth/login", LoginView.as_view(), name="user_login"),
     path("auth/social/google", GoogleLogin.as_view(), name="google_login"),
     path("auth/signup", SignUpView.as_view(), name="user_signup"),
+    path("auth/email/verification", EmailVerificationRequestView.as_view(), name="email_verification_request"),
+    path("auth/email/verify/<token>", EmailVerificationView.as_view(), name="verify_email"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("user/subscription", SubscriptionApiView.as_view(), name="user_subscription"),
     path("user/subscribe/<uuid:identifier>", Subscribe.as_view(), name="subscribe"),

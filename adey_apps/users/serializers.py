@@ -48,6 +48,10 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class EmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True, write_only=True)
+
+
 
 class PlanSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,5 +1,7 @@
 venv
 .env
+.general.log
 
 ./frontend/node_modules/
 ./chat_widget/node_modules/
+

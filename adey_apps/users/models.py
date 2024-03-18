@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Identifier", unique=True, db_index=True, editable=False, default=uuid4
     )
     email = models.EmailField("Email", max_length=255, unique=True)
+    is_verified = models.BooleanField("IsVerified", default=False)
     is_staff = models.BooleanField("IsStaff", default=False)
     is_superuser = models.BooleanField("IsSuperuser", default=False)
     
@@ -107,3 +108,7 @@ class SubscriptionOrder(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     verified = models.BooleanField(default=False)
     canceled = models.BooleanField(default=False)
+
+
+class EmailVerificationLog(BaseModel):
+    ip_address = models.GenericIPAddressField()

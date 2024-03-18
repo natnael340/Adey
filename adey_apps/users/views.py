@@ -3,7 +3,7 @@ import requests
 import base64
 import json
 from typing import Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from rest_framework import status
@@ -20,10 +20,14 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django_filters import rest_framework as filters
 from django.core.exceptions import BadRequest
 from django.conf import settings
-from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder
-from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
-from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, EmailVerificationLog
+from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer
+from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email
+from adey_apps.users.tasks import send_activation_email
 import logging
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 logger = logging.getLogger(__name__)
@@ -37,13 +41,19 @@ class LoginView(GenericAPIView):
     authentication_classes: List[Any] = []  
 
     def post(self, request: Request) -> Response:
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={"request": request})
         if not serializer.is_valid():
             return Response(
                     {"error": 1, "message": serializer.errors},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         user = serializer.validated_data["user"]
+
+        if not user.is_verified:
+            return Response(
+                    {"error": 1, "message": "Account has not be verified."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         token = RefreshToken.for_user(user)
         return Response(
@@ -61,11 +71,66 @@ class SignUpView(GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
 
-        return Response({"error": 0, "message": "User registered successfully."})
+        send_email_verification_email(user, request)
+
+        return Response({"error": 0, "message": "Email Activation link is sent to your email."})
 
 
+class EmailVerificationRequestView(GenericAPIView):
+    serializer_class = EmailVerificationSerializer
+    permission_classes = [AllowAny]
+    authentication_classes: List[Any] = []
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        ip_address = self.request.META.get('REMOTE_ADDR')
+
+        try:
+            user = User.objects.get(email=serializer.validated_data["email"])
+        except User.DoesNotExist:
+            logger.warning(f"IP: {ip_address}, Error: User with {serializer.validated_data['email']} doesn't exist.")
+        else:
+            recent_requests = EmailVerificationLog.objects.filter(ip_address=ip_address, created__gte=datetime.now() - timedelta(hours=1)).count()
+            if recent_requests >= 3:
+                return Response({"error": 1, "message": "Too many request. Please try again later."})
+            
+            send_email_verification_email(user, request)
+            EmailVerificationLog.objects.create(ip_address=ip_address)
+
+        return Response({
+            "error": 0, 
+            "message": "An activation link will be sent to your email shortly if you have an account with us."
+        })
+
+
+class EmailVerificationView(GenericAPIView):
+    serializer_class = None
+    permission_classes = [AllowAny]
+    authentication_classes: List[Any] = []
+
+    def get(self, request, token: str):
+        token = token.replace("_", "/") 
+        try:
+            token_dec = AESCipher().decrypt(token)
+        except Exception as e:
+            logger.warning(e.__str__())
+            return Response({"error": 1, "message": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, identifier = token_dec.split(":")
+        user = User.objects.get(identifier=identifier)
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            return Response({"error": 1, "message": "Invalid token or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+
+        return Response({
+            "error": 0, 
+            "message": "Your account has been successfully verified."
+        })
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter
@@ -102,7 +167,7 @@ class Subscribe(APIView):
             response, status_code = create_subscription(token, plan)
             if response.get("id", None):
                 SubscriptionOrder.objects.create(order_id=response.get("id"), user=request.user)
-            
+
             return Response(response, status=status_code)
         except Plan.DoesNotExist:
             return Response({"message": f"Plan with this identifier does not exist."}, status=status.HTTP_400_BAD_REQUEST)
