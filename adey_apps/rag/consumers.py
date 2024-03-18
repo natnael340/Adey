@@ -5,6 +5,9 @@ from django.conf import settings
 from adey_apps.rag.agent import Agent
 from adey_apps.rag.models import Chat, Message, MessageTypeChoices
 from adey_apps.adey_commons.permissions import has_chat_request_permission
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 CONVERSATION_STAGE =  {
@@ -76,26 +79,34 @@ class ChatConsumer(JsonWebsocketConsumer):
                })
                self.close()
 
-            Message.objects.create(
-                chat=self.chat, 
-                session_id=self.session_id, 
-                message=content["message"],
-                message_type=MessageTypeChoices.HUMAN,
-            )
-            res = self.agent.query(content["message"])
+            
+            try:
+                res = self.agent.query(content["message"])
+            except Exception as e:
+                logger.error(e.__str__())
+                self.send_json({
+                    "type": "error",
+                    "message": "Server error!",
+                })
+            else:
+                Message.objects.create(
+                    chat=self.chat, 
+                    session_id=self.session_id, 
+                    message=content["message"],
+                    message_type=MessageTypeChoices.HUMAN,
+                )
+                Message.objects.create(
+                    chat=self.chat, 
+                    session_id=self.session_id, 
+                    message=res,
+                    message_type=MessageTypeChoices.AI,
+                )
 
-            Message.objects.create(
-                chat=self.chat, 
-                session_id=self.session_id, 
-                message=res,
-                message_type=MessageTypeChoices.AI,
-            )
-
-            self.send_json({
-                "type": "message",
-                "message_type": MessageTypeChoices.AI,
-                "message": res,
-            })
+                self.send_json({
+                    "type": "message",
+                    "message_type": MessageTypeChoices.AI,
+                    "message": res,
+                })
         elif content["type"] == "instruction":
             if content["action"] == "message_seen":
                 Message.objects.filter(

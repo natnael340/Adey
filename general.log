@@ -1,0 +1,404 @@
+2024-03-18 14:28:23,851 INFO daphne.server HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2024-03-18 14:28:23,853 INFO daphne.server Configuring endpoint tcp:port=8000:interface=0.0.0.0
+2024-03-18 14:28:23,856 INFO daphne.server Listening on TCP address 0.0.0.0:8000
+2024-03-18 14:28:51,393 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:28:51,889 DEBUG psycopg.pq couldn't import psycopg 'c' implementation: No module named 'psycopg_c'
+2024-03-18 14:28:51,890 DEBUG psycopg.pq couldn't import psycopg 'binary' implementation: No module named 'psycopg_binary'
+2024-03-18 14:28:59,423 INFO daphne.server HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2024-03-18 14:28:59,424 INFO daphne.server Configuring endpoint tcp:port=8000:interface=0.0.0.0
+2024-03-18 14:28:59,427 INFO daphne.server Listening on TCP address 0.0.0.0:8000
+2024-03-18 14:36:48,523 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 50392]
+2024-03-18 14:36:48,539 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:36:48,598 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 50392]
+2024-03-18 14:36:48,600 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 50392]
+2024-03-18 14:36:48,600 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 50392]
+2024-03-18 14:37:48,696 DEBUG daphne.http_protocol HTTP b'POST' request for ['172.18.0.1', 35434]
+2024-03-18 14:37:48,704 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:37:49,211 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 35434]
+2024-03-18 14:37:49,212 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 35434]
+2024-03-18 14:37:49,213 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 35434]
+2024-03-18 14:38:19,305 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 41130]
+2024-03-18 14:38:19,317 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:38:19,514 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 41130]
+2024-03-18 14:38:19,516 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 41130]
+2024-03-18 14:38:19,517 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 41130]
+2024-03-18 14:39:12,903 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,910 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,910 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,911 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,924 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,929 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,930 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,930 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,957 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:12,962 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:12,981 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:12,990 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:13,076 DEBUG daphne.http_protocol HTTP 301 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,077 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,078 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,079 DEBUG daphne.http_protocol HTTP 301 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,081 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,081 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,153 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,158 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,165 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,171 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,172 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,175 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,176 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,177 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,196 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,199 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,208 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:13,209 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:13,406 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,408 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,409 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:13,411 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,412 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,413 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:13,660 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,665 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:13,667 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52984]
+2024-03-18 14:39:13,680 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:13,692 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,699 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52984]
+2024-03-18 14:39:13,703 DEBUG daphne.http_protocol HTTP response chunk for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,704 DEBUG daphne.http_protocol HTTP response chunk for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,705 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,705 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52974]
+2024-03-18 14:39:13,707 DEBUG daphne.http_protocol HTTP response chunk for ['172.18.0.1', 52984]
+2024-03-18 14:39:13,708 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52984]
+2024-03-18 14:39:13,709 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52984]
+2024-03-18 14:39:35,463 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,470 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,482 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,485 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,486 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,490 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,491 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,492 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,542 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,545 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,552 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,554 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,600 DEBUG daphne.http_protocol HTTP 301 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,601 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,603 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,607 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,613 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 34236]
+2024-03-18 14:39:35,622 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,623 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,623 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,625 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 34236]
+2024-03-18 14:39:35,627 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 34236]
+2024-03-18 14:39:35,628 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 34236]
+2024-03-18 14:39:35,664 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,667 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,675 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,677 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,684 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,687 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,691 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,731 DEBUG daphne.http_protocol HTTP 301 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,732 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,735 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,762 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,770 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,771 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,772 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 34230]
+2024-03-18 14:39:35,776 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,778 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,779 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,830 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,834 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,835 DEBUG daphne.http_protocol HTTP b'OPTIONS' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,848 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,849 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,850 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,899 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,900 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,901 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:39:35,903 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,909 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:35,967 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,969 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:39:35,970 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:39:36,090 DEBUG daphne.http_protocol HTTP b'GET' request for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,095 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:36,143 DEBUG daphne.http_protocol HTTP 200 response started for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,144 DEBUG daphne.http_protocol HTTP close for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,145 DEBUG daphne.http_protocol HTTP response complete for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,161 DEBUG daphne.http_protocol HTTP b'GET' request for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,166 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:36,211 DEBUG daphne.http_protocol HTTP 200 response started for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,212 DEBUG daphne.http_protocol HTTP close for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,213 DEBUG daphne.http_protocol HTTP response complete for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,224 DEBUG daphne.http_protocol Upgraded connection ['192.168.48.1', 56044] to WebSocket
+2024-03-18 14:39:36,334 DEBUG daphne.http_protocol HTTP b'GET' request for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,338 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,351 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:36,353 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:36,380 DEBUG daphne.http_protocol HTTP 200 response started for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,385 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,390 DEBUG daphne.http_protocol HTTP response chunk for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,394 DEBUG daphne.http_protocol HTTP response chunk for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,395 DEBUG daphne.http_protocol HTTP close for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,396 DEBUG daphne.http_protocol HTTP response complete for ['192.168.48.1', 56043]
+2024-03-18 14:39:36,401 DEBUG daphne.http_protocol HTTP response chunk for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,403 DEBUG daphne.http_protocol HTTP response chunk for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,404 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,405 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 34246]
+2024-03-18 14:39:36,424 DEBUG daphne.ws_protocol WebSocket ['192.168.48.1', 56044] open and established
+2024-03-18 14:39:36,425 DEBUG daphne.ws_protocol WebSocket ['192.168.48.1', 56044] accepted by application
+2024-03-18 14:39:36,480 DEBUG httpx load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-03-18 14:39:36,518 DEBUG httpx load_verify_locations cafile='/usr/local/lib/python3.8/site-packages/certifi/cacert.pem'
+2024-03-18 14:39:36,552 DEBUG httpx load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-03-18 14:39:36,564 DEBUG httpx load_verify_locations cafile='/usr/local/lib/python3.8/site-packages/certifi/cacert.pem'
+2024-03-18 14:39:36,971 DEBUG daphne.http_protocol HTTP b'GET' request for ['192.168.48.1', 56046]
+2024-03-18 14:39:36,983 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:39:37,047 WARNING django.request Not Found: /.git/HEAD
+2024-03-18 14:39:37,050 DEBUG daphne.http_protocol HTTP 404 response started for ['192.168.48.1', 56046]
+2024-03-18 14:39:37,051 DEBUG daphne.http_protocol HTTP close for ['192.168.48.1', 56046]
+2024-03-18 14:39:37,054 DEBUG daphne.http_protocol HTTP response complete for ['192.168.48.1', 56046]
+2024-03-18 14:39:37,055 WARNING django.channels.server [33mHTTP GET /.git/HEAD 404 [0.08, 192.168.48.1:56046][0m
+2024-03-18 14:39:37,074 DEBUG httpx load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-03-18 14:39:37,076 DEBUG httpx load_verify_locations cafile='/usr/local/lib/python3.8/site-packages/certifi/cacert.pem'
+2024-03-18 14:39:37,098 DEBUG httpx load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-03-18 14:39:37,100 DEBUG httpx load_verify_locations cafile='/usr/local/lib/python3.8/site-packages/certifi/cacert.pem'
+2024-03-18 14:39:37,187 DEBUG daphne.ws_protocol Sent WebSocket packet to client for ['192.168.48.1', 56044]
+2024-03-18 14:40:31,855 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:40:31,861 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:40:31,915 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:40:31,916 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:40:31,917 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:40:31,921 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:40:31,926 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:40:31,991 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:40:31,993 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:40:31,994 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:40:54,653 DEBUG daphne.ws_protocol WebSocket incoming frame on ['192.168.48.1', 56044]
+2024-03-18 14:40:54,756 DEBUG openai._base_client Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'json_data': {'messages': [{'role': 'user', 'content': 'Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.\n\nChat History:\n\nAssistant: Hello! How can I assist you today?\nFollow Up Input: hi\nStandalone question:'}], 'model': 'gpt-3.5-turbo', 'n': 1, 'stream': False, 'temperature': 0.7}}
+2024-03-18 14:40:54,865 DEBUG httpcore.connection connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=None socket_options=None
+2024-03-18 14:41:24,057 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:41:24,062 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:41:24,084 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:41:24,089 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:41:24,148 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:41:24,159 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:41:24,161 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:41:24,207 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:41:24,208 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:41:24,210 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:41:30,537 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:41:30,541 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:41:30,581 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:41:30,590 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:41:30,592 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:41:30,594 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:41:30,595 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:41:30,650 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:41:30,651 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:41:30,652 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:42:22,840 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:42:22,844 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:22,861 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:42:22,868 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:22,910 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:42:22,912 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:42:22,917 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:42:22,941 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:42:22,943 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:42:22,943 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:42:41,864 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:42:41,867 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:41,890 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:42:41,898 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:41,926 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:42:41,926 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:42:41,927 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:42:41,960 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:42:41,962 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:42:41,962 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:42:46,045 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:42:46,048 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:46,082 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:42:46,090 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:42:46,181 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:42:46,188 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:42:46,192 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:42:46,248 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:42:46,249 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:42:46,250 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:42:49,777 DEBUG daphne.ws_protocol WebSocket incoming frame on ['192.168.48.1', 56044]
+2024-03-18 14:43:05,046 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:43:05,049 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:43:05,081 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:43:05,089 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:43:05,106 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:43:05,107 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:43:05,108 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:43:05,154 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:43:05,156 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:43:05,156 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:43:05,178 DEBUG httpcore.connection connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x7f5e0272d340>
+2024-03-18 14:43:05,179 DEBUG httpcore.connection start_tls.started ssl_context=<ssl.SSLContext object at 0x7f5e028799c0> server_hostname='api.openai.com' timeout=None
+2024-03-18 14:43:05,287 DEBUG httpcore.connection start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x7f5e0272d760>
+2024-03-18 14:43:05,289 DEBUG httpcore.http11 send_request_headers.started request=<Request [b'POST']>
+2024-03-18 14:43:05,290 DEBUG httpcore.http11 send_request_headers.complete
+2024-03-18 14:43:05,291 DEBUG httpcore.http11 send_request_body.started request=<Request [b'POST']>
+2024-03-18 14:43:05,292 DEBUG httpcore.http11 send_request_body.complete
+2024-03-18 14:43:05,297 DEBUG httpcore.http11 receive_response_headers.started request=<Request [b'POST']>
+2024-03-18 14:43:05,641 DEBUG httpcore.http11 receive_response_headers.complete return_value=(b'HTTP/1.1', 401, b'Unauthorized', [(b'Date', b'Mon, 18 Mar 2024 14:43:05 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'301'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_eaa8b6c94ff092ecd636383dff3d0273'), (b'strict-transport-security', b'max-age=15724800; includeSubDomains'), (b'CF-Cache-Status', b'DYNAMIC'), (b'Set-Cookie', b'__cf_bm=xfjvHIlULqOwvlbQmn3B1ag2yQqIau4D8.qa8LzWS_g-1710772985-1.0.1.1-PSYwHBWNBvOfVZdfssyQdQlcng7CpRnNoWCLFf1JMVDtrN5K7lKQpx55D9j3Qjnu0f9wDUzRZM8q42BOWyc8qA; path=/; expires=Mon, 18-Mar-24 15:13:05 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'Set-Cookie', b'_cfuvid=no5GuXBJD_XY6lrhnO6bvaldFxbdvDaXmQ8QncoRwEg-1710772985955-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8665fe386d6b5454-JIB'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-03-18 14:43:05,644 INFO httpx HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2024-03-18 14:43:05,645 DEBUG httpcore.http11 receive_response_body.started request=<Request [b'POST']>
+2024-03-18 14:43:05,646 DEBUG httpcore.http11 receive_response_body.complete
+2024-03-18 14:43:05,647 DEBUG httpcore.http11 response_closed.started
+2024-03-18 14:43:05,647 DEBUG httpcore.http11 response_closed.complete
+2024-03-18 14:43:05,647 DEBUG openai._base_client HTTP Request: POST https://api.openai.com/v1/chat/completions "401 Unauthorized"
+2024-03-18 14:43:05,649 ERROR adey_apps.rag.consumers Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-BvsaD***************************************EwmO. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2024-03-18 14:43:05,650 DEBUG daphne.ws_protocol Sent WebSocket packet to client for ['192.168.48.1', 56044]
+2024-03-18 14:43:05,663 DEBUG daphne.ws_protocol WebSocket incoming frame on ['192.168.48.1', 56044]
+2024-03-18 14:43:05,704 DEBUG openai._base_client Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'json_data': {'messages': [{'role': 'user', 'content': 'Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.\n\nChat History:\n\nAssistant: Hello! How can I assist you today?\nFollow Up Input: \nhello\nStandalone question:'}], 'model': 'gpt-3.5-turbo', 'n': 1, 'stream': False, 'temperature': 0.7}}
+2024-03-18 14:43:05,706 DEBUG httpcore.http11 send_request_headers.started request=<Request [b'POST']>
+2024-03-18 14:43:05,707 DEBUG httpcore.http11 send_request_headers.complete
+2024-03-18 14:43:05,708 DEBUG httpcore.http11 send_request_body.started request=<Request [b'POST']>
+2024-03-18 14:43:05,709 DEBUG httpcore.http11 send_request_body.complete
+2024-03-18 14:43:05,709 DEBUG httpcore.http11 receive_response_headers.started request=<Request [b'POST']>
+2024-03-18 14:43:06,073 DEBUG httpcore.http11 receive_response_headers.complete return_value=(b'HTTP/1.1', 401, b'Unauthorized', [(b'Date', b'Mon, 18 Mar 2024 14:43:06 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'301'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_182abb4b506ab82e8590a76b92c431c9'), (b'strict-transport-security', b'max-age=15724800; includeSubDomains'), (b'CF-Cache-Status', b'DYNAMIC'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8665fe3b0f9c5454-JIB'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2024-03-18 14:43:06,075 INFO httpx HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2024-03-18 14:43:06,076 DEBUG httpcore.http11 receive_response_body.started request=<Request [b'POST']>
+2024-03-18 14:43:06,077 DEBUG httpcore.http11 receive_response_body.complete
+2024-03-18 14:43:06,077 DEBUG httpcore.http11 response_closed.started
+2024-03-18 14:43:06,078 DEBUG httpcore.http11 response_closed.complete
+2024-03-18 14:43:06,079 DEBUG openai._base_client HTTP Request: POST https://api.openai.com/v1/chat/completions "401 Unauthorized"
+2024-03-18 14:43:06,080 ERROR adey_apps.rag.consumers Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-BvsaD***************************************EwmO. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2024-03-18 14:43:06,082 DEBUG daphne.ws_protocol Sent WebSocket packet to client for ['192.168.48.1', 56044]
+2024-03-18 14:43:06,088 DEBUG daphne.ws_protocol WebSocket incoming frame on ['192.168.48.1', 56044]
+2024-03-18 14:43:09,324 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52958]
+2024-03-18 14:43:09,333 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:43:09,397 DEBUG daphne.http_protocol HTTP b'GET' request for ['172.18.0.1', 52948]
+2024-03-18 14:43:09,398 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52958]
+2024-03-18 14:43:09,399 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52958]
+2024-03-18 14:43:09,400 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52958]
+2024-03-18 14:43:09,406 DEBUG asyncio Using selector: EpollSelector
+2024-03-18 14:43:09,464 DEBUG daphne.http_protocol HTTP 200 response started for ['172.18.0.1', 52948]
+2024-03-18 14:43:09,466 DEBUG daphne.http_protocol HTTP close for ['172.18.0.1', 52948]
+2024-03-18 14:43:09,466 DEBUG daphne.http_protocol HTTP response complete for ['172.18.0.1', 52948]
+2024-03-18 14:45:33,522 WARNING django.request Not Found: /.git/HEAD
+2024-03-18 14:45:33,525 WARNING django.channels.server [33mHTTP GET /.git/HEAD 404 [0.09, 192.168.48.1:56350][0m
+2024-03-18 14:47:32,137 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:32,156 ERROR django.channels.server [35;1mHTTP GET /api/v1/rag/customer-support/resource/ 500 [0.50, 172.18.0.1:42456][0m
+2024-03-18 14:47:32,157 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:32,159 ERROR django.channels.server [35;1mHTTP GET /api/v1/rag/chats/customer-support/ 500 [0.47, 172.18.0.1:42454][0m
+2024-03-18 14:47:36,165 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:36,167 ERROR django.channels.server [35;1mHTTP OPTIONS /api/v1/rag/customer-support/resource/ 500 [0.80, 172.18.0.1:42456][0m
+2024-03-18 14:47:36,167 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:36,169 ERROR django.channels.server [35;1mHTTP OPTIONS /api/v1/rag/chats/customer-support/ 500 [0.76, 172.18.0.1:42454][0m
+2024-03-18 14:47:39,172 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:39,174 ERROR django.channels.server [35;1mHTTP OPTIONS /api/v1/rag/customer-support/resource/ 500 [0.67, 172.18.0.1:42456][0m
+2024-03-18 14:47:39,175 ERROR daphne.server Exception inside application: cannot schedule new futures after interpreter shutdown
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/django/contrib/staticfiles/handlers.py", line 101, in __call__
+    return await self.application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/channels/routing.py", line 62, in __call__
+    return await application(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 160, in __call__
+    await self.handle(scope, receive, send)
+  File "/usr/local/lib/python3.8/site-packages/django/core/handlers/asgi.py", line 173, in handle
+    await sync_to_async(signals.request_started.send, thread_sensitive=True)(
+  File "/usr/local/lib/python3.8/site-packages/asgiref/sync.py", line 479, in __call__
+    ret: _R = await loop.run_in_executor(
+  File "/usr/local/lib/python3.8/asyncio/base_events.py", line 783, in run_in_executor
+    executor.submit(func, *args), loop=self)
+  File "/usr/local/lib/python3.8/concurrent/futures/thread.py", line 181, in submit
+    raise RuntimeError('cannot schedule new futures after '
+RuntimeError: cannot schedule new futures after interpreter shutdown
+2024-03-18 14:47:39,176 ERROR django.channels.server [35;1mHTTP OPTIONS /api/v1/rag/chats/customer-support/ 500 [0.61, 172.18.0.1:42454][0m
+2024-03-18 14:48:02,465 ERROR adey_apps.rag.consumers Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-BvsaD***************************************EwmO. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2024-03-18 14:48:57,950 WARNING django.request Not Found: /.git/HEAD
+2024-03-18 14:48:57,952 WARNING django.channels.server [33mHTTP GET /.git/HEAD 404 [0.04, 192.168.48.1:56445][0m
+2024-03-18 14:54:21,394 WARNING django.request Not Found: /.git/HEAD
+2024-03-18 14:54:21,397 WARNING django.channels.server [33mHTTP GET /.git/HEAD 404 [0.03, 192.168.48.1:56745][0m
+2024-03-18 14:57:01,342 ERROR adey_apps.rag.consumers Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-BvsaD***************************************EwmO. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}

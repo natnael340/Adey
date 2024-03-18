@@ -226,3 +226,49 @@ PAYPAL_CLIENT_ID=env.str("PAYPAL_CLIENT_ID")
 PAYPAL_CLIENT_SECRET=env.str("PAYPAL_CLIENT_SECRET")
 PAYPAL_ACCESS_TOKEN=env.str("PAYPAL_ACCESS_TOKEN")
 PAYPAL_SELLER_ID=env.str("PAYPAL_SELLER_ID")
+
+
+# Email Configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = "587"
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", "")
+
+
+# Logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s %(levelname)s %(name)s %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "filters": [],
+        },
+        "file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "general.log",
+            "formatter": "standard",
+            "filters": [],
+        }
+    },
+    "loggers": {
+        logger_name: {
+            "level": "WARNING",
+            "propagate": True,
+        } for logger_name in ("django", "django.request", "django.db.backends", "adey")
+    },
+    "root": {
+        "level": "DEBUG",
+        "handlers": ["file", "console"]
+    }
+}

@@ -23,7 +23,10 @@ from django.conf import settings
 from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder
 from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer
 from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_TEST_KEY
 
@@ -99,14 +102,13 @@ class Subscribe(APIView):
             response, status_code = create_subscription(token, plan)
             if response.get("id", None):
                 SubscriptionOrder.objects.create(order_id=response.get("id"), user=request.user)
-
+            
             return Response(response, status=status_code)
         except Plan.DoesNotExist:
             return Response({"message": f"Plan with this identifier does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-        except requests.RequestException as e:
-            return Response({"message": e.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            return Response({"message": f"Other exception: {e.__str__()}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(e.__str__())
+            return Response({"message": f"Server Error!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
