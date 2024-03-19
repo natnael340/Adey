@@ -29,8 +29,7 @@ logger = logging.getLogger(__name__)
 
 class LoginView(GenericAPIView):
     serializer_class = UserLoginSerializer
-    permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []  
+    permission_classes = [AllowAny]  
 
     def post(self, request: Request) -> Response:
         serializer = self.serializer_class(data=request.data, context={"request": request})
@@ -58,7 +57,6 @@ class LoginView(GenericAPIView):
 class SignUpView(GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={"request": request})
@@ -73,7 +71,6 @@ class SignUpView(GenericAPIView):
 class EmailVerificationRequestView(GenericAPIView):
     serializer_class = EmailVerificationSerializer
     permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={"request": request})
@@ -105,7 +102,6 @@ class EmailVerificationRequestView(GenericAPIView):
 class EmailVerificationView(GenericAPIView):
     serializer_class = None
     permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []
 
     def get(self, request, token: str):
         token = token.replace("_", "/") 
@@ -132,7 +128,6 @@ class EmailVerificationView(GenericAPIView):
 class PasswordResetView(GenericAPIView):
     serializer_class = EmailVerificationSerializer
     permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={"request": request})
@@ -162,7 +157,6 @@ class PasswordResetView(GenericAPIView):
 class PasswordResetConfirmView(GenericAPIView):
     serializer_class = PasswordResetSerializer
     permission_classes = [AllowAny]
-    authentication_classes: List[Any] = []
 
     def post(self, request, token):
         token = token.replace("_", "/") 
