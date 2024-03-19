@@ -1,10 +1,8 @@
-import stripe
+import logging
 import requests
-import base64
-import json
+
 from typing import Any, List
 from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
@@ -18,21 +16,14 @@ from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django_filters import rest_framework as filters
-from django.core.exceptions import BadRequest
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
 from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, EmailVerificationLog
 from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer
 from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email
-from adey_apps.users.tasks import send_activation_email
-import logging
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from adey_apps.users.tokens import account_activation_token
 
 
 logger = logging.getLogger(__name__)
-
-stripe.api_key = settings.STRIPE_SECRET_TEST_KEY
 
 
 class LoginView(GenericAPIView):
@@ -90,6 +81,8 @@ class EmailVerificationRequestView(GenericAPIView):
 
         try:
             user = User.objects.get(email=serializer.validated_data["email"])
+            if user.is_verified:
+                return Response({"error": 1, "message": "User already verified."})
         except User.DoesNotExist:
             logger.warning(f"IP: {ip_address}, Error: User with {serializer.validated_data['email']} doesn't exist.")
         else:
@@ -121,7 +114,7 @@ class EmailVerificationView(GenericAPIView):
 
         token, identifier = token_dec.split(":")
         user = User.objects.get(identifier=identifier)
-        if not PasswordResetTokenGenerator().check_token(user, token):
+        if not account_activation_token.check_token(user, token):
             return Response({"error": 1, "message": "Invalid token or expired token."}, status=status.HTTP_400_BAD_REQUEST)
         
         user.is_verified = True
@@ -131,6 +124,7 @@ class EmailVerificationView(GenericAPIView):
             "error": 0, 
             "message": "Your account has been successfully verified."
         })
+
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter

@@ -11,11 +11,11 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 
 from adey_apps.users.models import Plan
+from adey_apps.users.tokens import account_activation_token
 
 
 
@@ -118,8 +118,7 @@ def send_activation_email(to_email: str, url: str) -> None:
 
 
 def send_email_verification_email(user, request):
-    token_generator = PasswordResetTokenGenerator()
-    token = token_generator.make_token(user)
+    token = account_activation_token.make_token(user)
 
     token_cipher = AESCipher().encrypt(f"{token}:{user.identifier}").decode("utf-8")
     token_cipher = token_cipher.replace("/", "_")
