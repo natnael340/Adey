@@ -17,9 +17,10 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django_filters import rest_framework as filters
 from django.conf import settings
-from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, EmailVerificationLog
-from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer
-from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, TokenGenerationLog
+from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer
+from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email, send_password_reset_email
 from adey_apps.users.tokens import account_activation_token
 
 
@@ -86,12 +87,14 @@ class EmailVerificationRequestView(GenericAPIView):
         except User.DoesNotExist:
             logger.warning(f"IP: {ip_address}, Error: User with {serializer.validated_data['email']} doesn't exist.")
         else:
-            recent_requests = EmailVerificationLog.objects.filter(ip_address=ip_address, created__gte=datetime.now() - timedelta(hours=1)).count()
+            recent_requests = TokenGenerationLog.objects.filter(
+                ip_address=ip_address, created__gte=datetime.now() - timedelta(hours=1), token_type=TokenGenerationLog.EMAIL
+            ).count()
             if recent_requests >= 3:
                 return Response({"error": 1, "message": "Too many request. Please try again later."})
             
             send_email_verification_email(user, request)
-            EmailVerificationLog.objects.create(ip_address=ip_address)
+            TokenGenerationLog.objects.create(ip_address=ip_address, token_type=TokenGenerationLog.EMAIL)
 
         return Response({
             "error": 0, 
@@ -115,7 +118,7 @@ class EmailVerificationView(GenericAPIView):
         token, identifier = token_dec.split(":")
         user = User.objects.get(identifier=identifier)
         if not account_activation_token.check_token(user, token):
-            return Response({"error": 1, "message": "Invalid token or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": 1, "message": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
         
         user.is_verified = True
         user.save(update_fields=["is_verified"])
@@ -124,7 +127,67 @@ class EmailVerificationView(GenericAPIView):
             "error": 0, 
             "message": "Your account has been successfully verified."
         })
+    
 
+class PasswordResetView(GenericAPIView):
+    serializer_class = EmailVerificationSerializer
+    permission_classes = [AllowAny]
+    authentication_classes: List[Any] = []
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        ip_address = self.request.META.get('REMOTE_ADDR')
+
+        try:
+            user = User.objects.get(email=serializer.validated_data["email"])
+        except User.DoesNotExist:
+            logger.warning(f"IP: {ip_address}, Error: User with {serializer.validated_data['email']} doesn't exist.")
+        else:
+            recent_requests = TokenGenerationLog.objects.filter(
+                ip_address=ip_address, created__gte=datetime.now() - timedelta(hours=1), token_type=TokenGenerationLog.PASSWORD
+            ).count()
+            if recent_requests >= 3:
+                return Response({"error": 1, "message": "Too many request. Please try again later."})
+            
+            send_password_reset_email(user, request)
+            TokenGenerationLog.objects.create(ip_address=ip_address, token_type=TokenGenerationLog.PASSWORD)
+
+        return Response({
+            "error": 0, 
+            "message": "A password reset link will be sent to your email shortly if you have an account with us."
+        })
+
+
+class PasswordResetConfirmView(GenericAPIView):
+    serializer_class = PasswordResetSerializer
+    permission_classes = [AllowAny]
+    authentication_classes: List[Any] = []
+
+    def post(self, request, token):
+        token = token.replace("_", "/") 
+        try:
+            token_dec = AESCipher().decrypt(token)
+        except Exception as e:
+            logger.warning(e.__str__())
+            return Response({"error": 1, "message": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, identifier = token_dec.split(":")
+        user = User.objects.get(identifier=identifier)
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            return Response({"error": 1, "message": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=user)
+
+        return Response({
+            "error": 0, 
+            "message": "A password reset successful."
+        })
+
+        
+        
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter

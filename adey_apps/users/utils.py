@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from adey_apps.users.models import Plan
 from adey_apps.users.tokens import account_activation_token
@@ -97,15 +98,39 @@ class AESCipher(object):
         return s[:-ord(s[len(s)-1:])]
 
 
-def send_activation_email(to_email: str, url: str) -> None:
+def send_act_email(to_email: str, url: str) -> None:
     context = {
         "email_verification_url": url,
+        "btn_txt": "Verify Email",
+        "title": "Please Verify your email address"
     }
 
     email_subject = "Verify Email"
     email_body = render_to_string("email_template.html", context)
     plain_message = strip_tags(email_body)
-    print(settings.EMAIL_HOST_USER)
+    
+    send_mail(
+        email_subject,
+        plain_message,
+        settings.EMAIL_HOST_USER,
+        [
+            to_email,
+        ],
+        html_message=email_body,
+    )
+
+
+def send_pwd_email(to_email: str, url: str) -> None:
+    context = {
+        "email_verification_url": url,
+        "btn_txt": "Reset Password",
+        "title": "Please click this button to reset your password."
+    }
+
+    email_subject = "Reset Password"
+    email_body = render_to_string("email_template.html", context)
+    plain_message = strip_tags(email_body)
+    
     send_mail(
         email_subject,
         plain_message,
@@ -129,4 +154,20 @@ def send_email_verification_email(user, request):
 
     absoluteUrl = f"http://{current_site}{relativeUrl}".format(current_site, relativeUrl)
     from adey_apps.users.tasks import send_activation_email as send_mail
+    send_mail.delay(user.email, absoluteUrl)
+
+
+def send_password_reset_email(user, request):
+    token_generator = PasswordResetTokenGenerator()
+    token = token_generator.make_token(user)
+
+    token_cipher = AESCipher().encrypt(f"{token}:{user.identifier}").decode("utf-8")
+    token_cipher = token_cipher.replace("/", "_")
+    current_site = get_current_site(request).domain
+    relativeUrl = reverse(
+        "reset_password", args=[token_cipher]
+    )
+
+    absoluteUrl = f"http://{current_site}{relativeUrl}".format(current_site, relativeUrl)
+    from adey_apps.users.tasks import send_password_reset_email as send_mail
     send_mail.delay(user.email, absoluteUrl)

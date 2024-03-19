@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
 from django.urls import reverse
 
@@ -51,6 +52,20 @@ class UserSerializer(serializers.ModelSerializer):
 class EmailVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, write_only=True)
 
+
+class PasswordResetSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True, write_only=True, validators=[validate_password])
+    confirm_password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get("confirm_password"):
+            raise serializers.ValidationError("password and confirm password do not match")
+        
+        return super().validate(attrs)
+
+    def save(self, user, **kwargs):
+        user.set_password(self.validated_data["password"])
+        user.save()
 
 
 class PlanSerializer(serializers.ModelSerializer):

@@ -110,5 +110,10 @@ class SubscriptionOrder(BaseModel):
     canceled = models.BooleanField(default=False)
 
 
-class EmailVerificationLog(BaseModel):
+class TokenGenerationLog(BaseModel):
+    EMAIL, PASSWORD = "email-verification", "password-reset"
+    TOKEN_TYPE_OPTIONS = ((EMAIL, "email-verification",), (PASSWORD, "password-reset"),)
+
     ip_address = models.GenericIPAddressField()
+    token_type = models.CharField(max_length=18, choices=TOKEN_TYPE_OPTIONS, default=EMAIL)
+
