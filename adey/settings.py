@@ -183,6 +183,10 @@ FRONTEND_URLS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+FRONTEND_DOMAIN = env.str("FRONTEND_DOMAIN", "127.0.0.1:3000")
+FRONTEND_PASSWORD_RESET_PATH = env.str("FRONTEND_PASSWORD_RESET_PATH", "/auth/password/reset/{token}")
+FRONTEND_EMAIL_VERIFICATION_PATH = env.str("FRONTEND_EMAIL_VERIFICATION_PATH", "")
+
 CHATBOT_ALLOWED_PATH = [
     "/media/chatbot/index.js",
     "/media/chatbot/index.css",

@@ -175,6 +175,7 @@ class PasswordResetConfirmView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=user)
 
+
         return Response({
             "error": 0, 
             "message": "A password reset successful."

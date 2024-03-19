@@ -147,12 +147,9 @@ def send_email_verification_email(user, request):
 
     token_cipher = AESCipher().encrypt(f"{token}:{user.identifier}").decode("utf-8")
     token_cipher = token_cipher.replace("/", "_")
-    current_site = get_current_site(request).domain
-    relativeUrl = reverse(
-        "verify_email", args=[token_cipher]
-    )
+    relativeUrl = settings.FRONTEND_EMAIL_VERIFICATION_PATH.format(token=token_cipher)
 
-    absoluteUrl = f"http://{current_site}{relativeUrl}".format(current_site, relativeUrl)
+    absoluteUrl = f"http://{settings.FRONTEND_DOMAIN}{relativeUrl}"
     from adey_apps.users.tasks import send_activation_email as send_mail
     send_mail.delay(user.email, absoluteUrl)
 
@@ -163,11 +160,8 @@ def send_password_reset_email(user, request):
 
     token_cipher = AESCipher().encrypt(f"{token}:{user.identifier}").decode("utf-8")
     token_cipher = token_cipher.replace("/", "_")
-    current_site = get_current_site(request).domain
-    relativeUrl = reverse(
-        "reset_password", args=[token_cipher]
-    )
+    relativeUrl = settings.FRONTEND_PASSWORD_RESET_PATH.format(token=token_cipher)
 
-    absoluteUrl = f"http://{current_site}{relativeUrl}".format(current_site, relativeUrl)
+    absoluteUrl = f"http://{settings.FRONTEND_DOMAIN}{relativeUrl}"
     from adey_apps.users.tasks import send_password_reset_email as send_mail
     send_mail.delay(user.email, absoluteUrl)
