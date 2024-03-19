@@ -141,7 +141,7 @@ export type PlanResponseType = {
   }[];
 };
 
-export type VerifySubType = {
+export type GenericResponseType = {
   message: string;
   error: boolean;
 };

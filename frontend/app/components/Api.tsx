@@ -8,7 +8,7 @@ import {
   PlanType,
   ResourceDataTypeWithPagination,
   ResourceFormType,
-  VerifySubType,
+  GenericResponseType,
 } from "../types/types";
 
 export const api = Axios.create({
@@ -135,7 +135,7 @@ class Api {
   }
 
   async check_status(id: string) {
-    const { data } = await this.axios.get<VerifySubType>(
+    const { data } = await this.axios.get<GenericResponseType>(
       `user/subscription/check/${id}`
     );
 
