@@ -86,7 +86,7 @@ const Pricing = ({ data: base }: PropsType) => {
             <a
               role="button"
               className="w-full h-14 mt-7 bg-[#EDD447] rounded-xl shadow-lg flex items-center justify-center"
-              href={`/subscription/${data[0].identifier}`}
+              href={"/auth/login"}
             >
               <span className="text-lg">Get Started</span>
             </a>

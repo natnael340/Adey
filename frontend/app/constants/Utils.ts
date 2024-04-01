@@ -15,3 +15,11 @@ export namespace JwtUtils {
     return true;
   };
 }
+
+export class AuthenticationError extends Error {
+  code;
+  constructor(message: string, code: number = 0) {
+    super(message);
+    this.code = code;
+  }
+}

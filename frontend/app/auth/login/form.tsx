@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import React, { FormEventHandler, useRef, useState } from "react";
-import { HiInformationCircle } from "react-icons/hi";
+import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
 import { get_redirect_url } from "../components/utils";
 
 const Form = () => {
@@ -13,7 +13,12 @@ const Form = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState({ email: "", password: "" });
-  const [showAlert, setShowAlert] = useState({ show: false, message: "" });
+  const [showAlert, setShowAlert] = useState({
+    show: false,
+    message: "",
+    code: 0,
+  });
+  const [showPassword, setShowPassword] = useState(false);
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -40,8 +45,16 @@ const Form = () => {
         callbackUrl: "/dashboard",
       });
       if (response?.error) {
-        setShowAlert({ show: true, message: response.error });
-        setTimeout(() => setShowAlert({ show: false, message: "" }), 3000);
+        try {
+          let _error = JSON.parse(response.error);
+          setShowAlert({
+            show: true,
+            message: _error.message,
+            code: _error.code,
+          });
+        } catch (e) {
+          setShowAlert({ show: true, message: response.error, code: 0 });
+        }
       } else if (response?.ok) {
         router.push(get_redirect_url(searchParams));
       }
@@ -51,10 +64,30 @@ const Form = () => {
       setLoading(false);
     }
   };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
   return (
     <>
       {showAlert.show ? (
-        <Alert color="failure" icon={HiInformationCircle}>
+        <Alert
+          color="warning"
+          icon={HiInformationCircle}
+          onDismiss={() => setShowAlert({ show: false, message: "", code: 0 })}
+          additionalContent={
+            showAlert.code == 2 ? (
+              <div className="pt-2">
+                <a
+                  href="/auth/email/verify"
+                  type="button"
+                  className="border border-primary-600 rounded-md py-1 px-2 text-[#15192C]"
+                >
+                  Verify Email
+                </a>
+              </div>
+            ) : (
+              <></>
+            )
+          }
+        >
           <span className="font-medium">Login failed!</span> {showAlert.message}
         </Alert>
       ) : (
@@ -91,17 +124,30 @@ const Form = () => {
           >
             Password
           </label>
-          <input
-            ref={password}
-            type="password"
-            name="password"
-            id="password"
-            placeholder="••••••••"
-            className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={({ target }) =>
-              setUserInfo({ ...userInfo, password: target.value })
-            }
-          />
+          <div className="relative">
+            <input
+              ref={password}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              id="password"
+              placeholder="********"
+              className=" bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              onChange={({ target }) =>
+                setUserInfo({ ...userInfo, password: target.value })
+              }
+            />
+            <button
+              className="absolute top-0 right-0 flex items-center justify-center bottom-0 w-10"
+              type="button"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <HiEyeOff color="#7a7a7a" />
+              ) : (
+                <HiEye color="#7a7a7a" />
+              )}
+            </button>
+          </div>
         </div>
         <button
           type="submit"

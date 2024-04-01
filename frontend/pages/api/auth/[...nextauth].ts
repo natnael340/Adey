@@ -103,7 +103,30 @@ export const authOptions: NextAuthOptions = {
 
           if (x.response?.data) {
             console.error(x.response?.data, x.message);
-            throw new Error("Invalid email or password.");
+            // @ts-ignore
+            if (x.response?.data?.non_field_errors) {
+              throw new Error(
+                JSON.stringify({
+                  // @ts-ignore
+                  message: x.response?.data?.non_field_errors?.[0],
+                  code: 1,
+                })
+              );
+            }
+            // @ts-ignore
+            else if (typeof x.response?.data?.message == "string") {
+              throw new Error(
+                // @ts-ignore
+                JSON.stringify({ message: x.response?.data?.message, code: 2 })
+              );
+            } else {
+              throw new Error(
+                JSON.stringify({
+                  message: x.response?.data.toString(),
+                  code: 0,
+                })
+              );
+            }
           }
         }
         return null;
