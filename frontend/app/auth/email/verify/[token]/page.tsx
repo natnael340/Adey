@@ -1,17 +1,12 @@
 import React from "react";
 import Image from "next/image";
-import { NextPage } from "next";
-import { signIn, useSession } from "next-auth/react";
-import { FcGoogle } from "react-icons/fc";
 import { HiInformationCircle } from "react-icons/hi";
-import { redirect, useRouter } from "next/navigation";
-import { isSafePath } from "@/app/components/utils";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { api } from "@/app/components/Api";
 import { GenericResponseType } from "@/app/types/types";
 import { Alert } from "flowbite-react";
-import { AxiosError } from "axios";
 
 type PropType = {
   params: {

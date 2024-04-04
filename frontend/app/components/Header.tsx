@@ -1,13 +1,5 @@
 import Image from "next/image";
 import React from "react";
-import Link from "next/link";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarToggle,
-  NavbarCollapse,
-  NavbarLink,
-} from "flowbite-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../pages/api/auth/[...nextauth]";
 

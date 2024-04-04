@@ -3,10 +3,8 @@
 import React, { FormEventHandler, useState } from "react";
 import Image from "next/image";
 import { RegisterFormType } from "@/app/types/types";
-import { register } from "module";
 import { api } from "@/app/components/Api";
 import { AxiosError } from "axios";
-import { redirect } from "next/navigation";
 import { navigate } from "@/app/components/handlers";
 import { Spinner } from "flowbite-react";
 

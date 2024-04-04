@@ -1,10 +1,6 @@
-import { Navbar, Button, Card } from "flowbite-react";
 import Image from "next/image";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Link from "next/link";
-import { FaBullseye, FaCheck } from "react-icons/fa";
-import { NextRequest } from "next/server";
 import Pricing from "./components/Pricing";
 import { api } from "./components/Api";
 import { PlanType } from "./types/types";

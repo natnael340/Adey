@@ -1,13 +1,3 @@
-import {
-  Footer as FBFooter,
-  FooterBrand,
-  FooterCopyright,
-  FooterDivider,
-  FooterIcon,
-  FooterLink,
-  FooterLinkGroup,
-  FooterTitle,
-} from "flowbite-react";
 import Image from "next/image";
 import {
   BsDribbble,
