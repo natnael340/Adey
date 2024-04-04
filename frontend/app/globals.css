@@ -2,190 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  overscroll-behavior: none;
-}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
-.loading_fluid {
-  box-shadow: inset 0 0 50px #555;
-  overflow: hidden;
-}
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-.loading_fluid::before {
-  content: "";
-  position: absolute;
-  top: -150%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  opacity: 0.8;
-  border-radius: 40%;
-  background-color: #eee;
-  animation: newanimation 12s linear infinite;
-}
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-@keyframes newanimation {
-  0% {
-    transform: rotate(0deg);
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
   }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
-.loading_fluid::after {
-  content: "";
-  position: absolute;
-  top: -150%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  opacity: 1;
-  border-radius: 40%;
-  background-color: #fff;
-  animation: newanimation2 6s linear infinite;
-}
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-@keyframes newanimation2 {
-  0% {
-    transform: rotate(360deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-.company_name {
-  position: relative;
-}
-.company_name img {
-  position: absolute;
-}
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-.company_name img:nth-child(1) {
-  animation: animate 4s ease-in-out infinite;
-}
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-@keyframes animate {
-  0%,
-  100% {
-    clip-path: polygon(
-      100% 100%,
-      0% 100%,
-      0% 50%,
-      2% 49.87%,
-      4% 49.47%,
-      6% 48.82%,
-      8% 47.94%,
-      10% 46.85%,
-      12% 45.57%,
-      14% 44.14%,
-      16% 42.61%,
-      18% 41%,
-      20% 39.37%,
-      22% 37.76%,
-      24% 36.2%,
-      26% 34.75%,
-      28% 33.43%,
-      30% 32.29%,
-      32% 31.36%,
-      34% 30.66%,
-      36% 30.2%,
-      38% 30.01%,
-      40% 30.08%,
-      42% 30.41%,
-      44% 31.01%,
-      46% 31.84%,
-      48% 32.88%,
-      50% 34.12%,
-      52% 35.52%,
-      54% 37.03%,
-      56% 38.62%,
-      58% 40.25%,
-      60% 41.87%,
-      62% 43.45%,
-      64% 44.93%,
-      66% 46.28%,
-      68% 47.46%,
-      70% 48.44%,
-      72% 49.2%,
-      74% 49.72%,
-      76% 49.97%,
-      78% 49.96%,
-      80% 49.69%,
-      82% 49.15%,
-      84% 48.38%,
-      86% 47.38%,
-      88% 46.18%,
-      90% 44.82%,
-      92% 43.33%,
-      94% 41.75%,
-      96% 40.13%,
-      98% 38.5%,
-      100% 36.91%
-    );
-  }
-  50% {
-    clip-path: polygon(
-      100% 100%,
-      0% 100%,
-      0% 35%,
-      2% 33.66%,
-      4% 32.49%,
-      6% 31.51%,
-      8% 30.77%,
-      10% 30.26%,
-      12% 30.02%,
-      14% 30.05%,
-      16% 30.34%,
-      18% 30.88%,
-      20% 31.67%,
-      22% 32.68%,
-      24% 33.89%,
-      26% 35.26%,
-      28% 36.75%,
-      30% 38.33%,
-      32% 39.96%,
-      34% 41.59%,
-      36% 43.17%,
-      38% 44.67%,
-      40% 46.05%,
-      42% 47.26%,
-      44% 48.28%,
-      46% 49.08%,
-      48% 49.64%,
-      50% 49.95%,
-      52% 49.98%,
-      54% 49.75%,
-      56% 49.27%,
-      58% 48.53%,
-      60% 47.57%,
-      62% 46.41%,
-      64% 45.07%,
-      66% 43.6%,
-      68% 42.04%,
-      70% 40.42%,
-      72% 38.79%,
-      74% 37.19%,
-      76% 35.67%,
-      78% 34.26%,
-      80% 33%,
-      82% 31.93%,
-      84% 31.08%,
-      86% 30.46%,
-      88% 30.1%,
-      90% 30%,
-      92% 30.17%,
-      94% 30.6%,
-      96% 31.28%,
-      98% 32.19%,
-      100% 33.31%
-    );
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
-.home {
-  background-image: url("/home_lg.jpg");
-  background-repeat: no-repeat;
-  background-size: 100%;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

@@ -1,0 +1,161 @@
+"use client";
+
+import React, { useContext, useEffect, useState } from "react";
+import { Context } from "./ChatDetailContext";
+import { ChatFormType, ChatType } from "@/app/types/types";
+import ChatForm from "../../components/ChatForm";
+import Api from "@/app/components/Api";
+import Image from "next/image";
+import { Button } from "flowbite-react";
+
+const ChatDetail = () => {
+  let { api, bot, identifier, setBot } = useContext(Context);
+
+  const [chatForm, setChatForm] = useState<ChatFormType>({
+    name: "",
+    assistant_picture_data: null,
+    assistant_characters: [],
+    assistant_name: "",
+    assistant_role: "",
+    business_description: "",
+    business_name: "",
+    allowed_urls: [],
+  });
+  const [_chatForm, _setChatForm] = useState<ChatFormType>({
+    name: "",
+    assistant_picture_data: null,
+    assistant_characters: [],
+    assistant_name: "",
+    assistant_role: "",
+    business_description: "",
+    business_name: "",
+    allowed_urls: [],
+  });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [chatHidden, setChatHidden] = useState<boolean>(true);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const initiateChatBotForm = (data: ChatType) => {
+    const form = {
+      assistant_name: data.assistant_name,
+      assistant_characters: data.assistant_characters.map(
+        (character) => character.name
+      ),
+      assistant_picture_data: data.assistant_picture_url,
+      assistant_role: data.assistant_role,
+      business_description: data.business_description,
+      business_name: data.business_name,
+      name: data.name,
+      allowed_urls: data.allowed_urls,
+    };
+    setChatForm(form);
+    _setChatForm(form);
+  };
+  const fetchChatBot = async (_api: Api) => {
+    try {
+      const data = await _api.get_chatbot(identifier);
+      setBot(data);
+      const form = {
+        assistant_name: data.assistant_name,
+        assistant_characters: data.assistant_characters.map(
+          (character) => character.name
+        ),
+        assistant_picture_data: data.assistant_picture_url,
+        assistant_role: data.assistant_role,
+        business_description: data.business_description,
+        business_name: data.business_name,
+        name: data.name,
+        allowed_urls: data.allowed_urls,
+      };
+      setChatForm(form);
+      _setChatForm(form);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const UpdateChatForm = async () => {
+    if (api) {
+      try {
+        const data = await api.update_chatbot(identifier, chatForm, _chatForm);
+        await fetchChatBot(api);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+  const buildChatBot = async () => {
+    if (api) {
+      try {
+        await api.build_chatbot(identifier);
+        fetchChatBot(api);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+  useEffect(() => {
+    initiateChatBotForm(bot);
+  }, []);
+  return (
+    <div className="flex flex-col  gap-y-5">
+      <ChatForm
+        CreateChatBot={UpdateChatForm}
+        chatForm={chatForm}
+        _chatForm={_chatForm}
+        openModal={openModal}
+        setChatForm={setChatForm}
+        setOpenModal={setOpenModal}
+        edit={true}
+      />
+      <div className="flex flex-row justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold capitalize">
+            {bot.assistant_name}
+          </h1>
+          <span className="text-sm font-light text-gray-400 capitalize">
+            {bot.assistant_characters
+              .map((character) => character.name)
+              .join(" | ")}
+          </span>
+        </div>
+        {bot.assistant_picture_url ? (
+          <Image
+            src={bot.assistant_picture_url}
+            width={500}
+            height={500}
+            className="rounded-full h-32 w-32"
+            alt="assistant image"
+            quality={100}
+          />
+        ) : (
+          <div className="h-32 w-32 rounded-full bg-slate-300" />
+        )}
+      </div>
+      <div className="bg-white p-5 rounded-xl text-gray-400">
+        <p>{bot.business_description}</p>
+        <div className="flex flex-row gap-x-5">
+          <Button className="mt-4" onClick={() => setChatHidden(false)}>
+            Start Chat
+          </Button>
+          <Button
+            className="mt-4"
+            color="warning"
+            onClick={() => setOpenModal(true)}
+          >
+            Edit Chat Bot
+          </Button>
+          {bot.status != "finished" ? (
+            <Button className="mt-4" onClick={() => buildChatBot()}>
+              {bot.status == "prepared" ? "Build" : "Rebuild"}
+            </Button>
+          ) : (
+            <></>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatDetail;

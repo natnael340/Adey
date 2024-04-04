@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Api from "./Api";
 
-export const authApi = async (redirect_url?: string) => {
+export const authToken = async (redirect_url?: string) => {
   const session = await getServerSession(authOptions);
   if (!session) {
     let path = "/auth/login";
@@ -13,5 +13,11 @@ export const authApi = async (redirect_url?: string) => {
     redirect(path);
   }
   // @ts-ignore
-  return new Api(session?.accessToken);
+  return session?.accessToken;
+};
+
+export const authApi = async (redirect_url?: string) => {
+  let token = await authToken();
+
+  return new Api(token);
 };

@@ -3,8 +3,13 @@ import { Bona_Nova } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./Providers";
 import Script from "next/script";
+import { cn } from "@/lib/utils";
 
-const inter = Bona_Nova({ subsets: ["greek"], weight: "400" });
+const fontSans = Bona_Nova({
+  subsets: ["greek"],
+  weight: "400",
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Adey",
@@ -19,7 +24,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription"></Script>
-      <body className={inter.className}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )}
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

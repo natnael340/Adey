@@ -7,6 +7,7 @@ import Image from "next/image";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FaCamera } from "react-icons/fa";
 import { IoIosClose } from "react-icons/io";
+import { HiOutlineX } from "react-icons/hi";
 
 type PropTypes = {
   openModal: boolean;
@@ -108,7 +109,13 @@ const ChatForm = ({
         },
       }}
     >
-      <Modal.Body className="bg-white p-10 space-y-5 rounded-3xl">
+      <Modal.Body className="bg-white p-10 space-y-5 rounded-3xl relative">
+        <button
+          className="absolute top-5 right-5"
+          onClick={() => setOpenModal(false)}
+        >
+          <HiOutlineX />
+        </button>
         <div className="flex flex-row items-center space-x-5">
           {chatForm.assistant_picture_data ? (
             <div className="relative">
@@ -233,21 +240,6 @@ const ChatForm = ({
           />
         </div>
         <div>
-          <label>Business Description</label>
-          <input
-            type="text"
-            value={chatForm.business_description}
-            onChange={(e) =>
-              setChatForm({
-                ...chatForm,
-                business_description: e.target.value,
-              })
-            }
-            placeholder="Print Avenue is a leading printing solutions provider, offering a wide range of high-quality printing services ..."
-            className="block text-sm w-full border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 ps-0 placeholder-gray-300"
-          />
-        </div>
-        <div>
           <label>Allowed urls</label>
           <div className="flex flex-row">
             <div
@@ -280,6 +272,21 @@ const ChatForm = ({
             />
           </div>
         </div>
+        <div>
+          <label>Business Description</label>
+          <textarea
+            value={chatForm.business_description}
+            onChange={(e) =>
+              setChatForm({
+                ...chatForm,
+                business_description: e.target.value,
+              })
+            }
+            placeholder="About your business..."
+            className="mt-2 block text-sm w-full border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 ps-0 placeholder-gray-300"
+          />
+        </div>
+
         <div className="flex justify-end mt-5">
           <button
             className={`py-2 px-4 bg-[#F0E07F] rounded-xl ${
