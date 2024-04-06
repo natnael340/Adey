@@ -2,11 +2,10 @@
 
 import { signIn } from "next-auth/react";
 import React from "react";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
-import { isSafePath } from "@/app/components/utils";
 import { useSearchParams } from "next/navigation";
 import { get_redirect_url } from "../components/utils";
+import GithubIcon from "../../components/ui/icons/github-icon";
+import GoogleIcon from "../../components/ui/icons/google-icon";
 
 const button = () => {
   const searchParams = useSearchParams();
@@ -22,14 +21,14 @@ const button = () => {
         onClick={() => oauthSignIn("google")}
         className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
       >
-        <FcGoogle />
+        <GoogleIcon size={16} />
         Sign in with Google
       </button>
       <button
         onClick={() => oauthSignIn("github")}
         className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
       >
-        <FaGithub />
+        <GithubIcon size={16} />
         Sign in with Github
       </button>
     </div>

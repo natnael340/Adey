@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../components/Sidebarv2";
+import Sidebar from "../components/Sidebar";
 
 type Props = {
   children: React.ReactElement;

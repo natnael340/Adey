@@ -3,11 +3,11 @@ import { authApi } from "@/app/components/protected_api";
 import Api from "@/app/components/Api";
 import { AxiosError } from "axios";
 import { redirect } from "next/navigation";
-import { FaRegGem, FaAngleDown } from "react-icons/fa6";
 import { PlanType } from "@/app/types/types";
 import PaypalPayment from "./PaypalPayment";
 import { PaypalOptions } from "@/app/constants/consts";
 import Features from "./Features";
+import { Gem } from "lucide-react";
 
 type ParamList = {
   params: {
@@ -40,7 +40,7 @@ const page = async ({ params: { identifier } }: ParamList) => {
           <div className="absolute w-20 h-20 rounded-full -top-[0.2px] -left-8 bg-gradient-to-b from-[rgba(218,226,255,0.56)] to-[rgba(255,255,255,0.2)] z-10" />
           <div className="absolute w-20 h-20 rounded-full -top-[20.51px] -left-[2.78px] bg-gradient-to-b from-[rgba(180,196,255,0.50)] to-[rgba(76,92,153,0.08)]" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-            <FaRegGem />
+            <Gem size={16} />
           </div>
         </div>
         <h1 className="text-3xl font-bold text-[#130F26]">Premium</h1>

@@ -5,9 +5,8 @@ import React, { useContext, useState } from "react";
 import ResourceForm from "../../components/ResourceForm";
 import { ResourceFormType, ResourceType } from "@/app/types/types";
 import { Context } from "./ChatDetailContext";
-import { IoAdd } from "react-icons/io5";
-import { FaTrash, FaEdit } from "react-icons/fa";
 import Api from "@/app/components/Api";
+import { Plus, Trash2, Settings2 } from "lucide-react";
 
 type ParamType = {
   initialData: ResourceType[];
@@ -101,7 +100,7 @@ const Resources = ({ initialData }: ParamType) => {
           gradientDuoTone="greenToBlue"
           onClick={() => setResourceFormModal(true)}
         >
-          <IoAdd />
+          <Plus size={16} />
           <span className="ml-2">Add Resource</span>
         </Button>
       </div>
@@ -135,7 +134,7 @@ const Resources = ({ initialData }: ParamType) => {
                       popUpEditResourceForm(resource.slug, resource.name)
                     }
                   >
-                    <FaEdit />
+                    <Settings2 size={16} />
                     <span className="ml-2">Edit</span>
                   </Button>
                   <Button
@@ -143,7 +142,7 @@ const Resources = ({ initialData }: ParamType) => {
                     size="xs"
                     onClick={() => removeResource(resource.slug)}
                   >
-                    <FaTrash />
+                    <Trash2 size={16} />
                     <span className="ml-2">Remove</span>
                   </Button>
                 </Table.Cell>
