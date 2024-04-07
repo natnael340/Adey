@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  IoMdChatbubbles,
-  IoMdClose,
-  IoMdSend,
-  IoMdWarning,
-} from "react-icons/io";
-import { MdMicNone } from "react-icons/md";
-import { FaPhone } from "react-icons/fa";
+  Mic,
+  MessageSquare,
+  X,
+  SendHorizonal,
+  TriangleAlert,
+  PhoneCall,
+} from "lucide-react";
 import Message from "./ChatMessage";
 import useWebSocket from "react-use-websocket";
 import { AI, HUMAN } from "@/app/constants/consts";
@@ -180,7 +180,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             </div>
           </div>
           <button className="w-5 h-5">
-            <FaPhone size={20} color="#363636" />
+            <PhoneCall size={22} color="#363636" />
           </button>
         </div>
         <div
@@ -204,7 +204,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
         {error ? (
           <div className="flex w-full py-5 justify-center items-center bg-[#F8F9FC]">
             <div className="py-3 px-4 rounded-xl bg-red-500 text-white flex flex-row items-center justify-center space-x-2">
-              <IoMdWarning color="#FFFFFF" /> <span>{error}</span>
+              <TriangleAlert color="#FFFFFF" size={16} /> <span>{error}</span>
             </div>
           </div>
         ) : (
@@ -224,7 +224,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
                 message.length > 0 ? "flex" : "hidden "
               }`}
             >
-              <IoMdSend className={`text-[#EDD447]`} size={26} />
+              <SendHorizonal className={`text-[#EDD447]`} size={28} />
             </button>
             <button
               onClick={sendMessage}
@@ -232,7 +232,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
                 message.length > 0 ? "hidden" : "flex"
               }`}
             >
-              <MdMicNone className="text-[#959595]" size={26} />
+              <Mic className="text-[#959595]" size={28} />
             </button>
           </div>
         )}
@@ -243,8 +243,8 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
       >
         <div>
           {loading ? (
-            <IoMdChatbubbles
-              size={30}
+            <MessageSquare
+              size={32}
               color="#fff"
               className={`animate-ping absolute`}
             />
@@ -252,15 +252,15 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             <></>
           )}
 
-          <IoMdChatbubbles
-            size={30}
+          <MessageSquare
+            size={32}
             color="#fff"
             className={`transition ease-in-out delay-75 ${
               showChatBot ? "scale-0 rotate-90 h-0" : ""
             }`}
           />
-          <IoMdClose
-            size={30}
+          <X
+            size={32}
             color="#fff"
             className={`transition-transform ease-in-out delay-75 ${
               showChatBot ? "scale-100 -rotate-90" : "rotate-90 scale-0 h-0"

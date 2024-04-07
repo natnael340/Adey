@@ -4,7 +4,7 @@ import Api from "@/app/components/Api";
 import Layout from "@/app/subscription/_layout";
 import { AxiosError } from "axios";
 import React, { useEffect, useState } from "react";
-import { AiOutlineCheck, AiFillCloud } from "react-icons/ai";
+import { Check, Cloudy } from "lucide-react";
 
 const page = () => {
   const [loading, setLoading] = useState(true);
@@ -47,9 +47,9 @@ const page = () => {
         <div className="w-64 p-10 rounded-lg flex justify-center items-center flex-col bg-white shadow-xl">
           <div className="w-32 h-32 rounded-full bg-[#F8FAF5] flex items-center justify-center">
             {loading ? (
-              <AiFillCloud size={40} color="#111" />
+              <Cloudy size={42} color="#111" />
             ) : (
-              <AiOutlineCheck size={40} color="#9ABC66" />
+              <Check size={42} color="#9ABC66" />
             )}
           </div>
           <p>{loading ? "Checking" : error ? error : message}</p>

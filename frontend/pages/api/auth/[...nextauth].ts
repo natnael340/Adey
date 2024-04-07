@@ -122,7 +122,7 @@ export const authOptions: NextAuthOptions = {
             } else {
               throw new Error(
                 JSON.stringify({
-                  message: x.response?.data.toString(),
+                  message: x.response?.data,
                   code: 0,
                 })
               );

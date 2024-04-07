@@ -32,6 +32,7 @@ const Chart = ({ data }: Props) => {
     data.message_statistics
   );
   const [chat, setChat] = useState<DashboardChatBotType>();
+  console.log(data.message_statistics);
 
   useEffect(() => {
     if (chartKey === "All") {

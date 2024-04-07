@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebarv2";
+import Sidebar from "../components/Sidebar";
 import { signOut, useSession } from "next-auth/react";
 import Header from "./components/Header";
 import Api from "../components/Api";

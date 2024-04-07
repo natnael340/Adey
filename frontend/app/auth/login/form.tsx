@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import React, { FormEventHandler, useRef, useState } from "react";
-import { HiInformationCircle, HiEye, HiEyeOff } from "react-icons/hi";
+import { BadgeInfo, Eye, EyeOff } from "lucide-react";
 import { get_redirect_url } from "../components/utils";
 
 const Form = () => {
@@ -47,12 +47,21 @@ const Form = () => {
       if (response?.error) {
         try {
           let _error = JSON.parse(response.error);
+          let message = "";
+          console.log("_error", response.error);
+          if (typeof _error.message == "string") {
+            message = _error.message;
+          } else if (_error.message?.message?.non_field_errors) {
+            message = _error.message?.message?.non_field_errors[0];
+          }
+
           setShowAlert({
             show: true,
-            message: _error.message,
+            message: message,
             code: _error.code,
           });
         } catch (e) {
+          console.log("error", response.error);
           setShowAlert({ show: true, message: response.error, code: 0 });
         }
       } else if (response?.ok) {
@@ -70,7 +79,7 @@ const Form = () => {
       {showAlert.show ? (
         <Alert
           color="warning"
-          icon={HiInformationCircle}
+          icon={BadgeInfo}
           onDismiss={() => setShowAlert({ show: false, message: "", code: 0 })}
           additionalContent={
             showAlert.code == 2 ? (
@@ -142,9 +151,9 @@ const Form = () => {
               onClick={togglePasswordVisibility}
             >
               {showPassword ? (
-                <HiEyeOff color="#7a7a7a" />
+                <EyeOff color="#7a7a7a" size={16} />
               ) : (
-                <HiEye color="#7a7a7a" />
+                <Eye color="#7a7a7a" size={16} />
               )}
             </button>
           </div>

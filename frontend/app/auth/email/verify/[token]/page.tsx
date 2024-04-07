@@ -1,12 +1,12 @@
 import React from "react";
 import Image from "next/image";
-import { HiInformationCircle } from "react-icons/hi";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { api } from "@/app/components/Api";
 import { GenericResponseType } from "@/app/types/types";
 import { Alert } from "flowbite-react";
+import { BadgeInfo } from "lucide-react";
 
 type PropType = {
   params: {
@@ -51,10 +51,7 @@ const Page = async ({ params: { token } }: PropType) => {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Email Verification
             </h1>
-            <Alert
-              color={data.error ? "failure" : "success"}
-              icon={HiInformationCircle}
-            >
+            <Alert color={data.error ? "failure" : "success"} icon={BadgeInfo}>
               {data.message}
             </Alert>
           </div>

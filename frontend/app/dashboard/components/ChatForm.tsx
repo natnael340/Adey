@@ -5,9 +5,7 @@ import { ChatFormType } from "@/app/types/types";
 import { Modal } from "flowbite-react";
 import Image from "next/image";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
-import { FaCamera } from "react-icons/fa";
-import { IoIosClose } from "react-icons/io";
-import { HiOutlineX } from "react-icons/hi";
+import { X, Camera } from "lucide-react";
 
 type PropTypes = {
   openModal: boolean;
@@ -114,7 +112,7 @@ const ChatForm = ({
           className="absolute top-5 right-5"
           onClick={() => setOpenModal(false)}
         >
-          <HiOutlineX />
+          <X size={16} />
         </button>
         <div className="flex flex-row items-center space-x-5">
           {chatForm.assistant_picture_data ? (
@@ -134,7 +132,7 @@ const ChatForm = ({
                     className="flex z-20 w-32 h-32 rounded-full items-center justify-center focus:border-transparent border-transparent outline-none outline-transparent opacity-0 hover:opacity-100"
                     onClick={handleImageUploadClick}
                   >
-                    <FaCamera size={26} color="#D9D9D9" />
+                    <Camera size={28} color="#D9D9D9" />
                   </button>
                 </div>
               ) : (
@@ -146,7 +144,7 @@ const ChatForm = ({
               className="w-32 h-32 rounded-full bg-[#D9D9D9] flex items-center justify-center focus:border-transparent border-transparent outline-none outline-transparent"
               onClick={handleImageUploadClick}
             >
-              <FaCamera size={26} color="#818181" />
+              <Camera size={28} color="#818181" />
             </button>
           )}
 
@@ -197,7 +195,7 @@ const ChatForm = ({
                 >
                   <p className="text-sm">{character}</p>
                   <button onClick={() => RemoveCharacter(character)}>
-                    <IoIosClose />
+                    <X size={16} />
                   </button>
                 </div>
               ))}
@@ -254,7 +252,7 @@ const ChatForm = ({
                 >
                   <p className="text-sm">{url}</p>
                   <button onClick={() => RemoveUrl(url)}>
-                    <IoIosClose />
+                    <X />
                   </button>
                 </div>
               ))}

@@ -1,13 +1,14 @@
 import Image from "next/image";
 import {
-  BsDribbble,
-  BsFacebook,
-  BsGithub,
-  BsInstagram,
-  BsTwitter,
-} from "react-icons/bs";
-import { PiPhoneCallLight } from "react-icons/pi";
-import { CiMail, CiLocationOn } from "react-icons/ci";
+  Facebook,
+  Dribbble,
+  Github,
+  Instagram,
+  Twitter,
+  PhoneCall,
+  Mail,
+  MapPin,
+} from "lucide-react";
 
 const Footer = () => {
   return (
@@ -33,25 +34,25 @@ const Footer = () => {
         </div>
         <div className="grid grid-cols-5 gap-x-3">
           <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <BsFacebook color="#C3A811" />
+            <Facebook color="#C3A811" size={18} />
           </div>
           <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <BsInstagram color="#C3A811" />
+            <Instagram color="#C3A811" size={18} />
           </div>
           <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <BsTwitter color="#C3A811" />
+            <Twitter color="#C3A811" size={18} />
           </div>
           <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <BsGithub color="#C3A811" />
+            <Github color="#C3A811" size={18} />
           </div>
           <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <BsDribbble color="#C3A811" />
+            <Dribbble color="#C3A811" size={18} />
           </div>
         </div>
         <div className="mt-10 flex items-center gap-x-20">
           <div className="flex items-center gap-x-3">
             <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-              <PiPhoneCallLight color="#C3A811" size={25} />
+              <PhoneCall color="#C3A811" size={22} />
             </div>
             <div>
               <p className="text-[#797878] text-sm">Tel</p>
@@ -60,7 +61,7 @@ const Footer = () => {
           </div>
           <div className="flex items-center gap-x-3">
             <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-              <CiMail color="#C3A811" size={25} />
+              <Mail color="#C3A811" size={22} />
             </div>
             <div>
               <p className="text-[#797878] text-sm">Mail</p>
@@ -71,7 +72,7 @@ const Footer = () => {
           </div>
           <div className="flex items-center gap-x-3">
             <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-              <CiLocationOn color="#C3A811" size={25} />
+              <MapPin color="#C3A811" size={22} />
             </div>
             <div>
               <p className="text-[#797878] text-sm">Address</p>

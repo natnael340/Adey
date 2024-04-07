@@ -1,11 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { NextPage } from "next";
-import { signIn, useSession } from "next-auth/react";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
-import { redirect, useRouter } from "next/navigation";
-import { isSafePath } from "@/app/components/utils";
+import { redirect } from "next/navigation";
 import Form from "./form";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";

@@ -1,8 +1,12 @@
 import Layout from "./_layout";
-import { FaRobot, FaUser, FaAngleRight } from "react-icons/fa";
-import { SiSalesforce } from "react-icons/si";
-import { IoIosChatboxes } from "react-icons/io";
-import { HiUsers } from "react-icons/hi2";
+import {
+  BotMessageSquare,
+  CircleUser,
+  TrendingUp,
+  ChevronRight,
+  Users,
+  MessageSquareMore,
+} from "lucide-react";
 import {
   Title,
   Text,
@@ -37,7 +41,7 @@ const Page = async () => {
             <div className="flex flex-row items-center justify-between bg-white px-4 py-6 rounded-lg divide-x">
               <div className="flex flex-row gap-x-3 px-2">
                 <div className="flex justify-center items-center w-12 h-12 rounded-lg bg-[#FFFFF0]">
-                  <FaRobot size={20} color="#E3C326" />
+                  <BotMessageSquare size={22} color="#E3C326" />
                 </div>
                 <div className="flex flex-col justify-between">
                   <p className="text-[#92959E]">Chat Bots</p>
@@ -46,7 +50,7 @@ const Page = async () => {
               </div>
               <div className="flex flex-row gap-x-3 px-2">
                 <div className="flex justify-center items-center w-12 h-12 rounded-lg bg-[#FFFFF0]">
-                  <SiSalesforce size={20} color="#E3C326" />
+                  <TrendingUp size={22} color="#E3C326" />
                 </div>
                 <div className="flex flex-col justify-between">
                   <p className="text-[#92959E]">Sales Bots</p>
@@ -55,7 +59,7 @@ const Page = async () => {
               </div>
               <div className="flex flex-row gap-x-3 px-2">
                 <div className="flex justify-center items-center w-12 h-12 rounded-lg bg-[#FFFFF0]">
-                  <FaUser size={20} color="#E3C326" />
+                  <CircleUser size={22} color="#E3C326" />
                 </div>
                 <div className="flex flex-col justify-between">
                   <p className="text-[#92959E]">Total Session</p>
@@ -64,7 +68,7 @@ const Page = async () => {
               </div>
               <div className="flex flex-row gap-x-3 px-2">
                 <div className="flex justify-center items-center w-12 h-12 rounded-lg bg-[#FFFFF0]">
-                  <IoIosChatboxes size={20} color="#E3C326" />
+                  <MessageSquareMore size={22} color="#E3C326" />
                 </div>
                 <div className="flex flex-col justify-between">
                   <p className="text-[#92959E]">Total Chats</p>
@@ -121,7 +125,7 @@ const Page = async () => {
                 <div className="flex justify-between items-center hover:bg-slate-50 hover:cursor-pointer rounded-xl">
                   <div className="flex flex-row space-x-3">
                     <div className="w-16 h-16 rounded-xl bg-[#F1FBFF] flex justify-center items-center">
-                      <HiUsers color="#00B7FE" size={24} />
+                      <Users color="#00B7FE" size={24} />
                     </div>
                     <div className="flex flex-col justify-evenly">
                       <div>
@@ -136,7 +140,7 @@ const Page = async () => {
                       </div>
                     </div>
                   </div>
-                  <FaAngleRight />
+                  <ChevronRight size={16} />
                 </div>
                 <div className="grid grid-rows-3 gap-y-3">
                   <div className="space-y-1">

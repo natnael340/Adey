@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FaBullseye, FaCheck } from "react-icons/fa";
-import { PiTarget } from "react-icons/pi";
+import TargetIcon from "./ui/icons/target-icon";
+import { CheckCircle } from "lucide-react";
 import { PlanType } from "../types/types";
 import { TEST_PLAN } from "../constants/consts";
 
@@ -48,7 +48,7 @@ const Pricing = ({ data: base }: PropsType) => {
       <div className="w-full grid grid-cols-1 md:gap-x-10 md:grid-cols-3">
         <div className="w-[344px] h-fit p-10 bg-white rounded-2xl space-y-4 shadow-lg mt-20 border border-white">
           <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-[#EDD447]">
-            <PiTarget size={32} />
+            <TargetIcon size={32} />
           </div>
           <h2 className="text-3xl font-bold">{data[0].name}</h2>
           <p className="text-[#797878]">
@@ -59,26 +59,26 @@ const Pricing = ({ data: base }: PropsType) => {
           </div>
           <div className="space-y-3">
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[0].max_chatbot} Chat Bots</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[0].max_webapp_per_bot} Web App per Chat Bot</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[0].max_user_session} Users</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>
                 {data[0].max_request_per_month} Request per{" "}
                 {data[0].period == "monthly" ? "month" : "year"}
               </p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>Third party Integration</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ const Pricing = ({ data: base }: PropsType) => {
           <div className="absolute w-[968px] -top-48 -left-[600px] h-[968px] rounded-full bg-gradient-to-b from-[rgba(237,212,71,0.7)] to-transparent border border-[#B5C2FB]" />
           <div className="absolute top-0 left-0 bottom-0 right-0 p-10 z-20 h-full space-y-4">
             <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-white">
-              <PiTarget size={32} />
+              <TargetIcon size={32} />
             </div>
             <h2 className="text-3xl font-bold">{data[2].name}</h2>
             <p className="text-[#797878]">
@@ -111,26 +111,26 @@ const Pricing = ({ data: base }: PropsType) => {
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-x-4">
-                <FaCheck />
+                <CheckCircle />
                 <p>Unlimited Chat Bots</p>
               </div>
               <div className="flex items-center gap-x-4">
-                <FaCheck />
+                <CheckCircle />
                 <p>Unlimited Web App per Bot</p>
               </div>
               <div className="flex items-center gap-x-4">
-                <FaCheck />
+                <CheckCircle />
                 <p>Unlimited Users</p>
               </div>
               <div className="flex items-center gap-x-4">
-                <FaCheck />
+                <CheckCircle />
                 <p>
                   {data[2].max_request_per_month} Request per{" "}
                   {data[2].period == "monthly" ? "month" : "year"}
                 </p>
               </div>
               <div className="flex items-center gap-x-4">
-                <FaCheck />
+                <CheckCircle />
                 <p>Third party Integration</p>
               </div>
             </div>
@@ -147,7 +147,7 @@ const Pricing = ({ data: base }: PropsType) => {
         </div>
         <div className="w-[344px] h-fit p-10 bg-white rounded-2xl space-y-4 shadow-lg mt-20 border border-white">
           <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-[#EDD447]">
-            <PiTarget size={32} />
+            <TargetIcon size={32} />
           </div>
           <h2 className="text-3xl font-bold">{data[1].name}</h2>
           <p className="text-[#797878]">
@@ -161,26 +161,26 @@ const Pricing = ({ data: base }: PropsType) => {
           </div>
           <div className="space-y-3">
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[1].max_chatbot} Chat Bots</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[1].max_webapp_per_bot} Web App per Chat Bot</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>{data[1].max_user_session} Users</p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>
                 {data[1].max_request_per_month} Request per{" "}
                 {data[1].period == "monthly" ? "month" : "year"}
               </p>
             </div>
             <div className="flex items-center gap-x-4">
-              <FaCheck />
+              <CheckCircle />
               <p>Third party Integration</p>
             </div>
           </div>

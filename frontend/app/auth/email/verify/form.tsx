@@ -2,7 +2,7 @@
 
 import { Alert, Spinner } from "flowbite-react";
 import React, { FormEventHandler, useRef, useState } from "react";
-import { HiInformationCircle, HiArrowLeft } from "react-icons/hi";
+import { Info, ArrowLeft } from "lucide-react";
 import { api } from "@/app/components/Api";
 import { useRouter } from "next/navigation";
 import { GenericResponseType } from "@/app/types/types";
@@ -59,19 +59,19 @@ const Form = () => {
       className="mr-2 inline-flex items-center rounded-lg bg-cyan-700 px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-cyan-800 focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-800 dark:hover:bg-cyan-900"
       onClick={() => router.push("auth/login")}
     >
-      <HiArrowLeft className="-ml-0.5 mr-2 h-4 w-4" />
+      <ArrowLeft className="-ml-0.5 mr-2 h-4 w-4" />
       Back to login
     </button>
   );
   return (
     <>
       {showAlert.show && showAlert.error ? (
-        <Alert color="failure" icon={HiInformationCircle}>
+        <Alert color="failure" icon={Info}>
           <span className="font-medium">Password reset failed!</span>{" "}
           {showAlert.message}
         </Alert>
       ) : showAlert.show && !showAlert.error ? (
-        <Alert color="success" icon={HiInformationCircle}>
+        <Alert color="success" icon={Info}>
           {showAlert.message}
         </Alert>
       ) : (

@@ -1,9 +1,6 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React from "react";
 import Layout from "../_layout";
-import ChatCard from "../components/ChatCard";
-import { ChatFormType, ChatType } from "@/app/types/types";
 import Api from "@/app/components/Api";
-
 import ChatContext from "./ChatContext";
 import { authToken } from "@/app/components/protected_api";
 import Form from "./Form";
