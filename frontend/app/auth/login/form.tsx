@@ -1,12 +1,14 @@
 "use client";
 
-import { Alert, Spinner } from "flowbite-react";
+import { Spinner } from "flowbite-react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import React, { FormEventHandler, useRef, useState } from "react";
-import { BadgeInfo, Eye, EyeOff } from "lucide-react";
+import { BadgeInfo, Eye, EyeOff, OctagonAlert, RefreshCw } from "lucide-react";
 import { get_redirect_url } from "../components/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Form = () => {
   const searchParams = useSearchParams();
@@ -77,27 +79,20 @@ const Form = () => {
   return (
     <>
       {showAlert.show ? (
-        <Alert
-          color="warning"
-          icon={BadgeInfo}
-          onDismiss={() => setShowAlert({ show: false, message: "", code: 0 })}
-          additionalContent={
-            showAlert.code == 2 ? (
-              <div className="pt-2">
-                <a
-                  href="/auth/email/verify"
-                  type="button"
-                  className="border border-primary-600 rounded-md py-1 px-2 text-[#15192C]"
-                >
-                  Verify Email
-                </a>
-              </div>
+        <Alert variant="destructive">
+          <OctagonAlert className="w-4 h-4" />
+          <AlertTitle>Login failed!</AlertTitle>
+          <AlertDescription>
+            {showAlert.message}
+            &nbsp;
+            {showAlert.code == 2 ? (
+              <a href="/auth/email/verify" className="text-blue-700 underline">
+                Verify email
+              </a>
             ) : (
               <></>
-            )
-          }
-        >
-          <span className="font-medium">Login failed!</span> {showAlert.message}
+            )}
+          </AlertDescription>
         </Alert>
       ) : (
         <></>
@@ -157,18 +152,30 @@ const Form = () => {
               )}
             </button>
           </div>
+          <div className="w-full text-right">
+            <a
+              href="/auth/password/forgot"
+              className="font-medium text-blue-600 hover:underline text-sm"
+            >
+              Forget password?
+            </a>
+          </div>
         </div>
-        <button
-          type="submit"
-          className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          {loading ? <Spinner color="info" /> : "Sign in"}
-        </button>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </>
+          ) : (
+            "Sign in"
+          )}
+        </Button>
         <p className="text-sm font-light text-gray-500 dark:text-gray-400">
           Don’t have an account yet?{" "}
           <a
             href="/auth/signup"
-            className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+            className="font-medium text-blue-700 underline"
           >
             Sign up
           </a>

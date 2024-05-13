@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { get_redirect_url } from "../components/utils";
 import GithubIcon from "../../components/ui/icons/github-icon";
 import GoogleIcon from "../../components/ui/icons/google-icon";
+import { Button } from "@/components/ui/button";
 
 const button = () => {
   const searchParams = useSearchParams();
@@ -17,20 +18,22 @@ const button = () => {
   };
   return (
     <div className="w-full space-y-2">
-      <button
+      <Button
         onClick={() => oauthSignIn("google")}
-        className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
+        variant="outline"
+        className="gap-x-3 w-full border-gray-300"
       >
         <GoogleIcon size={16} />
         Sign in with Google
-      </button>
-      <button
-        onClick={() => oauthSignIn("github")}
-        className="w-full flex flex-row items-center justify-center gap-x-3 h-10 border-gray-300 border rounded-md"
+      </Button>
+      <Button
+        onClick={() => oauthSignIn("google")}
+        variant="outline"
+        className="gap-x-3 w-full border-gray-300"
       >
         <GithubIcon size={16} />
         Sign in with Github
-      </button>
+      </Button>
     </div>
   );
 };

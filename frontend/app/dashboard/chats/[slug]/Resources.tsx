@@ -1,12 +1,29 @@
 "use client";
 
-import { Button, Dropdown, Table, TextInput } from "flowbite-react";
 import React, { useContext, useState } from "react";
-import ResourceForm from "../../components/ResourceForm";
+import ResourceForm from "../../components/ResourceForm2";
 import { ResourceFormType, ResourceType } from "@/app/types/types";
 import { Context } from "./ChatDetailContext";
 import Api from "@/app/components/Api";
-import { Plus, Trash2, Settings2 } from "lucide-react";
+import { Plus, Trash2, Settings2, Pencil } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 type ParamType = {
   initialData: ResourceType[];
@@ -21,6 +38,7 @@ const Resources = ({ initialData }: ParamType) => {
   const [resources, setResources] = useState<ResourceType[]>(initialData);
   const [resourceEdit, setResourceEdit] = useState<string>("");
   const [resourceFormModal, setResourceFormModal] = useState(false);
+  const [resourcesLimit, setResourcesLimit] = useState(10);
 
   const fetchResources = async (_api: Api) => {
     try {
@@ -69,89 +87,106 @@ const Resources = ({ initialData }: ParamType) => {
     setResourceForm({ ...resourceForm, name: name });
   };
   return (
-    <div className="bg-white p-5 rounded-xl">
-      <ResourceForm
-        updateForm={setResourceForm}
-        form={resourceForm}
-        openModal={resourceFormModal}
-        setOpenModal={setResourceFormModal}
-        saveChanges={(resource_slug) => createResource(resource_slug)}
-        edit={resourceEdit}
-      />
-      <h1 className="my-3 text-lg font-medium">Resources</h1>
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-x-4">
-          <p>Show</p>
-          <div className="bg-[#FFFFF0]">
-            <Dropdown label="10" inline>
-              <Dropdown.Item>20</Dropdown.Item>
-              <Dropdown.Item>30</Dropdown.Item>
-              <Dropdown.Item>40</Dropdown.Item>
-              <Dropdown.Item>50</Dropdown.Item>
-              <Dropdown.Item>100</Dropdown.Item>
-            </Dropdown>
-          </div>
+    <Dialog>
+      <div className="bg-white p-5 rounded-xl">
+        <ResourceForm
+          updateForm={setResourceForm}
+          form={resourceForm}
+          openModal={resourceFormModal}
+          setOpenModal={setResourceFormModal}
+          saveChanges={(resource_slug) => createResource(resource_slug)}
+          edit={resourceEdit}
+        />
+        <h1 className="my-3 text-lg font-medium">Resources</h1>
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center gap-x-4">
+            <p>Show</p>
+            <div className="bg-[#FFFFF0]">
+              <DropdownMenu>
+                <DropdownMenuTrigger>{resourcesLimit}</DropdownMenuTrigger>
+                <DropdownMenuContent className="w-10">
+                  <DropdownMenuRadioGroup
+                    value={resourcesLimit.toString()}
+                    onValueChange={(value: string) =>
+                      setResourcesLimit(parseInt(value, 10))
+                    }
+                  >
+                    <DropdownMenuRadioItem value="10">10</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="20">20</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="30">30</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="40">40</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="50">50</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="100">
+                      100
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-          <p>entries</p>
-          <TextInput id="search" type="text" sizing="sm" placeholder="Search" />
+            <p>Entries</p>
+            <Input id="search" type="text" placeholder="Search..." />
+          </div>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              onClick={() => setResourceFormModal(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Resource
+            </Button>
+          </DialogTrigger>
         </div>
-        <Button
-          outline
-          gradientDuoTone="greenToBlue"
-          onClick={() => setResourceFormModal(true)}
-        >
-          <Plus size={16} />
-          <span className="ml-2">Add Resource</span>
-        </Button>
+        <div>
+          <Table className="my-5">
+            <TableHeader>
+              <TableRow className="bg-[#F8FAFC]">
+                <TableHead>Name</TableHead>
+                <TableHead>Document</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
+              {resources.map((resource) => (
+                <TableRow key={resource.slug}>
+                  <TableCell>{resource.name}</TableCell>
+                  <TableCell className="whitespace-nowrap text-blue-600">
+                    <a href={resource.document}>
+                      {
+                        resource.document.split("/")[
+                          resource.document.split("/").length - 1
+                        ]
+                      }
+                    </a>
+                  </TableCell>
+                  <TableCell>{resource.document_type}</TableCell>
+                  <TableCell className="flex flex-row justify-end">
+                    <DialogTrigger>
+                      <Button
+                        variant="ghost"
+                        onClick={() =>
+                          popUpEditResourceForm(resource.slug, resource.name)
+                        }
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => removeResource(resource.slug)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <div>
-        <Table className="my-5">
-          <Table.Head>
-            <Table.HeadCell>Name</Table.HeadCell>
-            <Table.HeadCell>Document</Table.HeadCell>
-            <Table.HeadCell>Type</Table.HeadCell>
-            <Table.HeadCell>Action</Table.HeadCell>
-          </Table.Head>
-          <Table.Body className="divide-y">
-            {resources.map((resource) => (
-              <Table.Row key={resource.slug}>
-                <Table.Cell>{resource.name}</Table.Cell>
-                <Table.Cell className="whitespace-nowrap text-blue-600">
-                  <a href={resource.document}>
-                    {
-                      resource.document.split("/")[
-                        resource.document.split("/").length - 1
-                      ]
-                    }
-                  </a>
-                </Table.Cell>
-                <Table.Cell>{resource.document_type}</Table.Cell>
-                <Table.Cell className="flex flex-row gap-x-3">
-                  <Button
-                    color="success"
-                    size="xs"
-                    onClick={() =>
-                      popUpEditResourceForm(resource.slug, resource.name)
-                    }
-                  >
-                    <Settings2 size={16} />
-                    <span className="ml-2">Edit</span>
-                  </Button>
-                  <Button
-                    color="failure"
-                    size="xs"
-                    onClick={() => removeResource(resource.slug)}
-                  >
-                    <Trash2 size={16} />
-                    <span className="ml-2">Remove</span>
-                  </Button>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-      </div>
-    </div>
+    </Dialog>
   );
 };
 
