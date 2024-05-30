@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { signOut, useSession } from "next-auth/react";
-import Header from "./components/Header";
 import Api from "../components/Api";
-import { ChatType } from "../types/types";
 import Loading from "../components/Loading";
 
 type PropTypes = {

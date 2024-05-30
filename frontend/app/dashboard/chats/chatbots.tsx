@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useState } from "react";
 import ChatCard from "../components/ChatCard";
 import { Context } from "./ChatContext";
 import Api from "@/app/components/Api";
-import { Spinner } from "flowbite-react";
+import { Loader } from "lucide-react";
 
 type ParamType = {
   initialData: ChatType[];
@@ -42,7 +42,7 @@ const chatbots = ({ initialData }: ParamType) => {
     <div>
       {loading ? (
         <div className="w-full h-40 flex flex-1 justify-center items-center">
-          <Spinner color="info" aria-label="Loading ..." size="xl" />
+          <Loader className="animate-spin" />
         </div>
       ) : (
         <></>

@@ -5,8 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { api } from "@/app/components/Api";
 import { GenericResponseType } from "@/app/types/types";
-import { Alert } from "flowbite-react";
 import { BadgeInfo } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type PropType = {
   params: {
@@ -51,8 +51,15 @@ const Page = async ({ params: { token } }: PropType) => {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Email Verification
             </h1>
-            <Alert color={data.error ? "failure" : "success"} icon={BadgeInfo}>
-              {data.message}
+            <Alert variant={data.error ? "destructive" : "default"}>
+              <BadgeInfo size={16} />
+              <AlertTitle>
+                Email verification {data.error ? "failed." : "successful."}
+              </AlertTitle>
+              <AlertDescription>
+                {data.message}
+                <span>test</span>
+              </AlertDescription>
             </Alert>
           </div>
         </div>

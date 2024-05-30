@@ -3,8 +3,8 @@
 import { ChatFormType } from "@/app/types/types";
 import React, { useContext, useState } from "react";
 import ChatForm from "../components/ChatForm";
-import Api from "@/app/components/Api";
 import { Context } from "./ChatContext";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 function Form() {
   let { setBotAdded, api, formOpen, toggleFormOpen } = useContext(Context);

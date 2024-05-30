@@ -1,12 +1,13 @@
 "use client";
 
-import { Alert, Spinner } from "flowbite-react";
 import React, { FormEventHandler, useState } from "react";
-import { BadgeInfo, ArrowLeft } from "lucide-react";
+import { BadgeInfo, ArrowLeft, RefreshCw, BadgeCheck } from "lucide-react";
 import { api } from "@/app/components/Api";
 import { useRouter } from "next/navigation";
 import { GenericResponseType } from "@/app/types/types";
 import { AxiosError } from "axios";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type ParamType = {
   token: string;
@@ -69,6 +70,15 @@ const Form = ({ token }: ParamType) => {
             () => setShowAlert({ show: false, message: "", error: false }),
             3000
           );
+        } else if (
+          e.response?.data?.message &&
+          typeof e.response?.data?.message == "string"
+        ) {
+          setShowAlert({
+            show: true,
+            message: e.response?.data?.message,
+            error: true,
+          });
         }
       }
       console.error(e);
@@ -89,13 +99,21 @@ const Form = ({ token }: ParamType) => {
   return (
     <>
       {showAlert.show && showAlert.error ? (
-        <Alert color="failure" icon={BadgeInfo}>
-          <span className="font-medium">Password reset failed!</span>{" "}
-          {showAlert.message}
+        <Alert variant="destructive">
+          <BadgeInfo className="w-4 h-4" />
+          <AlertTitle>Password reset failed!</AlertTitle>
+          <AlertDescription>{showAlert.message}</AlertDescription>
         </Alert>
       ) : showAlert.show && !showAlert.error ? (
-        <Alert color="success" icon={BadgeInfo}>
-          {showAlert.message} <a href="/auth/login">Login</a>
+        <Alert variant="success">
+          <BadgeCheck className="w-4 h-4" />
+          <AlertTitle>Password reset successful!</AlertTitle>
+          <AlertDescription>
+            {showAlert.message}&nbsp;
+            <a className="text-blue-700 hover:underline" href="/auth/login">
+              Login
+            </a>
+          </AlertDescription>
         </Alert>
       ) : (
         <></>
@@ -152,12 +170,16 @@ const Form = ({ token }: ParamType) => {
             ))}
           </div>
         </div>
-        <button
-          type="submit"
-          className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          {loading ? <Spinner color="info" /> : "Reset password"}
-        </button>
+        <Button disabled={loading} className="w-full" type="submit">
+          {loading ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </>
+          ) : (
+            "Reset password"
+          )}
+        </Button>
       </form>
     </>
   );

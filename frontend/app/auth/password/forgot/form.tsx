@@ -1,11 +1,18 @@
 "use client";
 
-import { Alert, Spinner } from "flowbite-react";
 import React, { FormEventHandler, useRef, useState } from "react";
 import { api } from "@/app/components/Api";
 import { useRouter } from "next/navigation";
 import { GenericResponseType } from "@/app/types/types";
-import { BadgeInfo, ArrowLeft } from "lucide-react";
+import {
+  BadgeInfo,
+  BadgeCheck,
+  ArrowLeft,
+  RefreshCw,
+  Send,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Form = () => {
   const router = useRouter();
@@ -66,13 +73,16 @@ const Form = () => {
   return (
     <>
       {showAlert.show && showAlert.error ? (
-        <Alert color="failure" icon={BadgeInfo}>
-          <span className="font-medium">Password reset failed!</span>{" "}
-          {showAlert.message}
+        <Alert variant="destructive">
+          <BadgeInfo className="w-6 h-6" />
+          <AlertTitle>Failed!</AlertTitle>
+          <AlertDescription>{showAlert.message}</AlertDescription>
         </Alert>
       ) : showAlert.show && !showAlert.error ? (
-        <Alert color="success" icon={BadgeInfo}>
-          {showAlert.message}
+        <Alert variant="success">
+          <BadgeCheck className="w-6 h-6" />
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription>{showAlert.message}</AlertDescription>
         </Alert>
       ) : (
         <></>
@@ -99,12 +109,19 @@ const Form = () => {
             onChange={({ target }) => setEmail(target.value)}
           />
         </div>
-        <button
-          type="submit"
-          className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          {loading ? <Spinner color="info" /> : "Send password reset email"}
-        </button>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </>
+          ) : (
+            <>
+              <Send className="mr-2 h-4 w-4" />
+              Send password reset email
+            </>
+          )}
+        </Button>
       </form>
     </>
   );

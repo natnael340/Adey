@@ -6,7 +6,8 @@ import { RegisterFormType } from "@/app/types/types";
 import { api } from "@/app/components/Api";
 import { AxiosError } from "axios";
 import { navigate } from "@/app/components/handlers";
-import { Spinner } from "flowbite-react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 type RegisterFormError = {
   email: string[];
@@ -253,21 +254,25 @@ const signup = () => {
                   </label>
                 </div>
               </div>
-              <button
+              <Button
                 type="submit"
-                className={`w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-0 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 ${
-                  termConditionAccepted && !formSubmitLoading
-                    ? ""
-                    : "bg-opacity-30 hover:bg-opacity-30"
-                }`}
+                className="w-full"
+                disabled={!termConditionAccepted || formSubmitLoading}
               >
-                {formSubmitLoading ? <Spinner /> : "Create an account"}
-              </button>
+                {formSubmitLoading ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
+                  </>
+                ) : (
+                  "Create an account"
+                )}
+              </Button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account?{" "}
                 <a
                   href="/auth/login"
-                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                  className="font-medium text-blue-700 hover:underline dark:text-primary-500"
                 >
                   Login here
                 </a>
