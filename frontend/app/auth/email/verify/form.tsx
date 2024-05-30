@@ -1,11 +1,12 @@
 "use client";
 
-import { Alert, Spinner } from "flowbite-react";
 import React, { FormEventHandler, useRef, useState } from "react";
-import { Info, ArrowLeft } from "lucide-react";
+import { ArrowLeft, BadgeInfo, Loader } from "lucide-react";
 import { api } from "@/app/components/Api";
 import { useRouter } from "next/navigation";
 import { GenericResponseType } from "@/app/types/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Form = () => {
   const router = useRouter();
@@ -40,10 +41,6 @@ const Form = () => {
       );
       if (data.error) {
         setShowAlert({ show: true, message: data.message, error: true });
-        setTimeout(
-          () => setShowAlert({ show: false, message: "", error: false }),
-          3000
-        );
       } else {
         setShowAlert({ show: true, message: data.message, error: false });
       }
@@ -65,14 +62,13 @@ const Form = () => {
   );
   return (
     <>
-      {showAlert.show && showAlert.error ? (
-        <Alert color="failure" icon={Info}>
-          <span className="font-medium">Password reset failed!</span>{" "}
-          {showAlert.message}
-        </Alert>
-      ) : showAlert.show && !showAlert.error ? (
-        <Alert color="success" icon={Info}>
-          {showAlert.message}
+      {showAlert.show ? (
+        <Alert variant={showAlert.error ? "destructive" : "default"}>
+          <BadgeInfo size={16} />
+          <AlertTitle>
+            Password reset {showAlert.error ? "failed." : "successful."}
+          </AlertTitle>
+          <AlertDescription>{showAlert.message}</AlertDescription>
         </Alert>
       ) : (
         <></>
@@ -99,12 +95,9 @@ const Form = () => {
             onChange={({ target }) => setEmail(target.value)}
           />
         </div>
-        <button
-          type="submit"
-          className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          {loading ? <Spinner color="info" /> : "Verify Email"}
-        </button>
+        <Button type="submit" className="w-full">
+          {loading ? <Loader className="animate-spin" /> : "Verify Email"}
+        </Button>
       </form>
     </>
   );

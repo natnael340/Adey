@@ -1,8 +1,16 @@
 "use client";
 
 import { ResourceFormType } from "@/app/types/types";
-import { Modal } from "flowbite-react";
 import React, { ChangeEvent, useEffect, useState } from "react";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 type PropTypes = {
   openModal: boolean;
@@ -43,50 +51,38 @@ const ResourceForm = ({
     }
   };
   return (
-    <Modal
-      show={openModal}
-      onClose={() => onFormClose()}
-      dismissible
-      theme={{
-        content: {
-          inner:
-            "relative rounded-2xl bg-white shadow dark:bg-gray-700 flex flex-col max-h-[90vh]",
-        },
-      }}
-    >
-      <Modal.Body className="bg-white p-10 space-y-5 rounded-3xl">
-        <div>
-          <label>Resource Name</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) => updateForm({ ...form, name: e.target.value })}
-            placeholder="About XYZ LLC."
-            className="block text-sm w-full border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 ps-0 placeholder-gray-300"
-          />
-        </div>
-        <div>
-          <label>File</label>
-          <input
-            type="file"
-            accept=".pdf,.txt"
-            onChange={(e) => handleFileUpload(e)}
-            placeholder="About XYZ LLC."
-            className="block text-sm w-full border-x-transparent border-t-transparent border-gray-300 focus:border-x-transparent focus:border-t-transparent focus:ring-0 ps-0 placeholder-gray-300"
-          />
-        </div>
-        <div className="flex justify-end mt-5">
-          <button
-            className={`py-2 px-4 bg-[#F0E07F] rounded-xl ${
-              canSave ? "" : "opacity-30"
-            }`}
-            onClick={canSave ? () => saveChanges(edit) : () => null}
-          >
-            {edit ? "Update" : "Create"} resource
-          </button>
-        </div>
-      </Modal.Body>
-    </Modal>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{edit ? "Edit" : "Add"} Resource</DialogTitle>
+      </DialogHeader>
+
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <Label htmlFor="resource_name">Name</Label>
+        <Input
+          type="text"
+          id="resource_name"
+          placeholder="About XYZ LLC."
+          className="w-full"
+          value={form.name}
+          onChange={(e) => updateForm({ ...form, name: e.target.value })}
+        />
+      </div>
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <Label htmlFor="resource_file">File</Label>
+        <Input
+          type="file"
+          id="resource_file"
+          accept=".pdf,.txt"
+          onChange={(e) => handleFileUpload(e)}
+          className="w-full"
+        />
+      </div>
+      <DialogFooter>
+        <Button disabled={!canSave} onClick={() => saveChanges(edit)}>
+          {edit ? "Update" : "Create"} resource
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   );
 };
 

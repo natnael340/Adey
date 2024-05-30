@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "./ChatDetailContext";
 import { ChatFormType, ChatType } from "@/app/types/types";
-import ChatForm from "../../components/ChatForm1";
+import ChatForm from "../../components/ChatForm";
 import Api from "@/app/components/Api";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -138,7 +138,7 @@ const ChatDetail = () => {
         <div className="bg-white p-5 rounded-xl text-gray-400">
           <p>{bot.business_description}</p>
           <div className="flex flex-row gap-x-1 justify-end w-full">
-            <DialogTrigger>
+            <DialogTrigger asChild>
               <Button
                 variant="ghost"
                 onClick={() => setOpenModal(true)}

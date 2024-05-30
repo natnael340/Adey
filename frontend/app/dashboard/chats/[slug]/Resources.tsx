@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import ResourceForm from "../../components/ResourceForm2";
+import ResourceForm from "../../components/ResourceForm";
 import { ResourceFormType, ResourceType } from "@/app/types/types";
 import { Context } from "./ChatDetailContext";
 import Api from "@/app/components/Api";
@@ -162,7 +162,7 @@ const Resources = ({ initialData }: ParamType) => {
                   </TableCell>
                   <TableCell>{resource.document_type}</TableCell>
                   <TableCell className="flex flex-row justify-end">
-                    <DialogTrigger>
+                    <DialogTrigger asChild>
                       <Button
                         variant="ghost"
                         onClick={() =>
