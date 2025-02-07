@@ -61,7 +61,7 @@ services:
       - .:/usr/src/app
     networks:
       - adey_network
-    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 "
     stdin_open: true
     tty: true
 
