@@ -45,7 +45,7 @@ const Header = async ({ activeList, set_session }: PropType) => {
           Home
         </a>
         {session ? (
-          <a role="button" href="/" className="text-lg text-[#45464B]">
+          <a role="button" href="/dashboard" className="text-lg text-[#45464B]">
             Dashboard
           </a>
         ) : (
@@ -53,7 +53,7 @@ const Header = async ({ activeList, set_session }: PropType) => {
         )}
         <a
           role="button"
-          href="/"
+          href="/about"
           className={`text-lg  ${
             activeList["about"] ? "text-[#15192C] font-bold" : "text-[#45464B]"
           }`}

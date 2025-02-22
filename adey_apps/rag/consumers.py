@@ -5,6 +5,7 @@ from django.conf import settings
 from adey_apps.rag.agent import Agent
 from adey_apps.rag.models import Chat, Message, MessageTypeChoices
 from adey_apps.adey_commons.permissions import has_chat_request_permission
+from adey_apps.rag.utils import key_value_to_dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,10 +25,15 @@ class ChatConsumer(JsonWebsocketConsumer):
         headers = dict(self.scope["headers"])
         
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        user_session_id = headers.get(b"cookie", None)
-        if not user_session_id:
-            raise DenyConnection("Session ID not set")
-        self.session_id = user_session_id.decode("utf-8").split("=")[1]
+        cookie = headers.get(b"cookie", None)
+        if cookie:
+            cookie = key_value_to_dict(cookie.decode("utf-8"))
+            if cookie.get("user_session_id"):
+                self.session_id = cookie.get("user_session_id")
+            else:
+                raise DenyConnection("Session ID not set")
+        else:
+            raise DenyConnection("Unauthorized")
 
         try:
             chat = Chat.objects.get(identifier=self.chat_id)

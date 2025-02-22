@@ -65,6 +65,47 @@ services:
     stdin_open: true
     tty: true
 
+  celery_worker:
+    container_name: adey_celery
+    restart: on-failure
+    build:
+      dockerfile: ./devops/docker/python/Dockerfile
+      context: ./
+    command: celery -A adey worker --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - DJANGO_SETTINGS_MODULE=adey.settings
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+      - broker
+      - adey_backend
+    networks:
+      - adey_network
+
+  adey_frontend:
+    image: adey_frontend
+    container_name: adey_frontend
+    build:
+      dockerfile: ./devops/docker/nextjs/Dockerfile
+      context: .
+    restart: always
+    command: npm run dev
+    environment:
+      - API_DOMAIN=${API_DOMAIN}
+      - TLS_ENABLED=${TLS_ENABLED}
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - adey_backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - adey_network
+
 networks:
   adey_network:
     ipam:

@@ -215,7 +215,12 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
               placeholder="Type your question"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => (e.key === "Enter" ? sendMessage() : null)}
+              onKeyDown={(e) => {
+                if(e.key === "Enter"){
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
               aria-multiline
             />
             <button

@@ -60,7 +60,7 @@ def create_subscription(token, plan: Plan):
 
 
 def get_subscription(token: str, id):
-    print(token)
+   
     response = requests.get(f"https://api-m.sandbox.paypal.com/v1/billing/subscriptions/{id}", 
         headers={
         "Authorization": f"Bearer {token}",
@@ -68,7 +68,6 @@ def get_subscription(token: str, id):
         "Content-Type": "application/json",
     })
     data = response.json()
-    print("data", data)
     return [data, response.status_code]
 
 
@@ -130,7 +129,6 @@ def send_pwd_email(to_email: str, url: str) -> None:
     email_subject = "Reset Password"
     email_body = render_to_string("email_template.html", context)
     plain_message = strip_tags(email_body)
-    
     send_mail(
         email_subject,
         plain_message,
@@ -149,7 +147,7 @@ def send_email_verification_email(user, request):
     token_cipher = token_cipher.replace("/", "_")
     relativeUrl = settings.FRONTEND_EMAIL_VERIFICATION_PATH.format(token=token_cipher)
 
-    absoluteUrl = f"http://{settings.FRONTEND_DOMAIN}{relativeUrl}"
+    absoluteUrl = f"{'https' if settings.TLS_ENABLED else 'http'}://{settings.FRONTEND_DOMAIN}{relativeUrl}"
     from adey_apps.users.tasks import send_activation_email as send_mail
     send_mail.delay(user.email, absoluteUrl)
 
@@ -162,6 +160,6 @@ def send_password_reset_email(user, request):
     token_cipher = token_cipher.replace("/", "_")
     relativeUrl = settings.FRONTEND_PASSWORD_RESET_PATH.format(token=token_cipher)
 
-    absoluteUrl = f"http://{settings.FRONTEND_DOMAIN}{relativeUrl}"
+    absoluteUrl = f"{'https' if settings.TLS_ENABLED else 'http'}://{settings.FRONTEND_DOMAIN}{relativeUrl}"
     from adey_apps.users.tasks import send_password_reset_email as send_mail
     send_mail.delay(user.email, absoluteUrl)

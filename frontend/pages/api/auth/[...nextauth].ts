@@ -13,7 +13,6 @@ import NextAuth, {
   Profile,
   Session,
 } from "next-auth";
-import { JWT } from "next-auth/jwt";
 import CredentialsProvider, {
   CredentialInput,
 } from "next-auth/providers/credentials";
@@ -56,6 +55,7 @@ namespace NextAuthUtils {
           refresh: refreshToken,
         }
       );
+
       const { access } = data;
       return access;
     } catch (error) {
@@ -87,6 +87,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
+          console.log(credentials);
           const { data } = await axios({
             url: `${process.env.NEXTAUTH_BACKEND_URL}auth/login`,
             method: "POST",
@@ -100,9 +101,8 @@ export const authOptions: NextAuthOptions = {
           return user;
         } catch (error: any) {
           const x: AxiosError = error;
-
           if (x.response?.data) {
-            console.error(x.response?.data, x.message);
+            // console.error(x.response?.data, x.message);
             // @ts-ignore
             if (x.response?.data?.non_field_errors) {
               throw new Error(

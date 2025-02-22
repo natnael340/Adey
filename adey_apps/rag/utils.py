@@ -40,3 +40,9 @@ class Url(object):
         return self.parts == other.parts
     def __hash__(self):
         return hash(self.parts)
+
+
+def key_value_to_dict(value) -> dict:
+    return dict(
+        item.strip().split("=") for item in value.split(";")
+    )

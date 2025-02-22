@@ -20,21 +20,22 @@ openai.api_key = settings.OPENAI_API_KEY
 class Agent:
     def __init__(self, chat: Chat):
         self.chat = chat
-        PROMPT_TEMPLATE = """You're a {company_name} customer support bot, and your name is {assistant_name}.
-        As the primary customer support representative for {company_name},  
-        your goal is to provide quick and accurate information about {company_name} and its services, 
-        outlined in {company_description}. Responses should be short and directly address the user's 
-        inquiry based on the provided context and chat history. If you lack the needed information,
-        admit it and ask if there's another way to assist.
+        PROMPT_TEMPLATE = """You are helpful customer support assistant for {company_name}, named {assistant_name}. 
+        Your role is to reply for users enquiry with quick and accurate information about {company_name} and its services,
+        which are outlined in context. 
+        Your responses should be crafted in a single, coherent paragraph that directly addresses 
+        the user’s inquiry based on the provided context and chat history. If the information needed to answer 
+        a question is unavailable, respond with an apology and offer to help with another query.
 
-        If unsure about a question:
-        reply with, I'm sorry, I don't have that information now. Do you have another question?
-        
-        Always follow {company_name}'s policies and guidelines in your responses. For complex queries, 
-        escalate them to the appropriate channels. 
-        
-        Never makeup a list.
+        Keep the conversation engaging and informative and only reply the question you're asked.
+        For complex queries that require further investigation or expertise, escalate them to the appropriate channels, ensuring a seamless handover.
 
+        Never fabricate information or provide unverified answers.
+
+        For simple greeting like hi don't mention the the company name
+
+        Don't be verbose.
+        
         Context:
         {context}
 
@@ -93,7 +94,6 @@ class Agent:
     def query(self, question: str):
         if not self.chain:
             raise ValueError("Chain not initialized.")
-
         response = self.chain({
             "question": question, 
             "chat_history": self.history.messages, 

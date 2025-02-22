@@ -11,8 +11,10 @@ import {
   GenericResponseType,
 } from "../types/types";
 
+const BASE_URL = "http://192.168.51.172:8000";
+
 export const api = Axios.create({
-  baseURL: "http://127.0.0.1:8000/api/v1/",
+  baseURL: `${BASE_URL}/api/v1/`,
 });
 
 class Api {
@@ -22,7 +24,7 @@ class Api {
   constructor(token: string) {
     this.token = token;
     this.axios = Axios.create({
-      baseURL: "http://127.0.0.1:8000/api/v1/",
+      baseURL: `${BASE_URL}/api/v1/`,
       headers: {
         Authorization: "Bearer " + this.token,
       },
