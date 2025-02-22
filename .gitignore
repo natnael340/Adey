@@ -5,3 +5,4 @@ venv
 ./frontend/node_modules/
 ./chat_widget/node_modules/
 
+/node_modules

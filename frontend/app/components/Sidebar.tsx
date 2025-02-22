@@ -31,9 +31,9 @@ const Sidebar = ({ page }: PropTypes) => {
           width={75}
           height={75}
         />
-        <span className="self-center whitespace-nowrap font-semibold text-lg text-black">
+        <a href="/"><span className="self-center whitespace-nowrap font-semibold text-lg text-black">
           Adey
-        </span>
+        </span></a>
       </div>
       <div className="flex flex-1 flex-col">
         <div className="space-y-1">
@@ -59,7 +59,7 @@ const Sidebar = ({ page }: PropTypes) => {
             <User size={22} />
             <span className="text-base">Chat Bots</span>
           </a>
-          <a
+          {/* <a
             href="/dashboard/sales"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
               page == "salesbots"
@@ -69,8 +69,8 @@ const Sidebar = ({ page }: PropTypes) => {
           >
             <TrendingUp size={22} />
             <span className="text-base">Sales Bots</span>
-          </a>
-          <a
+          </a> */}
+          {/* <a
             href="/dashboard/sales"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
               page == "integrations"
@@ -80,10 +80,10 @@ const Sidebar = ({ page }: PropTypes) => {
           >
             <Workflow size={22} />
             <span className="text-base">Integrations</span>
-          </a>
+          </a> */}
         </div>
         <div className="border-t border-[#ECECEE] w-full space-y-1 py-2 mt-2">
-          <a
+          {/* <a
             href="/dashboard/chats"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
               page == "account"
@@ -93,7 +93,7 @@ const Sidebar = ({ page }: PropTypes) => {
           >
             <UserCircle size={22} />
             <span className="text-base">My Account</span>
-          </a>
+          </a> */}
           <button
             className="flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer text-gray-400"
             onClick={() =>

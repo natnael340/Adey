@@ -219,10 +219,11 @@ class ChatBotSerializer(serializers.Serializer):
 
     def get_messages(self, obj):
         request = self.context.get('request')
+        
         if request:
             user_session_id = request.COOKIES.get("user_session_id", "")
+            
             messages = obj.message_set.all().filter(session_id=user_session_id)
-
             return MessageSerializer(instance=messages, many=True).data
         return []
     

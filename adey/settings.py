@@ -179,10 +179,11 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS512"
 }
 
-FRONTEND_URLS = [
+FRONTEND_URLS = env.list("FRONTEND_URLS", default=[
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-]
+])
+TLS_ENABLED = env.bool("TLS_ENABLED", False)
 FRONTEND_DOMAIN = env.str("FRONTEND_DOMAIN", "127.0.0.1:3000")
 FRONTEND_PASSWORD_RESET_PATH = env.str("FRONTEND_PASSWORD_RESET_PATH", "/auth/password/reset/{token}")
 FRONTEND_EMAIL_VERIFICATION_PATH = env.str("FRONTEND_EMAIL_VERIFICATION_PATH", "")

@@ -19,4 +19,6 @@ const response = fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
   },
 });
 
+console.log("hit it");
+
 response.then((r) => console.log(r)).catch((err) => console.log(err));
