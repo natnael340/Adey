@@ -9,7 +9,9 @@ import { MessageType, ProfileType } from "./types";
 
 export const [HUMAN, AI] = ["HUMAN", "AI"];
 // @ts-expect-error  an erro due to meta
-const CHAT_ID: string = document.querySelector("meta[name='adey_chat_id']")?.content;
+const CHAT_ID: string = document.querySelector(
+  "meta[name='adey_chat_id']"
+)?.content;
 const App = () => {
   if (!CHAT_ID) {
     throw new Error("adey_chat_id meta property is not set");
@@ -28,7 +30,7 @@ const App = () => {
   const [thinking, setThinking] = useState<boolean>(false);
 
   const { sendJsonMessage } = useWebSocket(
-    `ws://192.168.51.172:8000/rag/${CHAT_ID}/messages/`,
+    `ws://app.adey-chatbot.website/rag/${CHAT_ID}/messages/`,
     {
       onOpen: () => {
         setOnline(true);
@@ -78,7 +80,7 @@ const App = () => {
     (async () => {
       try {
         const response = await fetch(
-          `http://192.168.51.172:8000/api/v1/rag/chat_bot/${CHAT_ID}/`,
+          `http://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
           {
             method: "GET",
             credentials: "include",
@@ -137,7 +139,7 @@ const App = () => {
             {chatProfile.assistant_pic ? (
               <div className="w-10 h-10 relative">
                 <img
-                  src="http://192.168.51.172:8000/media/Xzh3R6N3.jpg"
+                  src="http://app.adey-chatbot.website/media/Xzh3R6N3.jpg"
                   width={100}
                   height={100}
                   className="rounded-full h-10 w-10"

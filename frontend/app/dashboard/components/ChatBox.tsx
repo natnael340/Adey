@@ -34,7 +34,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
   const [thinking, setThinking] = useState<boolean>(false);
 
   const { sendJsonMessage } = useWebSocket(
-    `ws://192.168.51.172:8000/rag/${CHAT_ID}/messages/`,
+    `ws://app.adey-chatbot.website/rag/${CHAT_ID}/messages/`,
     {
       onOpen: () => {
         setOnline(true);
@@ -89,7 +89,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
     (async () => {
       try {
         const response = await fetch(
-          `http://192.168.51.172:8000/api/v1/rag/chat_bot/${CHAT_ID}/`,
+          `http://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
           {
             method: "GET",
             credentials: "include",
@@ -216,7 +216,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
-                if(e.key === "Enter"){
+                if (e.key === "Enter") {
                   e.preventDefault();
                   sendMessage();
                 }

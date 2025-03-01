@@ -87,7 +87,6 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          console.log(credentials);
           const { data } = await axios({
             url: `${process.env.NEXTAUTH_BACKEND_URL}auth/login`,
             method: "POST",
@@ -100,6 +99,7 @@ export const authOptions: NextAuthOptions = {
           };
           return user;
         } catch (error: any) {
+          console.error(error);
           const x: AxiosError = error;
           if (x.response?.data) {
             // console.error(x.response?.data, x.message);
