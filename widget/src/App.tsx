@@ -80,7 +80,7 @@ const App = () => {
     (async () => {
       try {
         const response = await fetch(
-          `http://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
+          `https://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
           {
             method: "GET",
             credentials: "include",
@@ -139,7 +139,7 @@ const App = () => {
             {chatProfile.assistant_pic ? (
               <div className="w-10 h-10 relative">
                 <img
-                  src="http://app.adey-chatbot.website/media/Xzh3R6N3.jpg"
+                  src="https://app.adey-chatbot.website/media/Xzh3R6N3.jpg"
                   width={100}
                   height={100}
                   className="rounded-full h-10 w-10"

@@ -89,7 +89,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
     (async () => {
       try {
         const response = await fetch(
-          `http://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
+          `https://app.adey-chatbot.website/api/v1/rag/chat_bot/${CHAT_ID}/`,
           {
             method: "GET",
             credentials: "include",

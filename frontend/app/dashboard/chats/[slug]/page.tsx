@@ -53,7 +53,7 @@ const page = async ({ params: { slug } }: PropType) => {
               &lt;head&gt; section of your HTML page:
             </p>
             <Code
-              code={`<link rel="stylesheet" crossorigin href="http://app.adey-chatbot.website/media/chatbot/index.css" />`}
+              code={`<link rel="stylesheet" crossorigin href="https://app.adey-chatbot.website/media/chatbot/index.css" />`}
             />
             <p>
               This link tag will load the CSS file required for the chatbot
@@ -69,7 +69,7 @@ const page = async ({ params: { slug } }: PropType) => {
               script:
             </p>
             <Code
-              code={`<script type="module" crossorigin src="http://app.adey-chatbot.website/media/chatbot/index.js"></script>`}
+              code={`<script type="module" crossorigin src="https://app.adey-chatbot.website/media/chatbot/index.js"></script>`}
             />
             <p>
               This script tag will load the JavaScript code responsible for
