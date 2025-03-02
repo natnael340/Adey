@@ -1,3 +1,3 @@
 FROM ankane/pgvector
 
-HEALTHCHECK CMD pg_isready -U postgres
+HEALTHCHECK CMD pg_isready -U adey_backend

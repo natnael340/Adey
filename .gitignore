@@ -1,9 +1,10 @@
 venv
 .env
 .general.log
+.production.env
 
 ./frontend/node_modules/
 ./chat_widget/node_modules/
 
-*.pyc
+**/__pycache__
 

@@ -9,10 +9,8 @@ services:
     image: adey_db
     build: ./devops/docker/postgres
     restart: on-failure
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
+    env_file:
+      - .env
     ports:
       - "${DOCKER_POSTGRES_PORT}:5434"
     command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_locks_per_transaction=1024
@@ -24,11 +22,8 @@ services:
   broker:
     image: rabbitmq:3-management
     hostname: rabbit1
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-      - RABBITMQ_DEFAULT_VHOST=/
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    env_file:
+      - .env
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -47,21 +42,17 @@ services:
     ports:
       - "${DOCKER_BACKEND_PORT}:8000"
     working_dir: /usr/src/app
-    environment:
-      - DEBUG=${DEBUG}
-      - ALLOWED_HOSTS=*
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - DB_NAME=print_avenue
-      - DJANGO_SECRET_KEY=django-insecure--&)201ee(0tbxek5224g(v^opym^lx0lt)m%qacjh*rmxqth0e
-      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - .env
     depends_on:
       - db
     volumes:
       - .:/usr/src/app
+      - /usr/src/app/frontend
+      - /usr/src/app/chat_widget
     networks:
       - adey_network
-    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 "
+    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     stdin_open: true
     tty: true
 
@@ -72,11 +63,13 @@ services:
       dockerfile: ./devops/docker/python/Dockerfile
       context: ./
     command: celery -A adey worker --loglevel=info
-    environment:
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - DJANGO_SETTINGS_MODULE=adey.settings
+    env_file:
+      - .env
     volumes:
       - .:/usr/src/app
+      - /usr/src/app/frontend
+      - /usr/src/app/chat_widget
+      - /usr/src/app/venv
     depends_on:
       - db
       - broker
@@ -92,10 +85,8 @@ services:
       context: .
     restart: always
     command: npm run dev
-    environment:
-      - API_DOMAIN=${API_DOMAIN}
-      - TLS_ENABLED=${TLS_ENABLED}
-      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - .env
     depends_on:
       - adey_backend
     ports:
