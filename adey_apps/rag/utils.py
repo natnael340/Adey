@@ -1,8 +1,11 @@
+import requests
+
 from django.conf import settings
 
 import openai
 from langchain.vectorstores.pgvector import PGVector
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 from langchain.llms.openai import OpenAI
 from django.utils.encoding import force_str
@@ -46,3 +49,37 @@ def key_value_to_dict(value) -> dict:
     return dict(
         item.strip().split("=") for item in value.split(";")
     )
+
+
+class URLTextLoader:
+    """
+    A class to load text data from a specified URL.
+
+    Attributes:
+        url (str): The URL from which to load the text.
+
+    Methods:
+        load(): Fetches and returns the text from the URL.
+    """
+    def __init__(self, url):
+        """
+        Constructs all the necessary attributes for the URLTextLoader object.
+
+        Parameters:
+            url (str): The URL from which to load the text.
+        """
+        self.url = url
+
+    def load(self):
+        """
+        Fetches the text from the specified URL.
+
+        Raises:
+            HTTPError: An error occurs from the HTTP request.
+
+        Returns:
+            str: The text retrieved from the URL.
+        """
+        response = requests.get(self.url)
+        response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
+        return [Document(page_content=response.text, metadata={"source": self.url})]

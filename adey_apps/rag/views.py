@@ -8,7 +8,7 @@ from django.db.models import Count
 
 from langchain.vectorstores.pgvector import PGVector
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.document_loaders import TextLoader
+from langchain.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
@@ -18,7 +18,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from adey_apps.rag.utils import URLTextLoader
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
@@ -179,10 +179,10 @@ class ChatBotBuildApiView(APIView):
             chat = Chat.objects.get(user=user, slug=chat_slug)
             resources = chat.resource_set.all()
             documents = []
-            if resources:
-                for resource in resources:
-                    loader = TextLoader(resource.document.path)
-                    documents.extend(loader.load())
+            for resource in resources:
+                loader = URLTextLoader(resource.document.url)
+                documents.extend(loader.load())
+                print(loader.load())
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             chunks = text_splitter.split_documents(documents)
             embedding = OpenAIEmbeddings()
