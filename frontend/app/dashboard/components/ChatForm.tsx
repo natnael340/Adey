@@ -177,56 +177,6 @@ const ChatForm = ({
       </div>
       <div>
         <label>Assistant Characters</label>
-        <div className="grid grid-cols-[repeat(auto-fill, minmax(75px, min-content))] gap-2 grid">
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Funny</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Intelligent</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Funny</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Intelligent</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Funny</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Intelligent</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Funny</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-          <div className="py-1 px-2 capitalize bg-[#E7CD3C] bg-opacity-60 space-x-2 flex flex-row items-center rounded-full">
-            <p className="text-sm">Intelligent</p>
-            <button onClick={() => RemoveCharacter(character)}>
-              <X size={16} />
-            </button>
-          </div>
-        </div>
         <div className="flex flex-row">
           <div
             className={`h-10 flex flex-row items-center gap-x-1 ${
@@ -327,7 +277,7 @@ const ChatForm = ({
           onChange={(e) =>
             setChatForm({ ...chatForm, business_description: e.target.value })
           }
-          value={chatForm.business_name}
+          value={chatForm.business_description}
         />
       </div>
       <DialogFooter>

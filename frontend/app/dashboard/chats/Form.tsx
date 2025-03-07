@@ -23,8 +23,8 @@ function Form() {
   const CreateChatBot = async () => {
     if (api) {
       try {
-        // const data = await api.create_chatbot(chatForm);
-        // setBotAdded(true);
+        const data = await api.create_chatbot(chatForm);
+        setBotAdded(true);
         toggleFormOpen();
       } catch (error) {
         console.error(error);
