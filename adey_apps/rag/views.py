@@ -182,7 +182,6 @@ class ChatBotBuildApiView(APIView):
             for resource in resources:
                 loader = URLTextLoader(resource.document.url)
                 documents.extend(loader.load())
-                print(loader.load())
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             chunks = text_splitter.split_documents(documents)
             embedding = OpenAIEmbeddings()
@@ -190,7 +189,7 @@ class ChatBotBuildApiView(APIView):
                 embedding=embedding,
                 documents=chunks,
                 collection_name=force_str(chat.identifier),
-                connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+                connection_string=settings.PG_VECTOR_DB_URL,
             )
             chat.status = "finished"
             chat.save()

@@ -37,7 +37,7 @@ class Command(BaseCommand):
                     embedding=embedding,
                     documents=docs,
                     collection_name=force_str(chat.identifier),
-                    connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+                    connection_string=settings.PG_VECTOR_DB_URL,
                 )
                 print(db)
         except User.DoesNotExist:

@@ -63,7 +63,7 @@ class Agent:
                     embedding=embedding,
                     documents=docs,
                     collection_name=force_str(self.chat.identifier),
-                    connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+                    connection_string=settings.PG_VECTOR_DB_URL,
             )
         if db:
             return {"status": "SUCCESS"}
@@ -85,7 +85,7 @@ class Agent:
             combine_docs_chain_kwargs={"prompt": self.prompt},
         )
         self.history = PostgresChatMessageHistory(
-            connection_string="postgresql://adey_backend:secret@db:5432/adey_backend",
+            connection_string=settings.PG_VECTOR_DB_URL,
             session_id=user_session_id,
         )
         if new_chat:
