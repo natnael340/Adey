@@ -1,6 +1,7 @@
 from datetime import datetime
 from rest_framework.permissions import BasePermission
 from adey_apps.rag.utils import Url
+from urllib.parse import urlparse
 from django.conf import settings
 from rest_framework.exceptions import PermissionDenied
 from adey_apps.rag.models import Message, MessageTypeChoices
@@ -12,10 +13,7 @@ class HasChatBotPermission(BasePermission):
         if request.headers.get("Origin", "") in settings.FRONTEND_URLS:
             return True
         
-        if origin and not origin.endswith("/"):
-            origin += "/"
-        
-        if any(Url(origin) == Url(url) for url in obj.allowed_urls):
+        if any(urlparse(origin).netloc == urlparse(url).netloc for url in obj.allowed_urls):
             return True
 
         raise PermissionDenied("Origin not allowed.")
