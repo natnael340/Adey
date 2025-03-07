@@ -14,13 +14,13 @@ export default async function Home() {
         <div className="container flex-1 grid grid-cols-2 items-center">
           <div className="space-y-16">
             <h1 className="text-6xl font-bold">
-              Transform Your Company with AI-Powered Tools
+              Transform Your Company with AI-Powered Chatbot
             </h1>
             <p className="text-[#363636]">
-              Enhance customer support with AI chat bots and boost sales with
-              intelligent sales agents. Revolutionize your operations and
-              deliver exceptional customer experiences with our advanced AI
-              solutions.
+              Enhance your customer support with AI-powered chatbots, providing
+              instant responses and seamless assistance. Improve efficiency,
+              reduce wait times, and deliver exceptional customer experiences
+              with our advanced AI solutions.
             </p>
             <div className="pt-5">
               <a
@@ -32,6 +32,7 @@ export default async function Home() {
               </a>
             </div>
           </div>
+          <Image src="/bot_logo.png" width={500} height={500} alt="Ai Bot" />
         </div>
       </section>
       <section className="grid grid-cols-2 items-center px-20 py-20 gap-x-20">
@@ -46,22 +47,42 @@ export default async function Home() {
           <h3 className="py-4 text-3xl font-bold text-[#363636]">
             We didn't reinvent the wheel.
           </h3>
-          <p className="text-justify text-[#797878]">
-            Welcome to our website! We are proud to present our groundbreaking
-            AI-powered customer service and sales agent solution. Our innovative
-            technology has redefined the way businesses engage with their
-            customers and drive sales. With our AI-powered platform, you can
-            harness the potential of artificial intelligence to deliver
-            exceptional customer service and maximize your sales potential. Our
-            intelligent system seamlessly integrates customer support and sales
-            functionalities, providing a comprehensive solution for your
-            business needs. Say goodbye to traditional customer service and
-            sales approaches—our AI-powered agent is capable of understanding
-            and responding to customer inquiries, providing personalized
-            recommendations, and closing deals with precision. Join us on the
-            forefront of AI innovation and witness how our solution can
-            transform your customer service and sales operations.
+          <p className="text-justify">
+            Welcome to a new era of customer service! Our cutting-edge
+            AI-powered customer support bot transforms the way businesses engage
+            with their customers—providing instant, intelligent, and seamless
+            assistance around the clock.
           </p>
+          <div className="mt-8 grid grid-rows-3 gap-1 text-left">
+            <div className="flex items-start space-x-3">
+              <span className="text-blue-500 text-sm">✔️</span>
+              <p>
+                <strong>Instant Responses</strong> – No more wait times! Get
+                real-time customer support.
+              </p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <span className="text-blue-500 text-sm">✔️</span>
+              <p>
+                <strong>Personalized Assistance</strong> – AI-powered
+                recommendations for every customer.
+              </p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <span className="text-blue-500 text-sm">✔️</span>
+              <p>
+                <strong>24/7 Availability</strong> – Always online, ensuring
+                customer satisfaction.
+              </p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <span className="text-blue-500 text-sm">✔️</span>
+              <p>
+                <strong>Seamless Integration</strong> – Works with your CRM,
+                helpdesk, and chat platforms.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
       <section className="px-20 py-5 space-y-7">

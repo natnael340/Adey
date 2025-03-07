@@ -11,7 +11,7 @@ import {
   GenericResponseType,
 } from "../types/types";
 
-const BASE_URL = "https://app.adey-chatbot.website";
+const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
 
 export const api = Axios.create({
   baseURL: `${BASE_URL}/api/v1/`,
