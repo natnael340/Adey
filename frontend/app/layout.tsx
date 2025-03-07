@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: "Your AI Chatbot solution",
 };
 
+const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
+
 export default function RootLayout({
   children,
 }: {
@@ -23,6 +25,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="adey_chat_id"
+          content="d0263fca-2060-4813-b346-03fe2d9b4b06"
+        />
+
+        <link
+          rel="stylesheet"
+          crossOrigin="anonymous"
+          href={`${BASE_URL}/media/chatbot/index.css`}
+        />
+      </head>
+
       <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription"></Script>
       <body
         className={cn(
@@ -31,6 +46,11 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>{children}</AuthProvider>
+        <script
+          type="module"
+          crossOrigin="anonymous"
+          src={`${BASE_URL}/media/chatbot/index.js`}
+        ></script>
       </body>
     </html>
   );
