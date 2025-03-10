@@ -34,7 +34,7 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
   const [thinking, setThinking] = useState<boolean>(false);
 
   const { sendJsonMessage } = useWebSocket(
-    `ws://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/rag/${CHAT_ID}/messages/`,
+    `wss://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}/rag/${CHAT_ID}/messages/`,
     {
       onOpen: () => {
         setOnline(true);
