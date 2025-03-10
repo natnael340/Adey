@@ -34,7 +34,7 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           crossOrigin="anonymous"
-          href={`${BASE_URL}/media/chatbot/index.css`}
+          href={`https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.css`}
         />
       </head>
 
@@ -49,7 +49,7 @@ export default function RootLayout({
         <script
           type="module"
           crossOrigin="anonymous"
-          src={`${BASE_URL}/media/chatbot/index.js`}
+          src={`https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js`}
         ></script>
       </body>
     </html>
