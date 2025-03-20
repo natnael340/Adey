@@ -6,9 +6,8 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from django.db.models import Count
 
-from langchain.vectorstores.pgvector import PGVector
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.document_loaders import WebBaseLoader
+from langchain_community.vectorstores import PGVector
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet

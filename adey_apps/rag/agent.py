@@ -1,18 +1,19 @@
 import openai
 
-from langchain.document_loaders import DirectoryLoader, TextLoader
-from langchain.schema import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores.chroma import Chroma
-from langchain.vectorstores.pgvector import PGVector
-from langchain.prompts import PromptTemplate
-from langchain.chat_models.openai import ChatOpenAI
-from langchain.chains import ConversationalRetrievalChain, LLMChain
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory, PostgresChatMessageHistory
-from adey_apps.rag.models import Chat
 from django.utils.encoding import force_str
 from django.conf import settings
+
+from langchain.document_loaders import TextLoader
+from langchain.schema import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import PGVector
+from langchain.prompts import PromptTemplate
+from langchain_community.chat_models.openai import ChatOpenAI
+from langchain.chains import ConversationalRetrievalChain
+from langchain_community.chat_message_histories import PostgresChatMessageHistory
+from adey_apps.rag.models import Chat
+
 
 openai.api_key = settings.OPENAI_API_KEY
 

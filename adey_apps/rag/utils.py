@@ -3,11 +3,11 @@ import requests
 from django.conf import settings
 
 import openai
-from langchain.vectorstores.pgvector import PGVector
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import PGVector
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
-from langchain.llms.openai import OpenAI
+from langchain_community.llms import OpenAI
 from django.utils.encoding import force_str
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
