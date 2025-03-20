@@ -98,7 +98,8 @@ function App() {
         }
       },
     },
-    !loading && chatProfile.assistant_name !== ""
+    !loading && chatProfile.assistant_name !== "",
+    
   );
   const sendMessage = () => {
     sendJsonMessage({

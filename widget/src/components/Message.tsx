@@ -1,4 +1,4 @@
-import { AI } from "../App";
+import { AI } from "../constants";
 
 type PropType = {
   message: string;
