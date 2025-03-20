@@ -2,6 +2,7 @@ venv
 .env
 .general.log
 .production.env
+.env.production
 
 ./frontend/node_modules/
 ./chat_widget/node_modules/
