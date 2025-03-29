@@ -28,7 +28,7 @@ export default function RootLayout({
       <head>
         <meta
           name="adey_chat_id"
-          content="d0263fca-2060-4813-b346-03fe2d9b4b06"
+          content="7b2aee34-1392-489e-95cb-757a382666d4"
         />
 
         <link
