@@ -86,6 +86,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"
 

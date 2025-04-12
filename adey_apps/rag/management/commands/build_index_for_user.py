@@ -4,8 +4,8 @@ from django.utils.encoding import force_str
 from django.conf import settings
 from adey_apps.users.models import User
 from adey_apps.rag.models import Resource, Chat
-from langchain.vectorstores.pgvector import PGVector
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import PGVector
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
