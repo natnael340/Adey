@@ -12,18 +12,18 @@ class MessageTypeChoices(models.TextChoices):
 
 
 class Resource(BaseModel):
-    DOCUMENT_OPTIONS = (
-        ("PDF", "PDF"),
-        ("TXT", "TXT"),
-        ("CSV", "CSV"),
-        ("HTML", "HTML"),
-        ("JSON", "JSON"),
-        ("MD", "MD"),
-    )
+    class DocumentTypeChoices(models.TextChoices):
+        PDF = "PDF", "PDF"
+        TXT = "TXT", "TXT"
+        CSV = "CSV", "CSV"
+        HTML = "HTML", "HTML"
+        JSON = "JSON", "JSON"
+        MD = "MD", "MD"
+    
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=256, blank=True)
     document = models.FileField()
-    document_type = models.CharField(max_length=5, choices=DOCUMENT_OPTIONS, default="TXT")
+    document_type = models.CharField(max_length=5, choices=DocumentTypeChoices.choices, default=DocumentTypeChoices.TXT)
     chat = models.ForeignKey(to="rag.Chat", on_delete=models.CASCADE)
 
     class Meta:
