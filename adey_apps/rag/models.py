@@ -54,12 +54,13 @@ class AssistantCharacter(models.Model):
 
 
 class Chat(BaseModel):
-    STATUS_OPTIONS = (
-        ("prepared", "PREPARED"),
-        ("ready", "READY"),
-        ("finished", "FINISHED"),
-        ("failed", "FAILED"),
-    )
+
+    class StatusChoices(models.TextChoices):
+        PREPARED = "prepared", "PREPARED"
+        READY = "ready", "READY"
+        FINISHED = "finished", "FINISHED"
+        FAILED = "failed", "FAILED"
+    
     identifier = models.UUIDField(
         "Identifier", unique=True, db_index=True, editable=False, default=uuid4
     )
@@ -74,7 +75,7 @@ class Chat(BaseModel):
     allowed_urls = ArrayField(models.URLField(max_length=255), blank=True, default=list)
     intro_text = models.TextField(default="Hello! How can I assist you today?")
     user = models.ForeignKey(to="users.User", on_delete=models.CASCADE)
-    status = models.CharField("Status", max_length=8, choices=STATUS_OPTIONS, default="prepared")
+    status = models.CharField("Status", max_length=8, choices=StatusChoices.choices, default="prepared")
 
     class Meta:
         constraints = [

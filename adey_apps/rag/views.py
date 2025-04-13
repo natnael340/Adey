@@ -31,6 +31,7 @@ from adey_apps.rag.serializers import (
     MessageAnalyticsSerializer,
     ChatBotAnalyticsSerializer,
 )
+from adey_apps.rag.mixins import ChatMixin
 from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
@@ -65,23 +66,18 @@ class ChatUpdateAPIView(UpdateAPIView):
         return Chat.objects.filter(user=self.request.user)
     
 
-class ResourceViewSet(ModelViewSet):
+class ResourceViewSet(ChatMixin, ModelViewSet):
     serializer_class = ResourceSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = StandardResultsSetPagination
     lookup_field = "slug"
     lookup_url_kwarg="slug"
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["chat_slug"] = self.kwargs.get("chat_slug")
-        return context
-
     def get_queryset(self):
         """
         Filter Resource with chat's slug and chat author.
         """
-        return Resource.objects.filter(chat__slug=self.kwargs["chat_slug"], chat__user=self.request.user)
+        return Resource.objects.filter(chat=self.request.chat)
        
 
 class MessageListCreateViewSet(ListCreateAPIView):

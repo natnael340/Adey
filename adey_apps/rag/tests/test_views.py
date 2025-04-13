@@ -29,6 +29,7 @@ def test_chat_create_view_set_create_chat_instance(logged_in_client ):
     chat = Chat.objects.last()
     assert chat.name == CHAT_DATA["name"]
 
+
 def test_chat_update_view_set_get_query_set_returns_only_chats_for_the_user(chat_request, user, chat_factory):
     chats = chat_factory.create_batch(3, user=user)
     chat_factory.create_batch(3)

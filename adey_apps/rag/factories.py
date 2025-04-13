@@ -1,4 +1,5 @@
 import factory
+import factory.fuzzy as random_argument
 from adey_apps.rag.models import Chat, Message, AssistantCharacter, Resource
 
 
@@ -31,4 +32,12 @@ class ChatFactory(factory.django.DjangoModelFactory):
             obj.assistant_characters.set(AssistantCharacterFactory.create_batch(3))
 
 
-
+class ResourceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Resource
+    
+    name = factory.Sequence(lambda n: f"Resource {n}")
+    slug = factory.Sequence(lambda n: f"resource-{n}")
+    document = factory.django.FileField()
+    document_type = random_argument.FuzzyChoice(choices=Resource.DocumentTypeChoices.values)
+    chat = factory.SubFactory(ChatFactory)
