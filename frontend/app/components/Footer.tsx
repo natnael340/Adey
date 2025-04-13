@@ -23,42 +23,18 @@ const Footer = () => {
         />
         <div className="w-full md:w-1/2">
           <p className="text-sm text-[#9A9EA6] text-center">
-            We ara a lorem ipsum dolor sit amet, consectetur adipiscing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud equip ex ea commodo
-            consequat...{" "}
-            <a href="/" className="text-[#C3A811]">
-              Read More
-            </a>
+            Helping small businesses automate customer support with AI-powered chatbots — no overhead, no hassle.
           </p>
         </div>
-        <div className="grid grid-cols-5 gap-x-3">
-          <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
+        <div className="grid grid-cols-2 gap-x-3">
+          <a className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center" href="https://www.facebook.com/profile.php?id=61574953423477">
             <Facebook color="#C3A811" size={18} />
-          </div>
-          <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <Instagram color="#C3A811" size={18} />
-          </div>
-          <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <Twitter color="#C3A811" size={18} />
-          </div>
-          <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
+          </a>
+          <a className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center" href="https://github.com/natnael340/Adey">
             <Github color="#C3A811" size={18} />
-          </div>
-          <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-            <Dribbble color="#C3A811" size={18} />
-          </div>
+          </a>
         </div>
         <div className="mt-10 flex items-center gap-x-20">
-          <div className="flex items-center gap-x-3">
-            <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
-              <PhoneCall color="#C3A811" size={22} />
-            </div>
-            <div>
-              <p className="text-[#797878] text-sm">Tel</p>
-              <p className="text-[#C3A811] text-sm font-bold">+251114532515</p>
-            </div>
-          </div>
           <div className="flex items-center gap-x-3">
             <div className="w-12 h-12 bg-[#FAF3CC] rounded-full flex justify-center items-center">
               <Mail color="#C3A811" size={22} />
@@ -66,7 +42,7 @@ const Footer = () => {
             <div>
               <p className="text-[#797878] text-sm">Mail</p>
               <p className="text-[#C3A811] text-sm font-bold">
-                contact@adey.com
+                contact@adey-chatbot.website
               </p>
             </div>
           </div>
@@ -77,7 +53,7 @@ const Footer = () => {
             <div>
               <p className="text-[#797878] text-sm">Address</p>
               <p className="text-[#C3A811] text-sm font-bold">
-                Addis Ababa, Ethiopia
+                Warsaw, Poland
               </p>
             </div>
           </div>
@@ -85,13 +61,8 @@ const Footer = () => {
       </div>
       <div className="pt-5 px-20 w-full flex items-center justify-between text-[#797878]">
         <div className="flex items-center gap-x-2">
-          <a href="#">About us</a>
-          <a href="#">Contact</a>
-          <a href="#">Privacy policy</a>
-          <a href="#">Sitemap</a>
-          <a href="#">Term of use</a>
         </div>
-        <p>© 2023-2024, All Rights Reserved</p>
+        <p>© 2025 Adey — AI Smart Chatbots for Small Business Success</p>
       </div>
     </div>
   );

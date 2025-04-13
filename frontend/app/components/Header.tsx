@@ -51,15 +51,6 @@ const Header = async ({ activeList, set_session }: PropType) => {
         ) : (
           <></>
         )}
-        <a
-          role="button"
-          href="/about"
-          className={`text-lg  ${
-            activeList["about"] ? "text-[#15192C] font-bold" : "text-[#45464B]"
-          }`}
-        >
-          About
-        </a>
       </div>
     </div>
   );
