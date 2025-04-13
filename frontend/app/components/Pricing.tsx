@@ -17,7 +17,6 @@ const Pricing = ({ data: base }: PropsType) => {
   useEffect(() => {
     const d = base.filter((p) => p.period == period);
     setData(d);
-    console.log(d, "here");
   }, [period]);
   return (
     <div className="w-full space-y-10">
@@ -104,7 +103,7 @@ const Pricing = ({ data: base }: PropsType) => {
               Unleash the Power of Your Business with Premium Plan.
             </p>
             <div className="flex flex-row justify-between items-center py-3">
-              <h1 className="text-4xl">ETB {data[2].price}</h1>
+              <h1 className="text-4xl">${data[2].price}</h1>
               <span className="text-sm text-[#797878]">
                 per {data[2].period == "monthly" ? "month" : "year"}
               </span>
@@ -154,7 +153,7 @@ const Pricing = ({ data: base }: PropsType) => {
             Unleash the Power of Your Business with Premium Plan.
           </p>
           <div className="flex flex-row justify-between items-center py-3">
-            <h1 className="text-4xl">ETB {data[1].price}</h1>
+            <h1 className="text-4xl">${data[1].price}</h1>
             <span className="text-sm text-[#797878]">
               per {data[1].period == "monthly" ? "month" : "year"}
             </span>

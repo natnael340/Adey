@@ -51,7 +51,7 @@ const Header = async ({ activeList, set_session }: PropType) => {
         ) : (
           <></>
         )}
-        <a
+        {/* <a
           role="button"
           href="/about"
           className={`text-lg  ${
@@ -59,7 +59,7 @@ const Header = async ({ activeList, set_session }: PropType) => {
           }`}
         >
           About
-        </a>
+        </a> */}
       </div>
     </div>
   );
