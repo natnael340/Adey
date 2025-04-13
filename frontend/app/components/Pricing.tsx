@@ -45,6 +45,7 @@ const Pricing = ({ data: base }: PropsType) => {
         </div>
       </div>
       <div className="w-full grid grid-cols-1 md:gap-x-10 md:grid-cols-3">
+        {/* TODO: fix the indexing */}
         <div className="w-[344px] h-fit p-10 bg-white rounded-2xl space-y-4 shadow-lg mt-20 border border-white">
           <div className="w-14 h-14 flex justify-center items-center rounded-xl bg-[#EDD447]">
             <TargetIcon size={32} />
