@@ -78,11 +78,9 @@ class ResourceViewSet(ModelViewSet):
         return context
 
     def get_queryset(self):
-        chat = Chat.objects.filter(slug=self.kwargs["chat_slug"], user=self.request.user).first()
-        if chat:
-            return Resource.objects.filter(chat=chat)
+        return Resource.objects.filter(chat__slug=self.kwargs["chat_slug"], user=self.request.user)
         
-        raise Http404
+       
     
 
 class MessageListCreateViewSet(ListCreateAPIView):

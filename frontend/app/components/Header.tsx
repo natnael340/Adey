@@ -17,7 +17,7 @@ const Header = async ({ activeList, set_session }: PropType) => {
     set_session(session);
   }
   return (
-    <div className="flex flex-row w-full items-center">
+    <div className="flex flex-row w-full items-center justify-between">
       <a
         role="button"
         href="/"
@@ -34,22 +34,23 @@ const Header = async ({ activeList, set_session }: PropType) => {
           Adey
         </span>
       </a>
-      <div className="flex-1 flex flex-row items-center justify-center gap-10">
-        <a
-          role="button"
-          href="/"
-          className={`text-lg ${
-            activeList["home"] ? "text-[#15192C] font-bold" : "text-[#45464B]"
-          }`}
-        >
+      <div className="flex flex-row items-center justify-center gap-10">
+        <a role="button" href="/" className="text-lg relative text-[#15192C]">
           Home
+          <div className="absolute w-10 bg-[#15192C] h-[0.5px] -bottom-1 left-1/2 -translate-x-1/2"></div>
         </a>
         {session ? (
           <a role="button" href="/dashboard" className="text-lg text-[#45464B]">
             Dashboard
           </a>
         ) : (
-          <></>
+          <a
+            role="button"
+            href="/auth/login"
+            className="text-lg text-[#15192C]"
+          >
+            Sign In
+          </a>
         )}
       </div>
     </div>
