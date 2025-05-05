@@ -289,8 +289,8 @@ AWS_SECRET_ACCESS_KEY = env.str("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME", "us-east-2")
 
-DEFAULT_FILE_STORAGE = "adey_apps.adey_commons.storages.MediaStorage"
-STATICFILES_STORAGE = "adey_apps.adey_commons.storages.StaticS3Storage"
+DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE", "django.core.files.storage.FileSystemStorage")
+STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.core.files.storage.FileSystemStorage")
 
 STATICFILES_LOCATION = "static/" 
 MEDIAFILES_LOCATION = "media/"

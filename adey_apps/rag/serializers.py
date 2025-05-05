@@ -128,23 +128,23 @@ class ChatCreateSerializer(serializers.ModelSerializer):
     
 
 class ResourceSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256)
+    slug = serializers.SlugField(max_length=256, required=False, allow_blank=True)
+    document = serializers.FileField(allow_empty_file=False)
+    document_type = serializers.ChoiceField(choices=Resource.DocumentTypeChoices, default=Resource.DocumentTypeChoices.TXT)
+    
     class Meta:
         model = Resource
         fields = ('name', 'slug', 'document', "document_type")
 
-    def validate(self, attrs):
-        chat = Chat.objects.filter(
-            slug=self.context["chat_slug"], user=self.context["request"].user
-        ).first() 
-        if not chat:
-            raise Http404
-        attrs["chat"] = chat
-        return super().validate(attrs)
     
     def create(self, validated_data):
-        chat = validated_data["chat"]
+        chat = self.context.get("request").chat
         chat.status = "ready"
         chat.save()
+
+        validated_data["chat"] = chat
+
         return super().create(validated_data)
 
    
