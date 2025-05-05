@@ -12,14 +12,14 @@ class ChatMixin:
         Initialize the request and add the chat object to it.
         """
         request = super().initialize_request(request, *args, **kwargs)
-        request.chat = self.resolve_chat_or_404()
+        request.chat = self.resolve_chat_or_404(request)
         
         return request
     
-    def resolve_chat_or_404(self:GenericViewSet) -> Chat:
+    def resolve_chat_or_404(self:GenericViewSet, request:Request) -> Chat:
         """
         Resolve the chat object from the request.
         """
-        chat = get_object_or_404(Chat, slug=self.kwargs.get("chat_slug"), user=self.request.user)
+        chat = get_object_or_404(Chat, slug=self.kwargs.get("chat_slug"), user=request.user)
         
         return chat

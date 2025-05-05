@@ -26,14 +26,6 @@ const button = () => {
         <GoogleIcon size={16} />
         Sign in with Google
       </Button>
-      <Button
-        onClick={() => oauthSignIn("google")}
-        variant="outline"
-        className="gap-x-3 w-full border-gray-300"
-      >
-        <GithubIcon size={16} />
-        Sign in with Github
-      </Button>
     </div>
   );
 };

@@ -4,88 +4,115 @@ import Footer from "./components/Footer";
 import Pricing from "./components/Pricing";
 import { api } from "./components/Api";
 import { PlanType } from "./types/types";
+import { AreaChart, Binary, Bot, Files, MessageCircle } from "lucide-react";
 
 export default async function Home() {
   const { data: plan } = await api.get<PlanType[]>("plans/");
   return (
-    <main className="min-h-screen bg-gradient-to-br from-25% from-white via-[#FFFFB3] to-white">
-      <section className="home h-screen w-full bg-[rgba(255,255,0,0.15)] flex flex-col relative py-5 px-32">
+    <main className="min-h-screen">
+      <section className="home h-screen w-full flex flex-col relative py-5 px-32 bg-gradient-to-b from-[#FFD53D] to-[#ECECEE]">
         <Header activeList={{ home: true }} />
-        <div className="container flex-1 grid grid-cols-2 items-center">
-          <div className="space-y-16">
+        <div className="container flex-1 flex justify-center items-center ">
+          <div className="text-center space-y-3">
             <h1 className="text-6xl font-bold">
               Transform Your Company with AI-Powered Chatbot
             </h1>
             <p className="text-[#363636]">
-              Enhance your customer support with AI-powered chatbots, providing
-              instant responses and seamless assistance. Improve efficiency,
-              reduce wait times, and deliver exceptional customer experiences
-              with our advanced AI solutions.
+              Instant, seamless customer support with AI-powered chatbots
             </p>
-            <div className="pt-5">
+            <div className="pt-5 flex flex-row gap-x-5 items-center justify-center">
               <a
                 role="button"
-                className="bg-[#EDD447] text-[#15192C] text-xl font-semibold px-10 py-3 rounded-lg"
+                className="bg-[#FBBF24] text-[#15192C] text-xl font-semibold px-10 py-3 rounded-lg"
                 href="/auth/login"
               >
-                Get Started
+                Try Now
+              </a>
+              <a
+                role="button"
+                className="border-[#15192C] border-[2px] text-[#15192C] text-xl font-semibold px-7 py-[0.65rem] rounded-lg"
+                href="/auth/login"
+              >
+                Watch Demo
               </a>
             </div>
           </div>
-          <Image src="/bot_logo.png" width={500} height={500} alt="Ai Bot" />
         </div>
       </section>
-      <section className="grid grid-cols-2 items-center px-20 py-20 gap-x-20">
-        <Image
-          src="/robot_with_kid.png"
-          width={840}
-          height={931}
-          alt="Ai Sales"
-        />
-
-        <div>
-          <h3 className="py-4 text-3xl font-bold text-[#363636]">
-            We didn't reinvent the wheel.
-          </h3>
-          <p className="text-justify">
-            Welcome to a new era of customer service! Our cutting-edge
-            AI-powered customer support bot transforms the way businesses engage
-            with their customers—providing instant, intelligent, and seamless
-            assistance around the clock.
+      <section className="px-20 py-5 gap-y-20 bg-[#ECECEE]">
+        <div className="w-full flex flex-col justify-center items-center space-y-5">
+          <h2 className="text-3xl font-bold text-[#15192C]">
+            Support That Never Sleeps
+          </h2>
+          <p className="text-[#797878] text-center w-1/2">
+            Adey’s AI assistant delivers instant, 24/7 customer support—freeing
+            your team to focus on what matters.
           </p>
-          <div className="mt-8 grid grid-rows-3 gap-1 text-left">
-            <div className="flex items-start space-x-3">
-              <span className="text-blue-500 text-sm">✔️</span>
-              <p>
-                <strong>Instant Responses</strong> – No more wait times! Get
-                real-time customer support.
+        </div>
+        <div className="flex flex-row items-center justify-between my-5 ">
+          <div className="flex flex-col gap-y-3 w-80">
+            <div className="max-w-60 px-2 py-4 bg-white rounded-t-lg rounded-bl-lg self-end">
+              <p className="text-sm">Do you still have NVIDIA GTX48 GPU?</p>
+            </div>
+            <div className="max-w-60 px-2 py-4 bg-[#EDD447] rounded-t-lg rounded-br-lg">
+              <p className="text-sm">
+                Sorry, unfortunately we don’t have it at the moment. I’ll be
+                happy to add you to the wait list.
               </p>
             </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-blue-500 text-sm">✔️</span>
-              <p>
-                <strong>Personalized Assistance</strong> – AI-powered
-                recommendations for every customer.
+          </div>
+          <div className="flex flex-col gap-y-3 w-80">
+            <div className="max-w-60 px-2 py-4 bg-[#EDD447] rounded-t-lg rounded-br-lg">
+              <p className="text-sm">Hi, How can i help you today?</p>
+            </div>
+            <div className="max-w-60 px-2 py-4 bg-white rounded-t-lg rounded-bl-lg self-end">
+              <p className="text-sm">
+                Can you tell me more about Your company?
               </p>
             </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-blue-500 text-sm">✔️</span>
-              <p>
-                <strong>24/7 Availability</strong> – Always online, ensuring
-                customer satisfaction.
+            <div className="max-w-60 px-2 py-4 bg-[#EDD447] rounded-t-lg rounded-br-lg">
+              <p className="text-sm">
+                Sure, XXX is a SASS system, that operation on ...
               </p>
             </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-blue-500 text-sm">✔️</span>
-              <p>
-                <strong>Seamless Integration</strong> – Works with your CRM,
-                helpdesk, and chat platforms.
+          </div>
+          <div className="flex flex-col gap-y-3 w-80">
+            <div className="max-w-60 px-2 py-4 bg-white rounded-t-lg rounded-bl-lg self-end">
+              <p className="text-sm">Can you set an appointment for me?</p>
+            </div>
+            <div className="max-w-60 px-2 py-4 bg-[#EDD447] rounded-t-lg rounded-br-lg">
+              <p className="text-sm">
+                Sure do, for when do you want the appointment?
               </p>
             </div>
           </div>
         </div>
+        <div className="w-full flex flex-col justify-center items-center space-y-5 my-10">
+          <h2 className="text-3xl font-bold text-[#15192C]">
+            Why Choose Adey?
+          </h2>
+        </div>
+        <div className="flex flex-row justify-center items-center gap-10">
+          <div className="flex flex-col items-center justify-center p-5 gap-y-3 shadow-xl rounded-lg ">
+            <Binary size={74} color="#B7B7B7" />
+            <p>No-Code Setup</p>
+          </div>
+          <div className="flex flex-col items-center justify-center p-5 gap-y-3 shadow-xl rounded-lg ">
+            <Files size={74} color="#B7B7B7" />
+            <p>Multi Document</p>
+          </div>
+          <div className="flex flex-col items-center justify-center p-5 gap-y-3 shadow-xl rounded-lg ">
+            <Bot size={74} color="#B7B7B7" />
+            <p>Personalized Agent</p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center p-5 gap-y-3 shadow-xl rounded-lg ">
+            <AreaChart size={74} color="#B7B7B7" />
+            <p>Advanced Analytics</p>
+          </div>
+        </div>
       </section>
-      <section className="px-20 py-5 space-y-7">
+      <section className="px-20 py-5 space-y-7 bg-[#ECECEE]">
         <div className="flex w-full flex-col justify-center items-center space-y-5">
           <h2 className="text-5xl">Find Your Perfect Plan</h2>
           <p className="text-[#797878] text-center w-1/2">

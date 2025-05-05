@@ -19,7 +19,7 @@ def test_chat_mixin_resolve_chat_instance_with_slug_and_user_in_request(chat, us
     view = ChatViewSetUnderTest()
     view.setup(request, chat_slug=chat.slug)
 
-    assert view.resolve_chat_or_404() == chat
+    assert view.resolve_chat_or_404(request) == chat
 
 
 def test_chat_mixin_raise_error_if_chat_slug_is_invalid(chat, user_with_password, rf):
@@ -30,7 +30,7 @@ def test_chat_mixin_raise_error_if_chat_slug_is_invalid(chat, user_with_password
     view.setup(request, chat_slug="DUMMY")
 
     with pytest.raises(Http404):
-        view.resolve_chat_or_404()
+        view.resolve_chat_or_404(request)
 
 
 def test_chat_mixin_raise_error_if_chat_does_not_belong_to_user_in_request(chat, user_with_password, rf, user_factory):
@@ -41,7 +41,7 @@ def test_chat_mixin_raise_error_if_chat_does_not_belong_to_user_in_request(chat,
     view.setup(request, chat_slug=chat.slug)
 
     with pytest.raises(Http404):
-        view.resolve_chat_or_404()
+        view.resolve_chat_or_404(request)
 
 
 def test_chat_mixin_raise_error_if_chat_slug_is_omitted_from_view_kwargs(chat, user_with_password, rf, user_factory):
@@ -52,7 +52,7 @@ def test_chat_mixin_raise_error_if_chat_slug_is_omitted_from_view_kwargs(chat, u
     view.setup(request)
 
     with pytest.raises(Http404):
-        view.resolve_chat_or_404()
+        view.resolve_chat_or_404(request)
 
 
 def test_chat_mixin_initialize_request_attach_chat_to_request(rf, user_with_password, chat, mocker):
