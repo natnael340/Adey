@@ -294,6 +294,5 @@ AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME", "us-east-2")
 DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE", "django.core.files.storage.FileSystemStorage")
 STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.core.files.storage.FileSystemStorage")
 
-if ENVIRONMENT != "production":
-    STATICFILES_LOCATION = "static/" 
-    MEDIAFILES_LOCATION = "media/"
+STATICFILES_LOCATION = "static/" 
+MEDIAFILES_LOCATION = "media/"
