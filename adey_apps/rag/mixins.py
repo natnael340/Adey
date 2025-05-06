@@ -20,6 +20,7 @@ class ChatMixin:
         """
         Resolve the chat object from the request.
         """
+        print("ChatMixin", self.kwargs.get("chat_slug"))
         chat = get_object_or_404(Chat, slug=self.kwargs.get("chat_slug"), user=request.user)
         
         return chat

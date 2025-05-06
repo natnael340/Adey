@@ -1,10 +1,13 @@
 import requests
+import tempfile
+import os
 
 from django.conf import settings
 
 import openai
 from langchain_community.vectorstores import PGVector
 from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 from langchain_community.llms import OpenAI
@@ -83,3 +86,27 @@ class URLTextLoader:
         response = requests.get(self.url)
         response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
         return [Document(page_content=response.text, metadata={"source": self.url})]
+
+
+class URLPdfLoader:
+    def __init__(self, url):
+        self.url = url
+
+    def load(self):
+        response = requests.get(self.url)
+        response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            tmp.write(response.content)
+            tmp.flush()
+            loader = PyPDFLoader(tmp.name)
+        
+        docs = loader.load()
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+
+        return docs
+
+

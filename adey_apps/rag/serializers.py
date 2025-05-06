@@ -1,6 +1,7 @@
 import time
 import base64
 from datetime import datetime
+import magic
 
 from rest_framework import serializers
 from django.http import Http404
@@ -8,6 +9,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models.functions import TruncDate
 from django.db.models import Count
+from django.core.validators import FileExtensionValidator
 
 from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices
 from adey_apps.adey_commons.serializers import ManyToManyListField
@@ -130,7 +132,10 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 class ResourceSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256)
     slug = serializers.SlugField(max_length=256, required=False, allow_blank=True)
-    document = serializers.FileField(allow_empty_file=False)
+    document = serializers.FileField(
+        allow_empty_file=False,
+        validators=[FileExtensionValidator(allowed_extensions=["txt", "pdf"])],
+    )
     document_type = serializers.ChoiceField(choices=Resource.DocumentTypeChoices, default=Resource.DocumentTypeChoices.TXT)
     
     class Meta:
@@ -146,6 +151,27 @@ class ResourceSerializer(serializers.ModelSerializer):
         validated_data["chat"] = chat
 
         return super().create(validated_data)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        file = attrs['document']
+        initial_bytes = file.read(2048)
+        file.seek(0)  # reset pointer for further processing
+        detected_mime = magic.from_buffer(initial_bytes, mime=True)
+
+        mime_map = {
+            "text/plain": Resource.DocumentTypeChoices.TXT,
+            "application/pdf": Resource.DocumentTypeChoices.PDF,
+        }
+        if detected_mime not in mime_map:
+            raise serializers.ValidationError({
+                'document': f'Unsupported file type: {detected_mime}. Only .txt and .pdf allowed.'
+            })
+
+        # Override document_type based on actual file content
+        attrs['document_type'] = mime_map[detected_mime]
+        return attrs
 
    
 class MessageSerializer(serializers.ModelSerializer):

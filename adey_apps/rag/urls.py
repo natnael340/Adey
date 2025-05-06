@@ -18,7 +18,7 @@ urlpatterns = [
     path("<str:chat_id>/messages/", MessageListCreateViewSet.as_view(), name="message-list-create"),
     path("chat/", ChatCreateAPIView.as_view(), name="chat-create"),
     path("chat/<slug:slug>/", ChatUpdateAPIView.as_view(), name="chat-update"),
-    path("chat/<slug:slug>/build", ChatBotBuildApiView.as_view(), name="chat-bot-build"),
+    path("chat/<slug:chat_slug>/build", ChatBotBuildApiView.as_view(), name="chat-bot-build"),
     re_path(r"^chat_bot/(?P<identifier>[0-9a-f-]+)/$", ChatBotApiView.as_view(), name="chat-bot"),
     path("dashboard/", ChatBotAnalytics.as_view(), name="dashboard"),
 ]

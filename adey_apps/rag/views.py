@@ -1,4 +1,5 @@
 from uuid import uuid4
+import os
 
 from django.utils import timezone
 from django.http import Http404
@@ -7,6 +8,7 @@ from django.utils.encoding import force_str
 from django.db.models import Count
 
 from langchain_community.vectorstores import PGVector
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -17,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from adey_apps.rag.utils import URLTextLoader
+from adey_apps.rag.utils import URLTextLoader, URLPdfLoader
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
@@ -162,19 +164,23 @@ class ChatBotApiView(RetrieveAPIView):
         return response
 
 
-class ChatBotBuildApiView(APIView):
+class ChatBotBuildApiView(ChatMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        chat_slug = kwargs.get("slug")
-        user = request.user
-
         try:
-            chat = Chat.objects.get(user=user, slug=chat_slug)
-            resources = chat.resource_set.all()
+            resources = request.chat.resource_set.all()
             documents = []
-            for resource in resources:
-                loader = URLTextLoader(resource.document.url)
+            
+            for resource in resources:    
+                if resource.document_type == Resource.DocumentTypeChoices.PDF:
+                    if settings.ENVIRONMENT == "production":
+                        loader = URLPdfLoader(resource.document.url)
+                    loader = PyPDFLoader(resource.document.path)
+                else:
+                    if settings.ENVIRONMENT == "production":
+                        loader = URLTextLoader(resource.document.url)
+                    loader = TextLoader(resource.document.path)
                 documents.extend(loader.load())
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             chunks = text_splitter.split_documents(documents)
@@ -182,15 +188,15 @@ class ChatBotBuildApiView(APIView):
             PGVector.from_documents(
                 embedding=embedding,
                 documents=chunks,
-                collection_name=force_str(chat.identifier),
+                collection_name=force_str(request.chat.identifier),
                 connection_string=settings.PG_VECTOR_DB_URL,
             )
-            chat.status = "finished"
-            chat.save()
+            request.chat.status = "finished"
+            request.chat.save()
         except Chat.DoesNotExist:
             return Response({"success": False, "message": "Chat does not exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print(e.__str__())
+            print(e)
             return Response({"success": False, "message": "Server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response({"success": True}, status=status.HTTP_200_OK)

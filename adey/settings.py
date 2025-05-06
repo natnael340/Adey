@@ -32,6 +32,8 @@ SECRET_KEY = env.str("DJANGO_SECRET_KEY", "djangosimplesecreatkey")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", True)
 
+ENVIRONMENT = env.str("ENVIRONMENT", "development")
+
 ALLOWED_HOSTS = [env.str("ALLOWED_HOSTS", "*")]
 
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", "")
