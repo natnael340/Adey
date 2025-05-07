@@ -11,7 +11,7 @@ import { Settings2, Cog } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 const ChatDetail = () => {
-  let { api, bot, identifier, setBot } = useContext(Context);
+  let { api, bot, identifier, setBot, toggleFormOpen } = useContext(Context);
 
   const [chatForm, setChatForm] = useState<ChatFormType>({
     name: "",
@@ -76,10 +76,10 @@ const ChatDetail = () => {
       setLoading(false);
     }
   };
-  const UpdateChatForm = async () => {
+  const UpdateChatForm = async (data: ChatFormType) => {
     if (api) {
       try {
-        const data = await api.update_chatbot(identifier, chatForm, _chatForm);
+        const _data = await api.update_chatbot(identifier, data, chatForm);
         await fetchChatBot(api);
       } catch (error) {
         console.error(error);
@@ -105,10 +105,7 @@ const ChatDetail = () => {
         <ChatForm
           CreateChatBot={UpdateChatForm}
           chatForm={chatForm}
-          _chatForm={_chatForm}
-          openModal={openModal}
-          setChatForm={setChatForm}
-          setOpenModal={setOpenModal}
+          toggleFormOpen={toggleFormOpen}
           edit={true}
         />
         <div className="flex flex-row justify-between items-center">

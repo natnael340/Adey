@@ -5,6 +5,7 @@ import React, { useContext, useState } from "react";
 import ChatForm from "../components/ChatForm";
 import { Context } from "./ChatContext";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import ChatAddToggle from "./ChatAddToggle";
 
 function Form() {
   let { setBotAdded, api, formOpen, toggleFormOpen } = useContext(Context);
@@ -19,11 +20,11 @@ function Form() {
     business_name: "",
     allowed_urls: [],
   });
-  const [_chatForm, _setChatForm] = useState<ChatFormType>({ ...chatForm });
-  const CreateChatBot = async () => {
+  const CreateChatBot = async (data: ChatFormType) => {
     if (api) {
       try {
-        const data = await api.create_chatbot(chatForm);
+        await api.create_chatbot(data);
+
         setBotAdded(true);
         toggleFormOpen();
       } catch (error) {
@@ -32,16 +33,17 @@ function Form() {
     }
   };
   return (
-    <div>
+    <Dialog open={formOpen} onOpenChange={toggleFormOpen}>
       <ChatForm
         CreateChatBot={CreateChatBot}
         chatForm={chatForm}
-        _chatForm={_chatForm}
-        openModal={formOpen}
-        setChatForm={setChatForm}
-        setOpenModal={(value) => toggleFormOpen()}
+        toggleFormOpen={toggleFormOpen}
       />
-    </div>
+      <div className="flex flex-row justify-between w-full items-center mb-10">
+        <h2 className="text-xl text-[#15192C] font-medium">Chat Bots</h2>
+        <ChatAddToggle />
+      </div>
+    </Dialog>
   );
 }
 
