@@ -7,17 +7,27 @@ type PropType = {
   activeList: {
     home?: boolean;
     about?: boolean;
+    features?: boolean;
   };
   set_session?: (session: any) => void;
+  absolute?: boolean;
 };
 
-const Header = async ({ activeList, set_session }: PropType) => {
+const Header = async ({
+  activeList,
+  set_session,
+  absolute = false,
+}: PropType) => {
   const session = await getServerSession(authOptions);
   if (set_session && session) {
     set_session(session);
   }
   return (
-    <div className="flex flex-row w-full items-center justify-between">
+    <div
+      className={`flex flex-row w-screen items-center justify-between px-16 py-5 ${
+        absolute ? "absolute z-50 bg-transparent" : "bg-white shadow-lg"
+      }`}
+    >
       <a
         role="button"
         href="/"
@@ -35,9 +45,29 @@ const Header = async ({ activeList, set_session }: PropType) => {
         </span>
       </a>
       <div className="flex flex-row items-center justify-center gap-10">
-        <a role="button" href="/" className="text-lg relative text-[#15192C]">
+        <a
+          role="button"
+          href="/"
+          className={`text-lg relative ${
+            activeList.home ? "text-[#15192C]" : "text-[#45464B]"
+          }`}
+        >
           Home
-          <div className="absolute w-10 bg-[#15192C] h-[0.5px] -bottom-1 left-1/2 -translate-x-1/2"></div>
+          {activeList.home && (
+            <div className="absolute w-10 bg-[#15192C] h-[0.5px] -bottom-1 left-1/2 -translate-x-1/2"></div>
+          )}
+        </a>
+        <a
+          role="button"
+          href="/features"
+          className={`text-lg relative ${
+            activeList.features ? "text-[#15192C]" : "text-[#45464B]"
+          }`}
+        >
+          Features
+          {activeList.features && (
+            <div className="absolute w-10 bg-[#15192C] h-[0.5px] -bottom-1 left-1/2 -translate-x-1/2"></div>
+          )}
         </a>
         {session ? (
           <a role="button" href="/dashboard" className="text-lg text-[#45464B]">
