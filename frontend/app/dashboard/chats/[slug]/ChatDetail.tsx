@@ -34,7 +34,6 @@ const ChatDetail = () => {
     allowed_urls: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [chatHidden, setChatHidden] = useState<boolean>(true);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const initiateChatBotForm = (data: ChatType) => {
     const form = {
