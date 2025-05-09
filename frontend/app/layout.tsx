@@ -46,6 +46,7 @@ export default function RootLayout({
         )}
       >
         <AuthProvider>{children}</AuthProvider>
+
         <script
           type="module"
           crossOrigin="anonymous"

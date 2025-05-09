@@ -47,7 +47,7 @@ const chatbots = ({ initialData }: ParamType) => {
       ) : (
         <></>
       )}
-      <div className="grid md:grid-cols-3 gap-x-5 sm:grid-cols-1 gap-y-5">
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-2 sm:grid-cols-1 lg:grid-cols-3">
         {chats.map((chat, idx) => (
           <ChatCard
             key={chat.slug}

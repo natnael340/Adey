@@ -21,10 +21,10 @@ const ChatCard = ({
 }: PropTypes) => {
   return (
     <a
-      className="shadow-xl flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-5 min-w-72"
+      className="shadow-lg flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-6 justify-between hover:shadow-2xl transition-shadow duration-150"
       href={`chats/${slug}`}
     >
-      <div className="flex flex-col justify-between">
+      <div className="flex flex-col justify-between w-full">
         <div>
           <div className="flex flex-row items-center space-x-2 mb-4">
             <div>
@@ -44,11 +44,11 @@ const ChatCard = ({
               </span>
             </div>
           </div>
-          <p className="text-sm text-gray-400 leading-none my-2 text-ellipsis line-clamp-3">
+          <p className="text-sm text-gray-400 my-2 text-ellipsis line-clamp-3 overflow-hidden">
             {description}
           </p>
         </div>
-        <div className="flex flex-row gap-x-2 mt-5">
+        <div className="flex flex-row gap-2 flex-wrap">
           <div className="flex rounded-full flex-row gap-x-2 items-center bg-[#EDD447]">
             <p className="pl-3 text-sm text-[#59595B]">Resources</p>
             <div className="rounded-full text-sm w-7 h-7 flex items-center justify-center text-white bg-[#C3A811]">

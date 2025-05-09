@@ -10,8 +10,8 @@ export default async function Home() {
   const { data: plan } = await api.get<PlanType[]>("plans/");
   return (
     <main className="min-h-screen">
+      <Header activeList={{ home: true }} absolute />
       <section className="home h-screen w-full flex flex-col relative py-5 px-32 bg-gradient-to-b from-[#FFD53D] to-[#ECECEE]">
-        <Header activeList={{ home: true }} />
         <div className="container flex-1 flex justify-center items-center ">
           <div className="text-center space-y-3">
             <h1 className="text-6xl font-bold">
@@ -122,9 +122,8 @@ export default async function Home() {
         </div>
         <Pricing data={plan} />
       </section>
-      <section className="mt-10">
-        <Footer />
-      </section>
+
+      <Footer />
     </main>
   );
 }

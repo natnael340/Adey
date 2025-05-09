@@ -3,6 +3,7 @@
 import { ResourceFormType } from "@/app/types/types";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -30,10 +31,10 @@ const ResourceForm = ({
 }: PropTypes) => {
   const [canSave, setCanSave] = useState(false);
   useEffect(() => {
-    if (edit && form.name) {
+    if ((edit && form.name) || (form.name && form.document)) {
       setCanSave(true);
-    } else if (form.document && form.name) {
-      setCanSave(true);
+    } else {
+      setCanSave(false);
     }
   }, [form]);
   // @ts-ignore
@@ -78,9 +79,11 @@ const ResourceForm = ({
         />
       </div>
       <DialogFooter>
-        <Button disabled={!canSave} onClick={() => saveChanges(edit)}>
-          {edit ? "Update" : "Create"} resource
-        </Button>
+        <DialogClose asChild>
+          <Button disabled={!canSave} onClick={() => saveChanges(edit)}>
+            {edit ? "Update" : "Create"} resource
+          </Button>
+        </DialogClose>
       </DialogFooter>
     </DialogContent>
   );

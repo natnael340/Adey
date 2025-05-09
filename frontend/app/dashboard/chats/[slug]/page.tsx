@@ -9,6 +9,7 @@ import AllowedURLList from "./AllowedURLList";
 import ChatDetailContext from "./ChatDetailContext";
 import ChatDetail from "./ChatDetail";
 import { authToken } from "@/app/components/protected_api";
+import Tools from "./Tools";
 
 type PropType = {
   params: {
@@ -77,8 +78,11 @@ const page = async ({ params: { slug } }: PropType) => {
               attribute points to the correct location of the JavaScript file.
             </p>
           </div>
+
           <AllowedURLList />
-          <Resources initialData={resources.results} />
+          <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
+            <Tools initialData={resources.results} />
+          </div>
           {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : <></>}
         </div>
       </ChatDetailContext>
