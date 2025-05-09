@@ -28,18 +28,21 @@ const TOOLS = [
     label: "RAG",
     description: "Retrieval-Augmented Generation",
     available: true,
+    added: false,
   },
   {
     key: "ec3873f3-d9da-4438-b0d8-aa7baa9b0e9f",
     label: "Appointment Scheduler",
     description: "Manage your calendar integrations",
     available: false,
+    added: false,
   },
   {
     key: "bcbdc1d9-a6d8-4c77-9d86-c9d6c926a9f6",
     label: "Retriever",
     description: "Corpus retrieval service",
     available: false,
+    added: false,
   },
 ];
 
@@ -144,11 +147,7 @@ function Tools({ initialData }: ParamType) {
                   }`}
                   disabled={!tool.available}
                 >
-                  {tool.available
-                    ? `+ Add ${tool.label}`
-                    : tool.available
-                    ? `${tool.label} Added`
-                    : "Upcoming"}
+                  {tool.available ? `+ Add ${tool.label}` : "Upcoming"}
                 </button>
               </div>
             ))}

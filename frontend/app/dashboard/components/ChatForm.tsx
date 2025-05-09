@@ -76,29 +76,6 @@ const ChatForm = ({
     });
   };
 
-  // const handleImageUploadClick = () => {
-  //   if (fileInputRef.current) {
-  //     fileInputRef.current.click();
-  //   }
-  // };
-  // const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setChatForm({
-  //         ...chatForm,
-  //         assistant_picture_data: reader.result as string,
-  //       });
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-  // useEffect(() => {
-  //   const { status, data } = formUpdated(chatForm, _chatForm);
-
-  //   if (status !== canSave) setCanSave(status);
-  // }, [chatForm]);
   return (
     <DialogContent className="max-w-xl p-0 overflow-hidden">
       <motion.div
@@ -149,7 +126,6 @@ const ChatForm = ({
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = () => {
-                  // @ts-ignore
                   setValue("avatar", reader.result as string);
                 };
                 reader.readAsDataURL(file);
