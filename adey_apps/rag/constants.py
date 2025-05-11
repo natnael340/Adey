@@ -7,6 +7,7 @@ WIDGET_PREFERENCE_SCHEMA = {
             "properties": {
                 "headerBackgroundColor": {"type": "string"},
                 "headerTitleColor": {"type": "string"},
+                "headerSubTitleColor": {"type": "string"},
                 "userChatColor": {"type": "string"},
                 "assistantChatColor": {"type": "string"},
                 "chatBackgroundColor": {"type": "string"},
@@ -16,10 +17,12 @@ WIDGET_PREFERENCE_SCHEMA = {
                 "inputPlaceholderText": {"type": "string"},
                 "inputPlaceholderTextColor": {"type": "string"},
                 "inputTextColor": {"type": "string"},
+                "inputButtonColor": {"type": "string"}
             },
             "required": [
                 "headerBackgroundColor",
                 "headerTitleColor",
+                "headerSubTitleColor",
                 "userChatColor",
                 "assistantChatColor",
                 "chatBackgroundColor",
@@ -28,7 +31,8 @@ WIDGET_PREFERENCE_SCHEMA = {
                 "inputBackgroundColor",
                 "inputPlaceholderText",
                 "inputPlaceholderTextColor",
-                "inputTextColor"
+                "inputTextColor",
+                "inputButtonColor",
             ]
         },
         "widget": {

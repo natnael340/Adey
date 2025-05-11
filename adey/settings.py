@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
+    "prettyjson",
 ]
 CELERY_RESULT_BACKEND = 'django-db'
 SITE_ID = 1

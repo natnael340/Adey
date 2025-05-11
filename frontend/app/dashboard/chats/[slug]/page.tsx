@@ -10,6 +10,7 @@ import ChatDetailContext from "./ChatDetailContext";
 import ChatDetail from "./ChatDetail";
 import { authToken } from "@/app/components/protected_api";
 import Tools from "./Tools";
+import Preferences from "./Preferences";
 
 type PropType = {
   params: {
@@ -21,7 +22,7 @@ const page = async ({ params: { slug } }: PropType) => {
   const token = await authToken();
   const api = new Api(token);
   const chat = await api.get_chatbot(slug);
-  const resources = await api.get_resources(slug);
+  const preferences = await api.get_preferences();
 
   return (
     <Layout page="chatbots">
@@ -83,6 +84,7 @@ const page = async ({ params: { slug } }: PropType) => {
           <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
             <Tools initialData={chat.resources} tools={chat.tools} />
           </div>
+          <Preferences preferences={preferences} />
           {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : <></>}
         </div>
       </ChatDetailContext>

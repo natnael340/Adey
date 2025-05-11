@@ -9,6 +9,7 @@ import {
   ResourceDataTypeWithPagination,
   ResourceFormType,
   GenericResponseType,
+  ThemeType,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -76,6 +77,21 @@ class Api {
       `rag/chat/${slug}/`,
       req_data
     );
+    return data;
+  }
+  async get_preferences() {
+    const { data } = await this.axios.get<ThemeType[]>(
+      "rag/widget/preferences/"
+    );
+
+    return data;
+  }
+
+  async set_preference(chat_slug: string, identifier: string) {
+    const { data } = await this.axios.post<ThemeType[]>(
+      `rag/chat/${chat_slug}/preference/${identifier}/`
+    );
+
     return data;
   }
   async create_resource(chat_slug: string, resource_form: ResourceFormType) {

@@ -1,6 +1,10 @@
 from django.contrib import admin
-from adey_apps.rag.models import Resource, Chat, Message, AgentTool
-# Register your models here.
+from django.db. models import JSONField
+
+from prettyjson import PrettyJSONWidget
+from adey_apps.rag.models import Resource, Chat, Message, AgentTool, WidgetPreference
+
+
 
 @admin.register(Resource)
 class ResourceAdmin(admin.ModelAdmin):
@@ -20,3 +24,11 @@ class MessageAdmin(admin.ModelAdmin):
 @admin.register(AgentTool)
 class AgentToolAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "tool_path")
+
+
+@admin.register(WidgetPreference)
+class WidgetPreferenceAdmin(admin.ModelAdmin):
+    list_display = ("name", "identifier")
+    formfield_overrides = {
+        JSONField: {"widget": PrettyJSONWidget}
+    }

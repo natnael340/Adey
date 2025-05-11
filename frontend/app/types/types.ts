@@ -41,6 +41,7 @@ export type ChatDetailType = {
   allowed_urls: string[] | [];
   status: string;
   tools: ToolType[] | [];
+  preference: ThemeType | null;
 };
 
 export type ChatFormType = {
@@ -179,4 +180,33 @@ export type PaypalOptionsType = {
   dataSdkIntegrationSource: string;
   vault: string;
   intent: string;
+};
+
+export type PreferenceType = {
+  chatBox: {
+    headerBackgroundColor: string;
+    headerTitleColor: string;
+    headerSubTitleColor: string;
+    userChatColor: string;
+    assistantChatColor: string;
+    chatBackgroundColor: string;
+    userChatTextColor: string;
+    assistantChatTextColor: string;
+    inputBackgroundColor: string;
+    inputPlaceholderText: string;
+    inputPlaceholderTextColor: string;
+    inputTextColor: string;
+    inputButtonColor: string;
+  };
+  widget: {
+    widgetBackgroundType: "solid" | "gradient";
+    widgetIconColor: string;
+    widgetBackground: string;
+  };
+};
+
+export type ThemeType = {
+  identifier: string;
+  name: string;
+  preferences: PreferenceType;
 };

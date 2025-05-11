@@ -21,7 +21,6 @@ import ResourceForm from "../../components/ResourceForm";
 import { Context } from "./ChatDetailContext";
 import { ResourceFormType, ResourceType, ToolType } from "@/app/types/types";
 import Api from "@/app/components/Api";
-import { keyframes } from "framer-motion";
 
 const TOOLS = [
   {
