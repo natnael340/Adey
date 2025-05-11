@@ -56,8 +56,8 @@ class Agent:
 
     def get_tools(self):
         tools = []
+        module = importlib.import_module(settings.AGENT_TOOL_PATH)
         for agent_tool in self.chat.tools.all().filter(is_active=True):
-            module = importlib.import_module(settings.AGENT_TOOL_PATH)
             tool_function = getattr(module, agent_tool.tool_path)
             tools.append(tool_function(self.chat, agent_tool))
                        
