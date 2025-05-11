@@ -41,7 +41,7 @@ class Agent:
             "use the tool function to retrieve the knowledge base\n\n"
             "Important: All you know about is the retrieved information from the tool."
         )
-        
+
         self.prompt = PromptTemplate(
             template=PROMPT_TEMPLATE, 
             input_variables=["context", "company_name", "assistant_name"]
@@ -60,18 +60,7 @@ class Agent:
             module = importlib.import_module(settings.AGENT_TOOL_PATH)
             tool_function = getattr(module, agent_tool.tool_path)
             tools.append(tool_function(self.chat, agent_tool))
-           
-        # vectorstore = self.get_db_from_collection()
-        
-        # @tool
-        # def lookup_context(keyword: str) -> str:
-        #     """Retrieve information related to a query."""
-        #     result = vectorstore.similarity_search(keyword, k=3)
-        #     if result:
-        #         return '\n'.join([res.page_content for res in result])
-        #     else:
-        #         return "No relevant context found for the provided keyword."
-            
+                       
         return tools
 
 

@@ -136,6 +136,18 @@ function Tools({ initialData, tools: agent_tools }: ParamType) {
       }
     }
   };
+  async function removeTool(slug: string): Promise<void> {
+    if (api) {
+      const newTools = tools.filter((tool) => tool.slug !== slug);
+      setTools(newTools);
+      try {
+        await api.remove_tool(identifier, slug);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
   return (
     <Dialog onOpenChange={onFormClose}>
       <ResourceForm
@@ -176,8 +188,17 @@ function Tools({ initialData, tools: agent_tools }: ParamType) {
           <h3 className="text-lg font-semibold mb-4">Tools</h3>
           <div>
             {tools.map((tool) => (
-              <Card className="w-full" key={tool.slug}>
+              <Card className="w-full relative" key={tool.slug}>
                 <CardHeader>
+                  <div className="absolute top-8 right-5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeTool(tool.slug)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
                   <CardTitle>{tool.name}</CardTitle>
                   <CardDescription>
                     {resources.length} Resources

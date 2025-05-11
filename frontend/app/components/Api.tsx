@@ -53,6 +53,12 @@ class Api {
     );
     return data;
   }
+  async remove_tool(chat_slug: string, tool: string) {
+    const { data } = await this.axios.delete<GenericResponseType>(
+      `rag/chat/${chat_slug}/tools/${tool}`
+    );
+    return data;
+  }
   async update_chatbot(
     slug: string,
     chatForm: ChatFormType,

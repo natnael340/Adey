@@ -252,3 +252,22 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             return Response({"success": True, "message": "Tool added successfully."}, status=status.HTTP_200_OK)
         else:
             return Response({"success": False, "message": "Tool already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        chat = request.chat
+        slug = kwargs.get("slug")
+
+        tool = get_object_or_404(AgentTool, slug=slug)
+        chat.tools.remove(tool)
+        chat.save()
+
+        if tool.tool_type == AgentTool.ToolTypeChoices.RAG:
+            # Avoid bulk_delete to ensure post_delete signals are sent
+            [resource.delete() for resource in Resource.objects.filter(chat=chat)]
+            PGVector(
+                collection_name=force_str(chat.identifier),
+                connection_string=settings.PG_VECTOR_DB_URL,
+                embedding_function=OpenAIEmbeddings()
+            ).delete_collection()
+        
+        return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)
