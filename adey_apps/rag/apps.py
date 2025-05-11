@@ -6,4 +6,4 @@ class RagConfig(AppConfig):
     name = 'adey_apps.rag'
 
     def ready(self) -> None:
-        from adey_apps.rag import handlers
+        from adey_apps.rag import handlers, signals

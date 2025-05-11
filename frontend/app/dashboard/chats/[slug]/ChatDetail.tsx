@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "./ChatDetailContext";
-import { ChatFormType, ChatType } from "@/app/types/types";
+import { ChatFormType, ChatType, ChatDetailType } from "@/app/types/types";
 import ChatForm from "../../components/ChatForm";
 import Api from "@/app/components/Api";
 import Image from "next/image";
@@ -12,7 +12,6 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 const ChatDetail = () => {
   let { api, bot, identifier, setBot, toggleFormOpen } = useContext(Context);
-
   const [chatForm, setChatForm] = useState<ChatFormType>({
     name: "",
     assistant_picture_data: null,
@@ -35,7 +34,7 @@ const ChatDetail = () => {
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const initiateChatBotForm = (data: ChatType) => {
+  const initiateChatBotForm = (data: ChatDetailType) => {
     const form = {
       assistant_name: data.assistant_name,
       assistant_characters: data.assistant_characters.map(

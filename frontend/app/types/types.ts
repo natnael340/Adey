@@ -20,12 +20,27 @@ export type ChatType = {
   status: string;
 };
 
+export type ToolType = {
+  name: string;
+  slug: string;
+};
+
 export type ChatDetailType = {
   identifier: string;
   name: string;
   slug: string;
   assistant_name: string;
+  assistant_role: string;
   business_description: string;
+  business_name: string;
+  assistant_characters: {
+    name: string;
+  }[];
+  assistant_picture_url: string;
+  resources: ResourceType[] | [];
+  allowed_urls: string[] | [];
+  status: string;
+  tools: ToolType[] | [];
 };
 
 export type ChatFormType = {

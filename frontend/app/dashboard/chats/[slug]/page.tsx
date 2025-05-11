@@ -81,7 +81,7 @@ const page = async ({ params: { slug } }: PropType) => {
 
           <AllowedURLList />
           <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
-            <Tools initialData={resources.results} />
+            <Tools initialData={chat.resources} tools={chat.tools} />
           </div>
           {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : <></>}
         </div>

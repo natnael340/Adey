@@ -11,13 +11,16 @@ from django.db.models.functions import TruncDate
 from django.db.models import Count
 from django.core.validators import FileExtensionValidator
 
-from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices
+from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool
 from adey_apps.adey_commons.serializers import ManyToManyListField
 
 class AssistantCharacterSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssistantCharacter
         fields = ('name',)
+
+
+
 
 class ChatSerializer(serializers.ModelSerializer):
     identifier = serializers.UUIDField(read_only=True)
@@ -173,6 +176,18 @@ class ResourceSerializer(serializers.ModelSerializer):
         attrs['document_type'] = mime_map[detected_mime]
         return attrs
 
+class ResourceReadSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
+    slug = serializers.SlugField(read_only=True)
+    document = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Resource
+        fields = ('name', 'slug', 'document')
+
+    def get_document(self, instance: Resource):
+        return instance.document.url
+
    
 class MessageSerializer(serializers.ModelSerializer):
     message_type = serializers.CharField(read_only=True)
@@ -265,3 +280,64 @@ class ChatBotSerializer(serializers.Serializer):
                 return request.build_absolute_uri(obj.assistant_picture.url)
             return obj.assistant_picture.url
         return ""
+
+
+class AgentToolSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
+    slug = serializers.SlugField(read_only=True)
+
+    class Meta:
+        model = AgentTool
+        fields = ('name', 'slug')
+
+
+class ChatDetailSerializer(serializers.ModelSerializer):
+    assistant_picture_url = serializers.SerializerMethodField()
+    assistant_characters = AssistantCharacterSerializer(many=True)
+    resources = serializers.SerializerMethodField()
+    tools = AgentToolSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Chat
+        fields = (
+            'identifier', 
+            'name', 
+            'slug', 
+            "business_name",
+            'business_description',
+            'assistant_name',
+            "assistant_role", 
+            "assistant_characters",
+            "assistant_picture_url",
+            "resources",
+            "allowed_urls",
+            "status",
+            "tools",
+        )
+        read_only_fields = (
+            'identifier', 
+            'name', 
+            'slug', 
+            "business_name",
+            'business_description',
+            'assistant_name',
+            "assistant_role", 
+            "assistant_characters",
+            "assistant_picture_url",
+            "resources",
+            "allowed_urls",
+            "status",
+            "tools",
+        )
+
+    def get_assistant_picture_url(self, instance):
+        if instance.assistant_picture:
+            request = self.context.get("request", None)
+            if request:
+                return request.build_absolute_uri(instance.assistant_picture.url)
+            return instance.assistant_picture.url
+
+        return ""
+
+    def get_resources(self, instance):
+        return ResourceReadSerializer(instance.resource_set.all(), many=True).data

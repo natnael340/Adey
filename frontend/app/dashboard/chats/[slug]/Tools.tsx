@@ -16,31 +16,32 @@ import {
 } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Edit2, FileText, Pen, Pencil, Plus, Trash2 } from "lucide-react";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import ResourceForm from "../../components/ResourceForm";
 import { Context } from "./ChatDetailContext";
-import { ResourceFormType, ResourceType } from "@/app/types/types";
+import { ResourceFormType, ResourceType, ToolType } from "@/app/types/types";
 import Api from "@/app/components/Api";
+import { keyframes } from "framer-motion";
 
 const TOOLS = [
   {
-    key: "3bb1fe19-03f1-4e27-aba2-665f90e22343",
+    key: "rag",
     label: "RAG",
     description: "Retrieval-Augmented Generation",
     available: true,
     added: false,
   },
   {
-    key: "ec3873f3-d9da-4438-b0d8-aa7baa9b0e9f",
+    key: "aps",
     label: "Appointment Scheduler",
     description: "Manage your calendar integrations",
     available: false,
     added: false,
   },
   {
-    key: "bcbdc1d9-a6d8-4c77-9d86-c9d6c926a9f6",
-    label: "Retriever",
-    description: "Corpus retrieval service",
+    key: "api",
+    label: "API",
+    description: "Make a call to an external API",
     available: false,
     added: false,
   },
@@ -48,14 +49,16 @@ const TOOLS = [
 
 type ParamType = {
   initialData: ResourceType[];
+  tools: ToolType[];
 };
-function Tools({ initialData }: ParamType) {
+function Tools({ initialData, tools: agent_tools }: ParamType) {
   let { api, identifier } = useContext(Context);
 
   const [resourceForm, setResourceForm] = useState<ResourceFormType>({
     name: "",
     document: "",
   });
+  const [tools, setTools] = useState<ToolType[]>(agent_tools);
   const [resources, setResources] = useState<ResourceType[]>(initialData);
   const [resourceEdit, setResourceEdit] = useState<string>("");
   const [resourceFormModal, setResourceFormModal] = useState(false);
@@ -70,6 +73,13 @@ function Tools({ initialData }: ParamType) {
       console.error(error);
     }
   };
+
+  const toolUsed = useCallback(
+    (slug: string) => {
+      return tools.findIndex((tool) => tool.slug == slug) != -1;
+    },
+    [tools]
+  );
 
   const createResource = async (resource_slug: string) => {
     if (api) {
@@ -116,6 +126,30 @@ function Tools({ initialData }: ParamType) {
       document: "",
     });
   };
+  const addTool = async (slug: string) => {
+    if (api) {
+      try {
+        const newTool = TOOLS.find((tool) => tool.key == slug);
+        if (!newTool) return;
+        await api.add_tool(identifier, slug);
+        setTools([...tools, { slug: slug, name: newTool.label }]);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+  async function removeTool(slug: string): Promise<void> {
+    if (api) {
+      const newTools = tools.filter((tool) => tool.slug !== slug);
+      setTools(newTools);
+      try {
+        await api.remove_tool(identifier, slug);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+
   return (
     <Dialog onOpenChange={onFormClose}>
       <ResourceForm
@@ -141,11 +175,12 @@ function Tools({ initialData }: ParamType) {
                 </div>
                 <button
                   className={`mt-4 px-4 py-2 rounded ${
-                    tool.available
+                    tool.available && !toolUsed(tool.key)
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
-                  disabled={!tool.available}
+                  disabled={!tool.available || toolUsed(tool.key)}
+                  onClick={() => addTool(tool.key)}
                 >
                   {tool.available ? `+ Add ${tool.label}` : "Upcoming"}
                 </button>
@@ -154,68 +189,85 @@ function Tools({ initialData }: ParamType) {
           </div>
           <h3 className="text-lg font-semibold mb-4">Tools</h3>
           <div>
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>RAG</CardTitle>
-                <CardDescription>{resources.length} Resources</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="resources">
-                    <AccordionTrigger>Resources</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2">
-                        {resources.map((resource, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-2 border rounded"
-                          >
-                            <a
-                              href={resource.document}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-medium hover:underline truncate flex space-x-4"
+            {tools.map((tool) => (
+              <Card className="w-full relative" key={tool.slug}>
+                <CardHeader>
+                  <div className="absolute top-8 right-5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeTool(tool.slug)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                  <CardTitle>{tool.name}</CardTitle>
+                  <CardDescription>
+                    {resources.length} Resources
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="resources">
+                      <AccordionTrigger>Resources</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          {resources.map((resource, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 border rounded"
                             >
-                              <FileText className="h-4 w-4 mr-1 text-gray-400" />
-                              {resource.name}
-                            </a>
-                            <div className="flex space-x-2">
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    popUpEditResourceForm(
-                                      resource.slug,
-                                      resource.name
-                                    )
-                                  }
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeResource(resource.slug)}
+                              <a
+                                href={resource.document}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium hover:underline truncate flex space-x-4"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                                <FileText className="h-4 w-4 mr-1 text-gray-400" />
+                                {resource.name}
+                              </a>
+                              <div className="flex space-x-2">
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      popUpEditResourceForm(
+                                        resource.slug,
+                                        resource.name
+                                      )
+                                    }
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => removeResource(resource.slug)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
 
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="mt-2">
-                            <Plus className="h-4 w-4 mr-1" /> Add Document
-                          </Button>
-                        </DialogTrigger>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </CardContent>
-            </Card>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                            >
+                              <Plus className="h-4 w-4 mr-1" /> Add Document
+                            </Button>
+                          </DialogTrigger>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
       </div>

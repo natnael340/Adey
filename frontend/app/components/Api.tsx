@@ -40,11 +40,23 @@ class Api {
     return data;
   }
   async get_chatbot(slug: string) {
-    const { data } = await this.axios.get<ChatType>(`rag/chats/${slug}`);
+    const { data } = await this.axios.get<ChatDetailType>(`rag/chats/${slug}`);
     return data;
   }
   async create_chatbot(chatForm: ChatFormType) {
     const { data } = await this.axios.post<ChatFormType>("rag/chat/", chatForm);
+    return data;
+  }
+  async add_tool(chat_slug: string, tool: string) {
+    const { data } = await this.axios.post<GenericResponseType>(
+      `rag/chat/${chat_slug}/tools/${tool}`
+    );
+    return data;
+  }
+  async remove_tool(chat_slug: string, tool: string) {
+    const { data } = await this.axios.delete<GenericResponseType>(
+      `rag/chat/${chat_slug}/tools/${tool}`
+    );
     return data;
   }
   async update_chatbot(

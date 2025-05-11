@@ -1,7 +1,7 @@
 "use client";
 
 import Api from "@/app/components/Api";
-import { ChatType } from "@/app/types/types";
+import { ChatDetailType } from "@/app/types/types";
 import React, { useEffect, useState, createContext } from "react";
 
 export const Context = createContext<{
@@ -13,8 +13,8 @@ export const Context = createContext<{
   allowedUrls: string[];
   setAllowedUrls: (value: string[]) => void;
   identifier: string;
-  bot: ChatType;
-  setBot: (value: ChatType) => void;
+  bot: ChatDetailType;
+  setBot: (value: ChatDetailType) => void;
 }>({
   botChanged: false,
   setBotChanged: (value) => {},
@@ -32,7 +32,7 @@ type ParamType = {
   children: React.ReactElement | React.ReactElement[];
   token: string;
   identifier: string;
-  bot: ChatType;
+  bot: ChatDetailType;
 };
 const ChatDetailContext = ({
   children,
@@ -43,7 +43,7 @@ const ChatDetailContext = ({
   const [botChanged, setBotChanged] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [allowedUrls, setAllowedUrls] = useState<string[]>([]);
-  const [bot, setBot] = useState<ChatType>(_bot);
+  const [bot, setBot] = useState<ChatDetailType>(_bot);
   const api = new Api(token);
 
   const toggleFormOpen = () => {
