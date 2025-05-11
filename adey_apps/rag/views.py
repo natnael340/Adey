@@ -241,7 +241,7 @@ class ChatBotAnalytics(APIView):
 class ChatToolsAddAPIView(ChatMixin, APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         chat = request.chat
         slug = kwargs.get("slug")
 

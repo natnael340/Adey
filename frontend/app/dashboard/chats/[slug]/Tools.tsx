@@ -129,8 +129,10 @@ function Tools({ initialData, tools: agent_tools }: ParamType) {
   const addTool = async (slug: string) => {
     if (api) {
       try {
-        const data = await api.add_tool(identifier, slug);
-        console.log(data);
+        const newTool = TOOLS.find((tool) => tool.key == slug);
+        if (!newTool) return;
+        await api.add_tool(identifier, slug);
+        setTools([...tools, { slug: slug, name: newTool.label }]);
       } catch (error) {
         console.error(error);
       }

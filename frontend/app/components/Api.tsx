@@ -48,7 +48,7 @@ class Api {
     return data;
   }
   async add_tool(chat_slug: string, tool: string) {
-    const { data } = await this.axios.get<GenericResponseType>(
+    const { data } = await this.axios.post<GenericResponseType>(
       `rag/chat/${chat_slug}/tools/${tool}`
     );
     return data;
