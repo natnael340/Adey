@@ -35,9 +35,10 @@ from adey_apps.rag.serializers import (
     MessageAnalyticsSerializer,
     ChatBotAnalyticsSerializer,
     ChatDetailSerializer,
+    WidgetPreferenceSerializer
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices, AgentTool
+from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices, AgentTool, WidgetPreference
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
@@ -272,3 +273,28 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             ).delete_collection()
         
         return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)
+
+class WidgetPreferenceViewSet(ReadOnlyModelViewSet):
+    serializer_class = WidgetPreferenceSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_field = "identifier"
+    lookup_url_kwarg = "identifier"
+
+    def get_queryset(self):
+        return WidgetPreference.objects.filter(is_public=True)
+
+
+class ChatPreferenceAPIView(ChatMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        chat = request.chat
+        identifier = kwargs.get("identifier")
+        preference = get_object_or_404(WidgetPreference, identifier=identifier)
+        if preference.is_public:
+            chat.widget_preference = preference
+            chat.save()
+
+            return Response({"success": True, "message": "Widget Preference has been set."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False, "message": "Preference not found."}, status=status.HTTP_404_NOT_FOUND)

@@ -11,7 +11,7 @@ from django.db.models.functions import TruncDate
 from django.db.models import Count
 from django.core.validators import FileExtensionValidator
 
-from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool
+from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool, WidgetPreference
 from adey_apps.adey_commons.serializers import ManyToManyListField
 
 class AssistantCharacterSerializer(serializers.ModelSerializer):
@@ -291,11 +291,21 @@ class AgentToolSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+class WidgetPreferenceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WidgetPreference
+        fields = ("identifier", "name", "preferences")
+        read_only_fields = ("identifier", "name", "preferences")
+
+
+
 class ChatDetailSerializer(serializers.ModelSerializer):
     assistant_picture_url = serializers.SerializerMethodField()
     assistant_characters = AssistantCharacterSerializer(many=True)
     resources = serializers.SerializerMethodField()
     tools = AgentToolSerializer(many=True, read_only=True)
+    preference = WidgetPreferenceSerializer(source="widget_preference", read_only=True)
 
     class Meta:
         model = Chat
@@ -313,6 +323,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
             "allowed_urls",
             "status",
             "tools",
+            "preference",
         )
         read_only_fields = (
             'identifier', 
@@ -328,6 +339,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
             "allowed_urls",
             "status",
             "tools",
+            "preference",
         )
 
     def get_assistant_picture_url(self, instance):
