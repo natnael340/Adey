@@ -157,6 +157,7 @@ class AgentTool(BaseModel):
             raise ValidationError("Tool path is required when the tool is active.")
 
     def save(self, **kwargs) -> None:
+        self._check_tool_path()
         if not self.slug:
             self.slug = slugify(self.name)
         return super().save(**kwargs)
