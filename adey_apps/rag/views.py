@@ -6,11 +6,13 @@ from django.http import Http404
 from django.conf import settings
 from django.utils.encoding import force_str
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 
 from langchain_community.vectorstores import PGVector
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
@@ -32,9 +34,10 @@ from adey_apps.rag.serializers import (
     ChatBotSerializer,
     MessageAnalyticsSerializer,
     ChatBotAnalyticsSerializer,
+    ChatDetailSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices
+from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices, AgentTool
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
@@ -44,13 +47,18 @@ from adey_apps.users.serializers import PlanSerializer
 # Create your views here.
 
 class ChatViewSet(ReadOnlyModelViewSet):
-    serializer_class = ChatSerializer
     permission_classes = (IsAuthenticated,)
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         return Chat.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action  == "list":
+            return ChatSerializer
+        else:
+            return ChatDetailSerializer
     
 
 class ChatCreateAPIView(CreateAPIView):
@@ -171,16 +179,18 @@ class ChatBotBuildApiView(ChatMixin, APIView):
         try:
             resources = request.chat.resource_set.all()
             documents = []
-            
+           
             for resource in resources:    
                 if resource.document_type == Resource.DocumentTypeChoices.PDF:
                     if settings.ENVIRONMENT == "production":
                         loader = URLPdfLoader(resource.document.url)
-                    loader = PyPDFLoader(resource.document.path)
+                    else:
+                        loader = PyPDFLoader(resource.document.path)
                 else:
                     if settings.ENVIRONMENT == "production":
                         loader = URLTextLoader(resource.document.url)
-                    loader = TextLoader(resource.document.path)
+                    else:
+                        loader = TextLoader(resource.document.path)
                 documents.extend(loader.load())
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             chunks = text_splitter.split_documents(documents)
@@ -227,3 +237,18 @@ class ChatBotAnalytics(APIView):
                 'session_id'
             ).annotate(count=Count('session_id')).count()
         })
+
+class ChatToolsAddAPIView(ChatMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        chat = request.chat
+        slug = kwargs.get("slug")
+
+        tool = get_object_or_404(AgentTool, slug=slug)
+        if tool not in chat.tools.all():
+            chat.tools.add(tool)
+            chat.save()
+            return Response({"success": True, "message": "Tool added successfully."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False, "message": "Tool already exists."}, status=status.HTTP_400_BAD_REQUEST)

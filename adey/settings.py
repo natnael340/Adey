@@ -22,7 +22,8 @@ env = environ.Env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 if os.getenv("DJANGO_ENV") != "production":
-    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+    # TODO: remove overwrite after https://github.com/microsoft/vscode/issues/248468 fixed
+    env.read_env(os.path.join(BASE_DIR, '.env'), overwrite=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -39,6 +40,8 @@ ALLOWED_HOSTS = [env.str("ALLOWED_HOSTS", "*")]
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", "")
 PG_VECTOR_DB_URL = env.str("PG_VECTOR_DB_URL", "")
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
+
+AGENT_TOOL_PATH = "adey_apps.rag.tools"
 
 # Application definition
 
@@ -88,7 +91,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=list)
 
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"

@@ -8,6 +8,7 @@ import {
   SendHorizonal,
   TriangleAlert,
   PhoneCall,
+  SendHorizontal,
 } from "lucide-react";
 import Message from "./ChatMessage";
 import useWebSocket from "react-use-websocket";
@@ -16,6 +17,40 @@ import { MessageType, ProfileType } from "@/app/types/types";
 
 type PropType = {
   chat_id: string;
+};
+type ConfigType = {
+  headerBackgroundColor: string;
+  headerTitleColor: string;
+  headerSubTitleColor: string;
+  userChatColor: string;
+  assistantChatColor: string;
+  chatBackgroundColor: string;
+  userChatTextColor: string;
+  assistantChatTextColor: string;
+  inputBackgroundColor: string;
+  inputPlaceholderText: string;
+  inputPlaceholderTextColor: string;
+  inputTextColor: string;
+  widgetIconColor: string;
+  widgetBackgroundGradient: string;
+  widgetBackgroundColor?: string;
+};
+const CONFIG: ConfigType = {
+  headerBackgroundColor: "#EDD447",
+  headerTitleColor: "#363636",
+  headerSubTitleColor: "#959595",
+  userChatColor: "#EDD447",
+  assistantChatColor: "#D3D3D3",
+  chatBackgroundColor: "#F8F9FC",
+  userChatTextColor: "#363636",
+  assistantChatTextColor: "#363636",
+  inputBackgroundColor: "#FFFFFF",
+  inputPlaceholderText: "Type your question",
+  inputPlaceholderTextColor: "#959595",
+  inputTextColor: "#363636",
+  widgetIconColor: "#FFA751",
+  widgetBackgroundGradient: "linear-gradient(to bottom, #FFA751, #FFE259)",
+  //widgetBackgroundColor: "#FFA751",
 };
 
 const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
@@ -143,7 +178,10 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             : "hidden"
         }`}
       >
-        <div className="flex flex-row items-center justify-between w-full bg-[#EDD447] px-4 py-2 rounded-t-lg">
+        <div
+          className="flex flex-row items-center justify-between w-full px-4 py-2 rounded-t-lg"
+          style={{ backgroundColor: CONFIG.headerBackgroundColor }}
+        >
           <div className="flex flex-row items-center gap-x-2 py-1">
             {chatProfile.assistant_pic ? (
               <div className="w-10 h-10 relative">
@@ -171,17 +209,20 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             )}
 
             <div className="flex flex-col gap-y-0 justify-center">
-              <h3 className="text-base font-bold  my-0 py-0 capitalize text-[#363636]">
+              <h3
+                className="text-base font-bold  my-0 py-0 capitalize "
+                style={{ color: CONFIG.headerTitleColor }}
+              >
                 {chatProfile.assistant_name}
               </h3>
-              <span className="text-xs text-gray-500 my-0 py-0">
+              <span
+                className="text-xs  my-0 py-0"
+                style={{ color: CONFIG.headerSubTitleColor }}
+              >
                 {online ? "online" : "offline"}
               </span>
             </div>
           </div>
-          <button className="w-5 h-5">
-            <PhoneCall size={22} color="#363636" />
-          </button>
         </div>
         <div
           className="bg-[#F8F9FC] px-5 flex-1 overflow-y-scroll"
@@ -192,14 +233,18 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
               key={`message_${idx}`}
               message={message.message}
               message_type={message.message_type}
-              thinking={false}
+              textColor={
+                message.message_type == AI
+                  ? CONFIG.assistantChatTextColor
+                  : CONFIG.userChatTextColor
+              }
+              backgroundColor={
+                message.message_type == AI
+                  ? CONFIG.assistantChatColor
+                  : CONFIG.userChatColor
+              }
             />
           ))}
-          {thinking ? (
-            <Message message="" message_type={AI} thinking={true} />
-          ) : (
-            <></>
-          )}
         </div>
         {error ? (
           <div className="flex w-full py-5 justify-center items-center bg-[#F8F9FC]">
@@ -208,11 +253,19 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-row items-center bg-white h-12 rounded-b-lg">
+          <div
+            className="flex flex-row items-center h-12 rounded-b-lg"
+            style={{ backgroundColor: CONFIG.inputBackgroundColor }}
+          >
+            <style>{`.inline-placeholder {color: ${CONFIG.inputPlaceholderTextColor}}`}</style>
             <textarea
-              className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full placeholder:text-[#959595]"
+              className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full inline-placeholder"
               name="message"
-              placeholder="Type your question"
+              style={{
+                backgroundColor: CONFIG.inputBackgroundColor,
+                color: CONFIG.inputTextColor,
+              }}
+              placeholder={CONFIG.inputPlaceholderText}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
@@ -225,26 +278,26 @@ const ChatBox = ({ chat_id: CHAT_ID }: PropType) => {
             />
             <button
               onClick={sendMessage}
-              className={` justify-center items-center mr-2 ${
-                message.length > 0 ? "flex" : "hidden "
-              }`}
+              className="justify-center items-center mr-2"
             >
-              <SendHorizonal className={`text-[#EDD447]`} size={28} />
-            </button>
-            <button
-              onClick={sendMessage}
-              className={`justify-center items-center mr-2 ${
-                message.length > 0 ? "hidden" : "flex"
-              }`}
-            >
-              <Mic className="text-[#959595]" size={28} />
+              <SendHorizontal
+                style={{
+                  color: CONFIG.widgetIconColor,
+                  opacity: message.length > 0 ? 1 : 0.2,
+                }}
+                size={28}
+              />
             </button>
           </div>
         )}
       </div>
       <div
-        className="relative bg-gradient-to-b from-[#FFA751] to-[#FFE259] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+        className="relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
         onClick={() => !loading && setShowChatBot(!showChatBot)}
+        style={{
+          background:
+            CONFIG?.widgetBackgroundColor ?? CONFIG.widgetBackgroundGradient,
+        }}
       >
         <div>
           {loading ? (

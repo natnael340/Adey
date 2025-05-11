@@ -1,5 +1,5 @@
 import openai
-
+import importlib
 
 from langchain_core.messages import SystemMessage
 from langchain.tools import tool
@@ -55,18 +55,24 @@ class Agent:
         )
 
     def get_tools(self):
-        vectorstore = self.get_db_from_collection()
+        tools = []
+        for agent_tool in self.chat.tools.all().filter(is_active=True):
+            module = importlib.import_module(settings.AGENT_TOOL_PATH)
+            tool_function = getattr(module, agent_tool.tool_path)
+            tools.append(tool_function(self.chat, agent_tool))
+           
+        # vectorstore = self.get_db_from_collection()
         
-        @tool
-        def lookup_context(keyword: str) -> str:
-            """Retrieve information related to a query."""
-            result = vectorstore.similarity_search(keyword, k=3)
-            if result:
-                return '\n'.join([res.page_content for res in result])
-            else:
-                return "No relevant context found for the provided keyword."
+        # @tool
+        # def lookup_context(keyword: str) -> str:
+        #     """Retrieve information related to a query."""
+        #     result = vectorstore.similarity_search(keyword, k=3)
+        #     if result:
+        #         return '\n'.join([res.page_content for res in result])
+        #     else:
+        #         return "No relevant context found for the provided keyword."
             
-        return [lookup_context]
+        return tools
 
 
     def setup_chain(self, user_session_id: str, new_chat: bool = False):

@@ -1,9 +1,12 @@
 from collections.abc import Iterable
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django.template.defaultfilters import slugify
 from uuid import uuid4
+from jsonschema import validate
 from adey_apps.adey_commons.models import BaseModel
+from adey_apps.rag.constants import WIDGET_PREFERENCE_SCHEMA
 
 # Create your models here.
 class MessageTypeChoices(models.TextChoices):
@@ -76,6 +79,10 @@ class Chat(BaseModel):
     intro_text = models.TextField(default="Hello! How can I assist you today?")
     user = models.ForeignKey(to="users.User", on_delete=models.CASCADE)
     status = models.CharField("Status", max_length=8, choices=StatusChoices.choices, default="prepared")
+    widget_preference = models.ForeignKey(
+        to="rag.WidgetPreference", on_delete=models.SET_NULL, blank=True, null=True
+    )
+    tools = models.ManyToManyField("rag.AgentTool", blank=True)
 
     class Meta:
         constraints = [
@@ -108,4 +115,48 @@ class Message(BaseModel):
     def save(self, **kwargs) -> None:
         if self.message_type == MessageTypeChoices.HUMAN:
             self.seen = True
+        return super().save(**kwargs)
+
+
+class WidgetPreference(BaseModel):
+    identifier = models.UUIDField(
+        "Identifier", unique=True, db_index=True, editable=False, default=uuid4
+    )
+    name = models.CharField("Name", max_length=256)
+    preferences = models.JSONField("Preferences", default=dict)
+    is_public = models.BooleanField("Is Public", default=False)
+    is_default = models.BooleanField("Is Default", default=False)
+
+    def _check_preferences(self):
+        try:
+            validate(instance=self.preferences, schema=WIDGET_PREFERENCE_SCHEMA)
+        except Exception as e:
+            raise ValidationError("Preference validation failed")
+        
+    def save(self, *args, **kwargs) -> None:
+        self._check_preferences()
+
+        super().save(*args, **kwargs)
+
+
+class AgentTool(BaseModel):
+    class ToolTypeChoices(models.TextChoices):
+        RAG = "rag", "Retrieval Augmented Generation"
+        API = "api", "API Call"
+        APS = "aps", "Appointment Scheduler"
+
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=300, blank=True)
+    description = models.TextField(blank=True)
+    tool_type = models.CharField(max_length=3, choices=ToolTypeChoices.choices, default=ToolTypeChoices.RAG)
+    tool_path = models.CharField(max_length=256, blank=True)
+    is_active = models.BooleanField(default=False)
+
+    def _check_tool_path(self):
+        if self.is_active and not self.tool_path:
+            raise ValidationError("Tool path is required when the tool is active.")
+
+    def save(self, **kwargs) -> None:
+        if not self.slug:
+            self.slug = slugify(self.name)
         return super().save(**kwargs)
