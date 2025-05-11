@@ -263,7 +263,8 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
 
         if tool.tool_type == AgentTool.ToolTypeChoices.RAG:
             # Avoid bulk_delete to ensure post_delete signals are sent
-            [resource.delete() for resource in Resource.objects.filter(chat=chat)]
+            for resource in Resource.objects.filter(chat=chat):
+                resource.delete()
             PGVector(
                 collection_name=force_str(chat.identifier),
                 connection_string=settings.PG_VECTOR_DB_URL,
