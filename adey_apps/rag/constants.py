@@ -8,7 +8,7 @@ WIDGET_PREFERENCE_SCHEMA = {
                 "headerBackgroundColor": {"type": "string"},
                 "headerTitleColor": {"type": "string"},
                 "userChatColor": {"type": "string"},
-                "assistantChatColor": {"type": "integer"},
+                "assistantChatColor": {"type": "string"},
                 "chatBackgroundColor": {"type": "string"},
                 "userChatTextColor": {"type": "string"},
                 "assistantChatTextColor": {"type": "string"},
