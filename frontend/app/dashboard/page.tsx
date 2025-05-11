@@ -36,8 +36,8 @@ const Page = async () => {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-5 w-full py-5">
-          <div className="col-span-2 space-y-5">
+        <div className="grid grid-cols-1 gap-5 w-full py-5">
+          <div className="space-y-5">
             <div className="flex flex-row items-center justify-between bg-white px-4 py-6 rounded-lg divide-x">
               <div className="flex flex-row gap-x-3 px-2">
                 <div className="flex justify-center items-center w-12 h-12 rounded-lg bg-[#FFFFF0]">
@@ -201,9 +201,6 @@ const Page = async () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="bg-white px-4 py-6 rounded-lg min-h-[35rem]">
-            <h4 className="text-lg">Frequent Question</h4>
           </div>
         </div>
       </div>
