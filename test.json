@@ -1,0 +1,20 @@
+{
+    "chatBox": {"headerBackgroundColor": "#EDD447",
+    "headerTitleColor": "#363636",
+    "headerSubTitleColor": "#959595",
+    "userChatColor": "#EDD447",
+    "assistantChatColor": "#D3D3D3",
+    "chatBackgroundColor": "#F8F9FC",
+    "userChatTextColor": "#363636",
+    "assistantChatTextColor": "#363636",
+    "inputBackgroundColor": "#FFFFFF",
+    "inputPlaceholderText": "Type your question",
+    "inputPlaceholderTextColor": "#959595",
+    "inputTextColor": "#363636"
+},
+    "widget": {
+        "widgetBackgroundType": "linear",
+        "widgetIconColor": "#FFA751",
+    "widgetBackground": "linear-gradient(to bottom, #FFA751, #FFE259)"
+   }
+  }

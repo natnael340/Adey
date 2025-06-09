@@ -15,6 +15,8 @@ from langgraph.prebuilt import create_react_agent
 from adey_apps.rag.models import Chat
 from django.utils.encoding import force_str
 from django.conf import settings
+from adey_apps.rag.constants import PROMPT_TEMPLATE, PROMPT_TEMPLATE_V2
+from adey_apps.rag.tools import escalate_issue
 
 openai.api_key = settings.OPENAI_API_KEY
 
@@ -23,28 +25,10 @@ class Agent:
     def __init__(self, chat: Chat):
         self.chat = chat
         self.tools = self.get_tools()
-        PROMPT_TEMPLATE = (
-            "Role Definition:\n"
-            "You are a customer support agent for {company_name} called {assistant_name}.\n"
-            "Behavior & Tone:\n"
-            "Act as a knowledgeable, empathetic, and professional representative.\n"
-            "Use clear, concise language and always maintain a friendly tone.\n"
-            "Task Guidelines:\n"
-            "Greet the customer warmly and ask for any missing details if their query is unclear.\n"
-            "Provide accurate and short answers using the company’s knowledge base. At most 2 or 3 sentences\n"
-            "If the query exceeds your scope (or involves complex issues), inform the customer and "
-            "offer to connect them with a human support agent.\n"
-            "If no relevant information is found in the knowledge base, apologize and ask if they have another question.\n\n"
-            "Engagement Strategy:\n"
-            "Always conclude your response with a follow-up question to ensure the customer feels heard"
-            " and to maintain engagement.\n\n"
-            "use the tool function to retrieve the knowledge base\n\n"
-            "Important: All you know about is the retrieved information from the tool."
-        )
 
         self.prompt = PromptTemplate(
-            template=PROMPT_TEMPLATE, 
-            input_variables=["context", "company_name", "assistant_name"]
+            template=PROMPT_TEMPLATE_V2, 
+            input_variables=["company_name", "assistant_name"]
         )
     
     def get_db_from_collection(self):
@@ -60,8 +44,9 @@ class Agent:
         for agent_tool in self.chat.tools.all().filter(is_active=True):
             tool_function = getattr(module, agent_tool.tool_path)
             tools.append(tool_function(self.chat, agent_tool))
-                       
-        return tools
+
+        
+        return tools + [escalate_issue]
 
 
     def setup_chain(self, user_session_id: str, new_chat: bool = False):

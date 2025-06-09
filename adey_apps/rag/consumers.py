@@ -26,9 +26,10 @@ class ChatConsumer(JsonWebsocketConsumer):
         
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
         cookie = headers.get(b"cookie", None)
-        print
+        
         if cookie:
             cookie = key_value_to_dict(cookie.decode("utf-8"))
+            
             if cookie.get("user_session_id"):
                 self.session_id = cookie.get("user_session_id")
             else:
@@ -53,6 +54,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 )
                 self.agent.setup_chain(self.session_id, new_chat=True)
                 self.send_json({
+                    "type": "message",
                     "message_type": MessageTypeChoices.AI,
                     "message": chat.intro_text,
                 })

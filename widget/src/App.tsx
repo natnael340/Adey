@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { IoMdChatbubbles, IoMdClose, IoMdSend } from "react-icons/io";
-import { MdMicNone } from "react-icons/md";
-import { FaPhone } from "react-icons/fa";
+import {
+  IoMdChatbubbles,
+  IoMdClose,
+  IoMdSend,
+  IoMdAlert,
+} from "react-icons/io";
 import Message from "./components/Message";
 import useWebSocket from "react-use-websocket";
 import "./App.css";
-import { MessageType, ProfileType } from "./types";
+import { MessageType, PreferenceType, ProfileType } from "./types";
 
-import { HUMAN, AI } from "./constants";
+import { HUMAN, AI, DEFAULT_CONFIG } from "./constants";
+
 const CHAT_ID: string | null =
   document
     .querySelector("meta[name='adey_chat_id']")
@@ -17,6 +21,7 @@ const App = () => {
     throw new Error("adey_chat_id meta property is not set");
   }
   const [showChatBot, setShowChatBot] = useState<boolean>(false);
+  const [preference, setPreference] = useState<PreferenceType>(DEFAULT_CONFIG);
   const chat_window = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<string>("");
   const [online, setOnline] = useState<boolean>(false);
@@ -27,10 +32,12 @@ const App = () => {
     assistant_name: "",
     assistant_role: "",
   });
-  const [thinking, setThinking] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const { sendJsonMessage } = useWebSocket(
-    `wss://${import.meta.env.VITE_BACKEND_DOMAIN}/rag/${CHAT_ID}/messages/`,
+    `${import.meta.env.VITE_BACKEND_WS_PROTOCOL}://${
+      import.meta.env.VITE_BACKEND_DOMAIN
+    }/rag/${CHAT_ID}/messages/`,
     {
       onOpen: () => {
         setOnline(true);
@@ -40,15 +47,18 @@ const App = () => {
       },
       onMessage: (e) => {
         const data = JSON.parse(e.data);
-        setThinking(false);
-        setMessages([
-          ...messages,
-          {
-            message: data.message,
-            message_type: AI,
-            seen: showChatBot,
-          },
-        ]);
+        if (data.type === "message") {
+          setMessages([
+            ...messages,
+            {
+              message: data.message,
+              message_type: AI,
+              seen: showChatBot,
+            },
+          ]);
+        } else if (data.type === "error") {
+          setError(data.message);
+        }
         if (showChatBot) {
           sendJsonMessage({
             type: "instruction",
@@ -109,8 +119,12 @@ const App = () => {
             assistant_role: data.assistant_role,
             assistant_pic: data.assistant_pic,
           });
+
           setUnseenCount(data.unread_messages_count);
           setMessages(msgs);
+          if (data.preference) {
+            setPreference(data.preference?.preferences);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -132,7 +146,6 @@ const App = () => {
     };
     setMessages([...messages, d]);
     setMessage("");
-    setThinking(true);
   };
 
   if (!loading && chatProfile.assistant_name != "") {
@@ -145,7 +158,12 @@ const App = () => {
               : "hidden"
           }`}
         >
-          <div className="flex flex-row items-center justify-between w-full bg-[#EDD447] px-4 py-2 rounded-t-lg">
+          <div
+            className="flex flex-row items-center justify-between w-full px-4 py-2 rounded-t-lg"
+            style={{
+              backgroundColor: preference.chatBox.headerBackgroundColor,
+            }}
+          >
             <div className="flex flex-row items-center gap-x-2 py-1">
               {chatProfile.assistant_pic ? (
                 <div className="w-10 h-10 relative">
@@ -173,17 +191,20 @@ const App = () => {
               )}
 
               <div className="flex flex-col gap-y-0 justify-center">
-                <h3 className="text-base font-bold  my-0 py-0 capitalize text-[#363636]">
+                <h3
+                  className="text-base font-bold  my-0 py-0 capitalize"
+                  style={{ color: preference.chatBox.headerTitleColor }}
+                >
                   {chatProfile.assistant_name}
                 </h3>
-                <span className="text-xs text-gray-500 my-0 py-0">
+                <span
+                  className="text-xs my-0 py-0"
+                  style={{ color: preference.chatBox.headerSubTitleColor }}
+                >
                   {online ? "online" : "offline"}
                 </span>
               </div>
             </div>
-            <button className="w-5 h-5">
-              <FaPhone size={20} color="#363636" />
-            </button>
           </div>
           <div
             className="bg-[#F8F9FC] px-5 flex-1 overflow-y-scroll"
@@ -194,63 +215,86 @@ const App = () => {
                 key={`message_${idx}`}
                 message={message.message}
                 message_type={message.message_type}
-                thinking={false}
+                textColor={
+                  message.message_type == AI
+                    ? preference.chatBox.assistantChatTextColor
+                    : preference.chatBox.userChatTextColor
+                }
+                backgroundColor={
+                  message.message_type == AI
+                    ? preference.chatBox.assistantChatColor
+                    : preference.chatBox.userChatColor
+                }
               />
             ))}
-            {thinking ? (
-              <Message message="" message_type={AI} thinking={true} />
-            ) : (
-              <></>
-            )}
           </div>
-          <div className="flex flex-row items-center bg-white h-12 rounded-b-lg">
-            <textarea
-              className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full placeholder:text-[#959595]"
-              name="message"
-              placeholder="Type your question"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  sendMessage();
-                }
+          {error ? (
+            <div className="flex w-full py-5 justify-center items-center bg-[#F8F9FC]">
+              <div className="py-2 px-4 rounded-xl bg-red-500 text-white flex flex-row items-center justify-center space-x-2">
+                <IoMdAlert color="#FFFFFF" size={16} /> <span>{error}</span>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex flex-row items-center  h-12 rounded-b-lg"
+              style={{
+                backgroundColor: preference.chatBox.inputBackgroundColor,
               }}
-              aria-multiline
-            />
-            <button
-              onClick={sendMessage}
-              className={` justify-center items-center mr-2 ${
-                message.length > 0 ? "flex" : "hidden "
-              }`}
             >
-              <IoMdSend className={`text-[#EDD447]`} size={26} />
-            </button>
-            <button
-              onClick={sendMessage}
-              className={`justify-center items-center mr-2 ${
-                message.length > 0 ? "hidden" : "flex"
-              }`}
-            >
-              <MdMicNone className="text-[#959595]" size={26} />
-            </button>
-          </div>
+              <style>{`.inline-placeholder {color: ${preference.chatBox.inputPlaceholderTextColor}}`}</style>
+              <textarea
+                className="flex-1 px-3 py-2 resize-none  rounded-bl-lg border-transparent !outline-none focus:border-transparent focus:ring-0 focus:outline-transparent h-full inline-placeholder"
+                name="message"
+                style={{
+                  backgroundColor: preference.chatBox.inputBackgroundColor,
+                  color: preference.chatBox.inputTextColor,
+                }}
+                placeholder={preference.chatBox.inputPlaceholderText}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                aria-multiline
+              />
+              <button
+                onClick={sendMessage}
+                className="justify-center items-center mr-2"
+              >
+                <IoMdSend
+                  style={{
+                    color: preference.chatBox.inputButtonColor,
+                    opacity: message.length > 0 ? 1 : 0.2,
+                  }}
+                  size={26}
+                />
+              </button>
+            </div>
+          )}
         </div>
         <div
-          className="relative bg-gradient-to-b from-[#FFA751] to-[#FFE259] w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
+          className="relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
           onClick={() => setShowChatBot(!showChatBot)}
+          style={
+            preference.widget.widgetBackgroundType == "solid"
+              ? { backgroundColor: preference.widget.widgetBackground }
+              : { background: preference.widget.widgetBackground }
+          }
         >
           <div>
             <IoMdChatbubbles
-              size={30}
-              color="#fff"
+              size={32}
+              color={preference.widget.widgetIconColor}
               className={`transition ease-in-out delay-75 ${
                 showChatBot ? "scale-0 rotate-90 h-0" : ""
               }`}
             />
             <IoMdClose
-              size={30}
-              color="#fff"
+              size={32}
+              color={preference.widget.widgetIconColor}
               className={`transition-transform ease-in-out delay-75 ${
                 showChatBot ? "scale-100 -rotate-90" : "rotate-90 scale-0 h-0"
               }`}
