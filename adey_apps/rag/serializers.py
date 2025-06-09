@@ -254,25 +254,26 @@ class ChatBotSerializer(serializers.Serializer):
     assistant_pic = serializers.SerializerMethodField(read_only=True)
     allowed_urls = serializers.ListField(read_only=True)
     unread_messages_count = serializers.SerializerMethodField(read_only=True)
+    preference = WidgetPreferenceSerializer(source="widget_preference", read_only=True)
 
     class Meta:
         model = Chat
-        fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic', "allowed_urls", "unread_messages_count")
-        read_only_fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic', "allowed_urls", "unread_messages_count")
+        fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic', "allowed_urls", "unread_messages_count", "preference")
+        read_only_fields = ('messages', 'assistant_name', 'assistant_role', 'assistant_pic', "allowed_urls", "unread_messages_count", "preference")
 
     def get_messages(self, obj):
         request = self.context.get('request')
-        
+
         if request:
             user_session_id = request.COOKIES.get("user_session_id", "")
-            
-            messages = obj.message_set.all().filter(session_id=user_session_id)
+
+            messages = obj.message_set.all().filter(session_id=user_session_id).order_by("created")
             return MessageSerializer(instance=messages, many=True).data
         return []
-    
+
     def get_unread_messages_count(self, obj):
         return len(list(filter(lambda message: not message["seen"], self.get_messages(obj))))
-    
+
     def get_assistant_pic(self, obj):
         if obj.assistant_picture:
             request = self.context.get("request", None)
