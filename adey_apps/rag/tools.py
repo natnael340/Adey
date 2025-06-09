@@ -18,9 +18,24 @@ def prepare_rag_tool(chat, agent_tool):
     @tool
     def lookup_context(keyword: str) -> str:
         """
-        Given a keyword, return the top 3 most relevant document passages from the vectorstore.
-        If matches are found, concatenate and return their text. If none, return 
-        “No relevant context found for the provided keyword.”
+        Search your document index for the given keyword and return up to
+        the top 3 most relevant passages as plain text. If no matches are found,
+        returns: "No relevant context found for the provided keyword."
+        :args
+        :keyword: The term or phrase to search for.
+
+        :returns: Either the concatenated top-3 passages, or the no-context message.
+
+        examples:
+        user: can you tell me about xyz?
+        AI: lookup_context("xyz")
+        tool: Xyz is a product we ...
+        AI: Xyz is a product we ...
+
+        user: can you tell me about abc?
+        AI: lookup_context("abc")
+        tool: No relevant context found for the provided keyword.
+        AI: I don't have information on that subject.
         """
         result = vectorstore.similarity_search(keyword, k=3)
         if result:
@@ -29,6 +44,20 @@ def prepare_rag_tool(chat, agent_tool):
             return "No relevant context found for the provided keyword."
         
     return lookup_context
+
+
+def prepare_calendar_tool(char, user):
+    """Prepare the calendar tool for the given chat."""
+    # Here you would implement the logic to prepare the calendar tool, e.g., fetching events or scheduling.
+    
+    @tool
+    def get_calendar_events(date: str) -> str:
+        """Retrieve calendar events for a specific date."""
+        # This is a placeholder implementation.
+        print(f"Fetching calendar events for {date} for user {user}.")
+        return f"Events for {date}: [Event1, Event2, Event3]"
+    
+    return get_calendar_events
 
 @tool
 def escalate_issue(issue: str, customer_name, customer_email) -> str:

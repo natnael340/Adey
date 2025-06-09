@@ -11,6 +11,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 from langchain_community.llms import OpenAI
+from allauth.socialaccount.models import SocialToken
 from django.utils.encoding import force_str
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
@@ -110,3 +111,13 @@ class URLPdfLoader:
         return docs
 
 
+def find_available_slot(date, user):
+    try:
+        token = SocialToken.objects.get(account__user=user, account__provider="google")
+
+        token.token
+
+    except SocialToken.DoesNotExist:
+        # todo: add logger
+        return []
+    
