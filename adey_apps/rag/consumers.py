@@ -51,7 +51,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                     message=chat.intro_text,
                     message_type=MessageTypeChoices.AI,
                 )
-                self.agent.setup_chain(self.session_id, new_chat=True)
+                #self.agent.setup_chain(self.session_id, new_chat=True)
                 self.send_json({
                     "message_type": MessageTypeChoices.AI,
                     "message": chat.intro_text,
@@ -60,7 +60,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 raise DenyConnection("Session ID not set")
             else:
                 self.session_id = self.session_id
-                self.agent.setup_chain(self.session_id)
+                #self.agent.setup_chain(self.session_id)
                 self.accept()        
         except Chat.DoesNotExist:
             raise DenyConnection("Chat with this identifier does not exist.")
@@ -88,7 +88,7 @@ class ChatConsumer(JsonWebsocketConsumer):
 
             
             try:
-                res = self.agent.query(content["message"])
+                res = self.agent.query(content["message"], session_id=self.session_id)
             except Exception as e:
                 logger.error(e.__str__())
                 self.send_json({

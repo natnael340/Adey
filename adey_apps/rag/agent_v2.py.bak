@@ -12,12 +12,9 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.prebuilt import create_react_agent
-from langchain_openai import ChatOpenAI
 from adey_apps.rag.models import Chat
 from django.utils.encoding import force_str
 from django.conf import settings
-from adey_apps.rag.constants import PROMPT_TEMPLATE_V2
-from adey_apps.rag.workflow import AgentWorkflow
 
 openai.api_key = settings.OPENAI_API_KEY
 
@@ -26,18 +23,36 @@ class Agent:
     def __init__(self, chat: Chat):
         self.chat = chat
         self.tools = self.get_tools()
+        PROMPT_TEMPLATE = (
+            "Role Definition:\n"
+            "You are a customer support agent for {company_name} called {assistant_name}.\n"
+            "Behavior & Tone:\n"
+            "Act as a knowledgeable, empathetic, and professional representative.\n"
+            "Use clear, concise language and always maintain a friendly tone.\n"
+            "Task Guidelines:\n"
+            "Greet the customer warmly and ask for any missing details if their query is unclear.\n"
+            "Provide accurate and short answers using the company’s knowledge base. At most 2 or 3 sentences\n"
+            "If the query exceeds your scope (or involves complex issues), inform the customer and "
+            "offer to connect them with a human support agent.\n"
+            "If no relevant information is found in the knowledge base, apologize and ask if they have another question.\n\n"
+            "Engagement Strategy:\n"
+            "Always conclude your response with a follow-up question to ensure the customer feels heard"
+            " and to maintain engagement.\n\n"
+            "use the tool function to retrieve the knowledge base\n\n"
+            "Important: All you know about is the retrieved information from the tool."
+        )
 
         self.prompt = PromptTemplate(
-            template=PROMPT_TEMPLATE_V2, 
-            input_variables=["company_name", "assistant_name"]
+            template=PROMPT_TEMPLATE, 
+            input_variables=["context", "company_name", "assistant_name"]
         )
-        self.system_message =  self.prompt.format(
-            company_name=self.chat.business_name, 
-            assistant_name=self.chat.assistant_name,
-        )
-
-        self.model = ChatOpenAI(model="gpt-4o-mini")
     
+    def get_db_from_collection(self):
+        return PGVector(
+            collection_name=force_str(self.chat.identifier),
+            connection_string=settings.PG_VECTOR_DB_URL,
+            embedding_function=OpenAIEmbeddings()
+        )
 
     def get_tools(self):
         tools = []
@@ -47,6 +62,7 @@ class Agent:
             tools.append(tool_function(self.chat, agent_tool))
                        
         return tools
+
 
     def setup_chain(self, user_session_id: str, new_chat: bool = False):
         self.user_session_id = user_session_id
@@ -58,7 +74,7 @@ class Agent:
             assistant_name=self.chat.assistant_name,
         )
 
-    def _query(self, question: str):
+    def query(self, question: str):
         if not self.llm:
             raise ValueError("Chain not initialized.")
         
@@ -73,25 +89,4 @@ class Agent:
                 step["messages"][-1].pretty_print()
     
 
-        return step["messages"][-1].content
-    
-    def query(self, question: str, session_id: str):
-        if not self.model:
-            raise ValueError("Chain not initialized.")
-        
-        with PostgresSaver.from_conn_string(f"{settings.PG_VECTOR_DB_URL}?sslmode=disable") as memory:
-            agent = AgentWorkflow(
-                model=self.model, 
-                tools=self.tools, 
-                prompt_template=self.system_message, 
-                saver=memory
-            )
-            # agent.run(
-            #     inputs=question, 
-            #     session_key=session_id,
-            # )
-        
-            for step in agent.run(inputs=question, session_key=session_id):
-                step["messages"][-1].pretty_print()
-        
         return step["messages"][-1].content

@@ -22,6 +22,7 @@ class Resource(BaseModel):
         HTML = "HTML", "HTML"
         JSON = "JSON", "JSON"
         MD = "MD", "MD"
+        URL = "URL", "URL"
     
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=256, blank=True)
