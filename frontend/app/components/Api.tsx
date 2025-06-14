@@ -10,6 +10,7 @@ import {
   ResourceFormType,
   GenericResponseType,
   ThemeType,
+  UserMessageType,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -49,8 +50,8 @@ class Api {
     return data;
   }
   async get_messages() {
-    const { data } = await this.axios.get<ChatDetailType>(
-      `rag/chat/user_messages`
+    const { data } = await this.axios.get<UserMessageType[]>(
+      `chat/messages/`
     );
     return data;
   }

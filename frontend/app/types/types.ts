@@ -109,6 +109,18 @@ export type MessageType = {
   message_type: string;
   seen: boolean;
 };
+
+export type UserMessageType = {
+  username: string;
+  message: string;
+  message_type: string;
+  session_id: string;
+  created: string;
+  chat: {
+    name: string;
+    slug: string;
+  };
+};
 export type DashboardMessageType = {
   date: string;
   count: number;
