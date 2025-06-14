@@ -3,18 +3,22 @@ import Layout from "../_layout";
 import Api from "@/app/components/Api";
 import ChatContext from "@/app/hooks/ChatContext";
 import { authToken } from "@/app/components/protected_api";
-import Messages from "./Messages";
+import SessionMessages from "./session";
 
-const page = async () => {
+interface Param {
+  params: { session_id: string };
+}
+
+const page = async ({ params: { session_id } }: Param) => {
   const token = await authToken();
   const api = new Api(token);
-  const data = await api.get_messages();
+  const data = await api.get_messages_by_session(session_id);
 
   return (
     <Layout page="messages">
       <ChatContext token={token}>
         <div className="mx-10 my-5">
-          <Messages initialData={data} token={token} />
+          <SessionMessages initialData={data} />
         </div>
       </ChatContext>
     </Layout>
