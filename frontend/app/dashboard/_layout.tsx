@@ -3,7 +3,13 @@ import Sidebar from "../components/Sidebar";
 
 type Props = {
   children: React.ReactElement;
-  page: "dashboard" | "chatbots" | "salesbots" | "integrations" | "account";
+  page:
+    | "dashboard"
+    | "chatbots"
+    | "salesbots"
+    | "integrations"
+    | "account"
+    | "messages";
 };
 function layout({ children, page }: Props) {
   return (

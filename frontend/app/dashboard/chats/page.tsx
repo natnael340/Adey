@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "../_layout";
 import Api from "@/app/components/Api";
-import ChatContext from "./ChatContext";
+import ChatContext from "@/app/hooks/ChatContext";
 import { authToken } from "@/app/components/protected_api";
 import Form from "./Form";
 import ChatAddToggle from "./ChatAddToggle";

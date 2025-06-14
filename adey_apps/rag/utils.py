@@ -1,4 +1,5 @@
 import requests
+import re
 import tempfile
 import os
 
@@ -54,6 +55,13 @@ def key_value_to_dict(value) -> dict:
     )
 
 
+def clean_text(text: str) -> str:
+    
+    cleaned = re.sub(r'[^A-Za-z0-9 ]+', ' ', text)
+
+    return cleaned
+
+
 class URLTextLoader:
     """
     A class to load text data from a specified URL.
@@ -85,7 +93,9 @@ class URLTextLoader:
         """
         response = requests.get(self.url)
         response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
-        return [Document(page_content=response.text, metadata={"source": self.url})]
+        cleaned_text = clean_text(response.text)
+
+        return [Document(page_content=cleaned_text, metadata={"source": self.url})]
 
 
 class URLPdfLoader:

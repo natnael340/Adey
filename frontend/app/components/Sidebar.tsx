@@ -17,7 +17,13 @@ import {
 import { signOut } from "next-auth/react";
 
 type PropTypes = {
-  page: "dashboard" | "chatbots" | "salesbots" | "integrations" | "account";
+  page:
+    | "dashboard"
+    | "chatbots"
+    | "salesbots"
+    | "integrations"
+    | "account"
+    | "messages";
 };
 
 const Sidebar = ({ page }: PropTypes) => {
@@ -31,9 +37,11 @@ const Sidebar = ({ page }: PropTypes) => {
           width={75}
           height={75}
         />
-        <a href="/"><span className="self-center whitespace-nowrap font-semibold text-lg text-black">
-          Adey
-        </span></a>
+        <a href="/">
+          <span className="self-center whitespace-nowrap font-semibold text-lg text-black">
+            Adey
+          </span>
+        </a>
       </div>
       <div className="flex flex-1 flex-col">
         <div className="space-y-1">
@@ -59,6 +67,17 @@ const Sidebar = ({ page }: PropTypes) => {
             <User size={22} />
             <span className="text-base">Chat Bots</span>
           </a>
+          {/* <a
+            href="/dashboard/messages"
+            className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
+              page == "messages"
+                ? "bg-[rgba(255,255,0,0.1)] text-black"
+                : "text-gray-400"
+            }`}
+          >
+            <MessageSquareMore size={22} />
+            <span className="text-base">Messages</span>
+          </a> */}
           {/* <a
             href="/dashboard/sales"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${

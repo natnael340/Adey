@@ -195,6 +195,30 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ('username', 'message', 'message_type', "seen", "created")
 
+    def get_assistant_picture_url(self, instance):
+        if instance.assistant_picture:
+            request = self.context.get("request", None)
+            if request:
+                return request.build_absolute_uri(instance.assistant_picture.url)
+            return instance.assistant_picture.url
+
+        return ""
+    
+    def get_resources(self, instance):
+        return instance.resource_set.count()
+
+class MessageListSerializer(serializers.ModelSerializer):
+    message_type = serializers.CharField(read_only=True)
+    created = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    username = serializers.CharField(read_only=True)
+    session_id = serializers.CharField(read_only=True)
+    message = serializers.CharField(read_only=True)
+    chat = ChatSerializer(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ('username', 'message', 'message_type', "session_id", "chat", "created")
+
 
 class MessageAnalyticsSerializer(serializers.Serializer):
     date = serializers.SerializerMethodField(read_only=True)

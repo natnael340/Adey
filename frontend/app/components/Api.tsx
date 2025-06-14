@@ -48,6 +48,12 @@ class Api {
     const { data } = await this.axios.post<ChatFormType>("rag/chat/", chatForm);
     return data;
   }
+  async get_messages() {
+    const { data } = await this.axios.get<ChatDetailType>(
+      `rag/chat/user_messages`
+    );
+    return data;
+  }
   async add_tool(chat_slug: string, tool: string) {
     const { data } = await this.axios.post<GenericResponseType>(
       `rag/chat/${chat_slug}/tools/${tool}`

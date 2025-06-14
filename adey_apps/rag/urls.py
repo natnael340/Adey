@@ -12,12 +12,14 @@ from adey_apps.rag.views import (
     ChatBotAnalytics,
     ChatToolsAddAPIView,
     WidgetPreferenceViewSet,
-    ChatPreferenceAPIView
+    ChatPreferenceAPIView,
+    MessagesViewSet
 )
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
+    path("chat/messages/", MessagesViewSet.as_view({'get': 'list'}), name="chat-message-list"),
     path("<str:chat_id>/messages/", MessageListCreateViewSet.as_view(), name="message-list-create"),
     path("chat/", ChatCreateAPIView.as_view(), name="chat-create"),
     path("chat/<slug:slug>/", ChatUpdateAPIView.as_view(), name="chat-update"),

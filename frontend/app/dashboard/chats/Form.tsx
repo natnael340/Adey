@@ -3,7 +3,7 @@
 import { ChatFormType } from "@/app/types/types";
 import React, { useContext, useState } from "react";
 import ChatForm from "../components/ChatForm";
-import { Context } from "./ChatContext";
+import { Context } from "@/app/hooks/ChatContext";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ChatAddToggle from "./ChatAddToggle";
 

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.db.models import Max
 
 from langchain_community.vectorstores import PGVector
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
@@ -16,6 +17,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
+from rest_framework.mixins import ListModelMixin
 from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
@@ -35,6 +37,7 @@ from adey_apps.rag.serializers import (
     MessageAnalyticsSerializer,
     ChatBotAnalyticsSerializer,
     ChatDetailSerializer,
+    MessageListSerializer,
     WidgetPreferenceSerializer
 )
 from adey_apps.rag.mixins import ChatMixin
@@ -298,3 +301,29 @@ class ChatPreferenceAPIView(ChatMixin, APIView):
             return Response({"success": True, "message": "Widget Preference has been set."}, status=status.HTTP_200_OK)
         else:
             return Response({"success": False, "message": "Preference not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class MessagesViewSet(ListModelMixin, GenericViewSet):
+    serializer_class = MessageListSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
+        latest_per_pair = (
+            Message.objects
+                .filter(chat_id__in=user_chats)
+                .values('chat_id', 'session_id')
+                .annotate(last_pk=Max('pk'))
+                .values_list('last_pk', flat=True)
+        )
+        return Message.objects.filter(pk__in=latest_per_pair).select_related('chat')
+    
+    @action(detail=False, methods=["GET"], url_path=r"(?P<session_id>[^/.]+)/")
+    def message_by_session(self, request, *args, **kwargs):
+        session_id = kwargs.get("session_id")
+        user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
+        messages = Message.objects.filter(session_id=session_id, chat_id__in=user_chats).order_by("created")
+
+
+        return MessageListSerializer(messages, many=True).data
