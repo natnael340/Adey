@@ -119,7 +119,16 @@ export type UserMessageType = {
   chat: {
     name: string;
     slug: string;
+    assistant_name?: string;
+    assistant_picture_url?: string;
   };
+};
+
+export type UserMessageDataWithPagination = {
+  count: number;
+  next: null | string;
+  prev: null | string;
+  results: UserMessageType[];
 };
 export type DashboardMessageType = {
   date: string;

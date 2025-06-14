@@ -11,6 +11,7 @@ import {
   GenericResponseType,
   ThemeType,
   UserMessageType,
+  UserMessageDataWithPagination,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -50,8 +51,15 @@ class Api {
     return data;
   }
   async get_messages() {
+    const { data } = await this.axios.get<UserMessageDataWithPagination>(
+      `rag/chat/messages/`
+    );
+    return data;
+  }
+
+  async get_messages_by_session(session_id: string) {
     const { data } = await this.axios.get<UserMessageType[]>(
-      `chat/messages/`
+      `rag/chat/messages/${session_id}/`
     );
     return data;
   }
