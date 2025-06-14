@@ -3,7 +3,7 @@ import Layout from "../_layout";
 import Api from "@/app/components/Api";
 import ChatContext from "@/app/hooks/ChatContext";
 import { authToken } from "@/app/components/protected_api";
-import Messages from "./Messages";
+import MessagesPage from "./MessagesPage";
 
 const page = async () => {
   const token = await authToken();
@@ -13,8 +13,8 @@ const page = async () => {
   return (
     <Layout page="messages">
       <ChatContext token={token}>
-        <div className="mx-10 my-5">
-          <Messages initialData={data} token={token} />
+        <div className="mx-10 my-5 h-full">
+          <MessagesPage initialData={data} token={token} />
         </div>
       </ChatContext>
     </Layout>

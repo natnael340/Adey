@@ -4,23 +4,34 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserMessageType, UserMessageDataWithPagination } from "@/app/types/types";
-import { useRouter } from "next/navigation";
+import Api from "@/app/components/Api";
 
 interface Props {
   initialData: UserMessageDataWithPagination;
   token: string;
+  onSelect: (id: string) => void;
 }
 
-const Messages = ({ initialData }: Props) => {
-  const [messages] = useState<UserMessageType[]>(initialData.results);
-  const router = useRouter();
+const Messages = ({ initialData, token, onSelect }: Props) => {
+  const [messages, setMessages] = useState<UserMessageType[]>(initialData.results);
+  const [next, setNext] = useState<string | null>(initialData.next);
+  const [prev, setPrev] = useState<string | null>(initialData.prev);
+  const api = new Api(token);
+
+  const fetchPage = async (url: string | null) => {
+    if (!url) return;
+    const data = await api.get_messages(url);
+    setMessages(data.results);
+    setNext(data.next);
+    setPrev(data.prev);
+  };
 
   return (
     <div className="space-y-4">
       {messages.map((msg, idx) => (
         <Card
           key={idx}
-          onClick={() => router.push(`/dashboard/messages/${msg.session_id}`)}
+          onClick={() => onSelect(msg.session_id)}
           className="cursor-pointer"
         >
           <CardHeader className="pb-2">
@@ -59,6 +70,22 @@ const Messages = ({ initialData }: Props) => {
           </CardContent>
         </Card>
       ))}
+      <div className="flex justify-between pt-4">
+        <button
+          className="text-sm disabled:text-gray-300"
+          disabled={!prev}
+          onClick={() => fetchPage(prev)}
+        >
+          Previous
+        </button>
+        <button
+          className="text-sm disabled:text-gray-300"
+          disabled={!next}
+          onClick={() => fetchPage(next)}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
