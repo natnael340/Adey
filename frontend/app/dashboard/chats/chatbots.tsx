@@ -3,7 +3,7 @@
 import { ChatType } from "@/app/types/types";
 import React, { useContext, useEffect, useState } from "react";
 import ChatCard from "../components/ChatCard";
-import { Context } from "./ChatContext";
+import { Context } from "../../hooks/ChatContext";
 import Api from "@/app/components/Api";
 import { Loader } from "lucide-react";
 

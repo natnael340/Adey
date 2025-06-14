@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext } from "react";
-import { Context } from "./ChatContext";
+import { Context } from "../../hooks/ChatContext";
 import { Plus } from "lucide-react";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 
