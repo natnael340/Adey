@@ -67,7 +67,7 @@ const Sidebar = ({ page }: PropTypes) => {
             <User size={22} />
             <span className="text-base">Chat Bots</span>
           </a>
-          {/* <a
+          <a
             href="/dashboard/messages"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
               page == "messages"
@@ -77,7 +77,7 @@ const Sidebar = ({ page }: PropTypes) => {
           >
             <MessageSquareMore size={22} />
             <span className="text-base">Messages</span>
-          </a> */}
+          </a>
           {/* <a
             href="/dashboard/sales"
             className={`flex items-center justify-center space-x-4 w-full p-5 rounded-full cursor-pointer ${
