@@ -22,7 +22,6 @@ class Resource(BaseModel):
         HTML = "HTML", "HTML"
         JSON = "JSON", "JSON"
         MD = "MD", "MD"
-        URL = "URL", "URL"
     
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=256, blank=True)
@@ -71,7 +70,7 @@ class Chat(BaseModel):
     name = models.CharField("Chat name", max_length=255)
     slug = models.SlugField("Slug", blank=True)
     business_name = models.CharField("Business name", max_length=256)
-    business_description = models.TextField("Business description")
+    business_description = models.TextField("Business description", blank=True)
     assistant_name = models.CharField("Assistant name", max_length=256)
     assistant_picture = models.ImageField("Assistant picture", null=True, blank=True)
     assistant_characters = models.ManyToManyField(verbose_name="Assistant Characters", to=AssistantCharacter, blank=True)

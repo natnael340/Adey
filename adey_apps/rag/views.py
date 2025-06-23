@@ -1,5 +1,6 @@
 from uuid import uuid4
 import os
+import logging
 
 from django.utils import timezone
 from django.http import Http404
@@ -14,8 +15,8 @@ from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin
 from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
@@ -48,9 +49,10 @@ from adey_apps.adey_commons.paginations import StandardResultsSetPagination
 from adey_apps.adey_commons.permissions import HasChatBotPermission
 from adey_apps.users.serializers import PlanSerializer
 
-# Create your views here.
+logger = logging.getLogger(__name__)
 
-class ChatViewSet(ReadOnlyModelViewSet):
+
+class ChatViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
@@ -61,24 +63,26 @@ class ChatViewSet(ReadOnlyModelViewSet):
     def get_serializer_class(self):
         if self.action  == "list":
             return ChatSerializer
-        else:
+        elif self.action == "retrieve":
             return ChatDetailSerializer
+        elif self.action in ["create", "update", "partial_update"]:
+            return ChatCreateSerializer
+        else:
+            raise MethodNotAllowed()
     
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
 
-class ChatCreateAPIView(CreateAPIView):
-    serializer_class = ChatCreateSerializer
-    permission_classes = (IsAuthenticated,)
-    
+        try:
+            vectorstore = PGVector(
+                embedding=OpenAIEmbeddings(),
+                collection_name=force_str(instance.identifier),
+                connection_string=settings.PG_VECTOR_DB_URL,
+            )
+            vectorstore.delete(collection_only=True)
+        except Exception as e:
+            logger.error(f"Error deleting vector store for chat {instance.identifier}: {e}")
 
-class ChatUpdateAPIView(UpdateAPIView):
-    serializer_class = ChatCreateSerializer
-    permission_classes = (IsAuthenticated,)
-    lookup_field = "slug"
-    lookup_url_kwarg = "slug"
-
-    def get_queryset(self):
-        return Chat.objects.filter(user=self.request.user)
-    
 
 class ResourceViewSet(ChatMixin, ModelViewSet):
     serializer_class = ResourceSerializer
@@ -210,7 +214,7 @@ class ChatBotBuildApiView(ChatMixin, APIView):
         except Chat.DoesNotExist:
             return Response({"success": False, "message": "Chat does not exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            print(e)
+            logger.error(f"Error building chat bot: {e}")
             return Response({"success": False, "message": "Server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response({"success": True}, status=status.HTTP_200_OK)

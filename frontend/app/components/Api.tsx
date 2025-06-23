@@ -45,7 +45,10 @@ class Api {
     return data;
   }
   async create_chatbot(chatForm: ChatFormType) {
-    const { data } = await this.axios.post<ChatFormType>("rag/chat/", chatForm);
+    const { data } = await this.axios.post<ChatFormType>(
+      "rag/chats/",
+      chatForm
+    );
     return data;
   }
   async get_messages() {
@@ -80,7 +83,7 @@ class Api {
       }
     });
     const { data } = await this.axios.patch<ChatFormType>(
-      `rag/chat/${slug}/`,
+      `rag/chats/${slug}/`,
       req_data
     );
     return data;
