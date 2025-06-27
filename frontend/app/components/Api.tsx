@@ -51,6 +51,12 @@ class Api {
     );
     return data;
   }
+  async remove_chatbot(slug: string) {
+    const { data } = await this.axios.delete<GenericResponseType>(
+      `rag/chats/${slug}`
+    );
+    return data;
+  }
   async get_messages() {
     const { data } = await this.axios.get<ChatDetailType>(
       `rag/chat/user_messages`
