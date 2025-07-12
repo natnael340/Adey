@@ -8,6 +8,8 @@ type PropType = {
     home?: boolean;
     about?: boolean;
     features?: boolean;
+    tos?: boolean;
+    privacy?: boolean;
   };
   set_session?: (session: any) => void;
   absolute?: boolean;
