@@ -10,6 +10,8 @@ import {
   ResourceFormType,
   GenericResponseType,
   ThemeType,
+  UserMessageType,
+  UserMessageDataWithPagination,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -48,10 +50,19 @@ class Api {
     const { data } = await this.axios.post<ChatFormType>("rag/chat/", chatForm);
     return data;
   }
-  async get_messages() {
-    const { data } = await this.axios.get<ChatDetailType>(
-      `rag/chat/user_messages`
-    );
+  async get_messages(page?: string) {
+    const url = page
+      ? page.replace(`${BASE_URL}/api/v1/`, "")
+      : `rag/chat/messages/`;
+    const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
+    return data;
+  }
+
+  async get_messages_by_session(session_id: string, page?: string) {
+    const url = page
+      ? page.replace(`${BASE_URL}/api/v1/`, "")
+      : `rag/chat/messages/${session_id}/`;
+    const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
     return data;
   }
   async add_tool(chat_slug: string, tool: string) {
