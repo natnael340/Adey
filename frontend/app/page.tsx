@@ -7,7 +7,7 @@ import { PlanType } from "./types/types";
 import { AreaChart, Binary, Bot, Files, MessageCircle } from "lucide-react";
 
 export default async function Home() {
-  const { data: plan } = await api.get<PlanType[]>("plans/");
+  //const { data: plan } = await api.get<PlanType[]>("plans/");
   return (
     <main className="min-h-screen">
       <Header activeList={{ home: true }} absolute />
@@ -112,7 +112,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      <section className="px-20 py-5 space-y-7 bg-[#ECECEE]">
+      {/* Pricing Plan Section */}
+      {/* <section className="px-20 py-5 space-y-7 bg-[#ECECEE]">
         <div className="flex w-full flex-col justify-center items-center space-y-5">
           <h2 className="text-5xl">Find Your Perfect Plan</h2>
           <p className="text-[#797878] text-center w-1/2">
@@ -121,7 +122,7 @@ export default async function Home() {
           </p>
         </div>
         <Pricing data={plan} />
-      </section>
+      </section> */}
 
       <Footer />
     </main>
