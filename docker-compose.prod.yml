@@ -1,0 +1,103 @@
+version: "3.9"
+
+volumes:
+  adey_backend_db_data: {}
+  certbot_conf:
+  certbot_www:
+
+services:
+  db:
+    container_name: adey_db
+    image: ankane/pgvector
+    restart: on-failure
+    env_file:
+      - .production.env
+    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_locks_per_transaction=1024
+    volumes:
+      - adey_backend_db_data:/var/lib/postgresql/data
+    networks:
+      - adey_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adey_backend"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  adey_backend:
+    image: adey_backend
+    container_name: adey_backend
+    build:
+      dockerfile: ./devops/docker/python/Dockerfile
+      context: ./
+    restart: on-failure
+    working_dir: /usr/src/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - adey_network
+    expose:
+      - 8000
+    command: /bin/bash -c "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 adey.asgi:application "
+
+  worker:
+    image: adey_celery_worker
+    container_name: adey_celery_worker
+    build:
+      dockerfile: ./devops/docker/python/Dockerfile
+      context: ./
+    restart: on-failure
+    working_dir: /usr/src/app
+    env_file:
+      - .production.env
+    depends_on:
+      - broker
+      - adey_backend
+    networks:
+      - adey_network
+    command: /bin/bash -c "celery -A adey worker --loglevel=info"
+
+  broker:
+    image: rabbitmq:3-management
+    hostname: rabbit1
+    env_file:
+      - .production.env
+    expose:
+      - "5672"
+    networks:
+      - adey_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: adey_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./devops/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./devops/nginx/conf.d/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - adey_backend
+    networks:
+      - adey_network
+
+  certbot:
+    image: certbot/certbot
+    container_name: adey_certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - adey_backend
+    networks:
+      - adey_network
+
+networks:
+  adey_network:
+    ipam:
+      driver: default
