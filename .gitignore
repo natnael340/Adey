@@ -3,6 +3,7 @@ venv
 .general.log
 .production.env
 .env.production
+.staging.env
 
 ./frontend/node_modules/
 ./chat_widget/node_modules/
@@ -20,3 +21,5 @@ media/*
 **/.terraform/
 
 *.dump
+
+/plan
