@@ -231,3 +231,29 @@ export type ThemeType = {
   name: string;
   preferences: PreferenceType;
 };
+
+export type MessageFlag = "HUMAN" | "AI" | "SYSTEM";
+
+export interface SessionListMessageType {
+  username: string;
+  message: string;
+  message_type: MessageFlag;
+  session_id: string;
+  chat: ChatDetailType;
+  created: string;
+}
+
+export interface ConversationMessage {
+  username: string;
+  message: string;
+  message_type: MessageType;
+  created: string;
+  session_id: string;
+}
+
+export type SessionListMessages = {
+  count: number;
+  next: string;
+  previous: MessageFlag;
+  results: SessionListMessageType[];
+};
