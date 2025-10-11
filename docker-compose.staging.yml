@@ -1,5 +1,3 @@
-version: "3.9"
-
 volumes:
   adey_backend_db_data: {}
   certbot_conf:
