@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Bona_Nova } from "next/font/google";
-import "./globals.css";
+
 import { AuthProvider } from "./Providers";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
+import "./globals.css";
 
 const fontSans = Bona_Nova({
   subsets: ["greek"],
@@ -31,11 +32,11 @@ export default function RootLayout({
           content="7b2aee34-1392-489e-95cb-757a382666d4"
         />
 
-        <link
-          rel="stylesheet"
+        {/* <link
+          rel="stylesheet"  
           crossOrigin="anonymous"
           href={`https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.css`}
-        />
+        /> */}
       </head>
 
       <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription"></Script>

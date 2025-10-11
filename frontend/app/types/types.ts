@@ -109,6 +109,27 @@ export type MessageType = {
   message_type: string;
   seen: boolean;
 };
+
+export type UserMessageType = {
+  username: string;
+  message: string;
+  message_type: string;
+  session_id: string;
+  created: string;
+  chat: {
+    name: string;
+    slug: string;
+    assistant_name?: string;
+    assistant_picture_url?: string;
+  };
+};
+
+export type UserMessageDataWithPagination = {
+  count: number;
+  next: null | string;
+  prev: null | string;
+  results: UserMessageType[];
+};
 export type DashboardMessageType = {
   date: string;
   count: number;
@@ -209,4 +230,30 @@ export type ThemeType = {
   identifier: string;
   name: string;
   preferences: PreferenceType;
+};
+
+export type MessageFlag = "HUMAN" | "AI" | "SYSTEM";
+
+export interface SessionListMessageType {
+  username: string;
+  message: string;
+  message_type: MessageFlag;
+  session_id: string;
+  chat: ChatDetailType;
+  created: string;
+}
+
+export interface ConversationMessage {
+  username: string;
+  message: string;
+  message_type: MessageType;
+  created: string;
+  session_id: string;
+}
+
+export type SessionListMessages = {
+  count: number;
+  next: string;
+  previous: MessageFlag;
+  results: SessionListMessageType[];
 };

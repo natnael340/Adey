@@ -39,3 +39,17 @@ export const isSafePath = (path: string): boolean => {
   }
   return false;
 };
+
+export function toDate(s: string) {
+  // accept "YYYY-MM-DD HH:mm:ss" or ISO
+  return new Date(s.replace(" ", "T"));
+}
+
+export function formatTime(s: string) {
+  const d = toDate(s);
+  return d.toLocaleString();
+}
+
+export function classNames(...xs: Array<string | false | undefined | null>) {
+  return xs.filter(Boolean).join(" ");
+}
