@@ -97,14 +97,21 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=list)
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",
-        "CONFIG": {
-            "host": env.str("RABBITMQ_ASGI_URL", "amqp://adey_backend:secret@broker:5672/asgi"),
+if ENVIRONMENT == "development":
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",
+            "CONFIG": {
+                "host": env.str("RABBITMQ_ASGI_URL", "amqp://adey_backend:secret@broker:5672/asgi"),
+            },
+        },
+    }
 
 MIDDLEWARE = [
     "adey_apps.adey_commons.middleware.HealthCheckMiddleware",
