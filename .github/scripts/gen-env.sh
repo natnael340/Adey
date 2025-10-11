@@ -19,7 +19,6 @@ RABBITMQ_DEFAULT_PASS=password
 CELERY_BROKER_URL="amqp://test_user:password@broker:5672"
 CELERY_RESULT_BROKER_URL="amqp://test_user:password@broker:5672"
 
-
 # ASGI Channel layer config
 RABBITMQ_ASGI_URL="amqp://test_user:password@broker:5672/asgi"
 EOF
