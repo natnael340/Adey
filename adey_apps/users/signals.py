@@ -4,7 +4,7 @@ from adey_apps.users.models import User, Subscription, Plan
 
 
 @receiver(post_save, sender=User)
-def create_basic_subscription(sender, instance, created, **kwargs):
-    if created:
+def create_basic_subscription(sender, instance: User, created, **kwargs):
+    if created and not instance.is_superuser:
         plan = Plan.objects.get(name="Basic", period=Plan.YEARLY)
         Subscription.objects.create(user=instance, plan=plan)

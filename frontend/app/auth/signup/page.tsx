@@ -247,7 +247,7 @@ const signup = () => {
                     I accept the{" "}
                     <a
                       className="font-medium text-primary-600 hover:underline dark:text-primary-500"
-                      href="#"
+                      href="/terms-of-service"
                     >
                       Terms and Conditions
                     </a>

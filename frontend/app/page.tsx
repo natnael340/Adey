@@ -9,7 +9,7 @@ import ChatDemo from "./components/ChatDemo";
 import Features from "./components/Features";
 
 export default async function Home() {
-  const { data: plan } = await api.get<PlanType[]>("plans/");
+  //const { data: plan } = await api.get<PlanType[]>("plans/");
   return (
     <main className="min-h-screen">
       <Header activeList={{ home: true }} absolute />

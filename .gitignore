@@ -22,4 +22,4 @@ media/*
 
 *.dump
 
-/plan
+plan/
