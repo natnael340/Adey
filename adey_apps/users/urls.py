@@ -1,9 +1,9 @@
 from django.urls import path
 
 from rest_framework import routers
-from rest_framework_simplejwt.views import TokenRefreshView
-from adey_apps.users.views import (
-    LoginView, 
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from adey_apps.users.views import ( 
+    AdTokenObtainPairView,
     SignUpView, 
     GoogleLogin, 
     PlanViewSet, 
@@ -20,7 +20,7 @@ from adey_apps.users.views import (
 router = routers.DefaultRouter()
 
 urlpatterns = [
-    path("auth/login", LoginView.as_view(), name="user_login"),
+    path("auth/login", AdTokenObtainPairView.as_view(), name="user_login"),
     path("auth/social/google", GoogleLogin.as_view(), name="google_login"),
     path("auth/signup", SignUpView.as_view(), name="user_signup"),
     path("auth/email/verification", EmailVerificationRequestView.as_view(), name="email_verification_request"),
