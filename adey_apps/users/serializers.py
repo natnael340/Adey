@@ -2,11 +2,16 @@ from typing import Any, Dict
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import update_last_login
 from django.core.validators import RegexValidator
 from django.urls import reverse
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from adey_apps.users.models import User, Plan, Subscription
 
 
@@ -47,6 +52,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+
+class UserReadSerializer(serializers.Serializer):
+    email = serializers.EmailField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
 
 
 class EmailVerificationSerializer(serializers.Serializer):
@@ -92,3 +103,32 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             "end_at",
             "status",
         )
+
+
+class AdTokenObtainPairSerializer(TokenObtainSerializer):
+    """
+    Override serializer to raise error when a user is not verified
+    """
+    token_class = RefreshToken
+    default_error_messages = {
+        "unverified_account": _("This account email is not verified."),
+    }
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, str]:
+        data = super().validate(attrs)
+
+        if not self.user.is_verified:
+            raise exceptions.AuthenticationFailed(
+                self.error_messages["unverified_account"],
+                "unverified_account",
+            )
+        
+        refresh = self.get_token(self.user)
+
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
+
+        if settings.UPDATE_LAST_LOGIN:
+            update_last_login(None, self.user)
+
+        return data

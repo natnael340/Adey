@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -19,7 +20,7 @@ from django_filters import rest_framework as filters
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, TokenGenerationLog
-from adey_apps.users.serializers import UserLoginSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer
+from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer, UserReadSerializer
 from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email, send_password_reset_email
 from adey_apps.users.tokens import account_activation_token
 
@@ -27,31 +28,8 @@ from adey_apps.users.tokens import account_activation_token
 logger = logging.getLogger(__name__)
 
 
-class LoginView(GenericAPIView):
-    serializer_class = UserLoginSerializer
-    permission_classes = [AllowAny]  
-
-    def post(self, request: Request) -> Response:
-        serializer = self.serializer_class(data=request.data, context={"request": request})
-        if not serializer.is_valid():
-            return Response(
-                    {"error": 1, "message": serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        user = serializer.validated_data["user"]
-
-        if not user.is_verified:
-            return Response(
-                    {"error": 1, "message": "Account has not be verified."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        token = RefreshToken.for_user(user)
-        return Response(
-                    {"error": 0, "token": str(token.access_token), "refresh": str(token)},
-                    status=status.HTTP_200_OK,
-                )
-    
+class AdTokenObtainPairView(TokenObtainPairView):
+    serializer_class = AdTokenObtainPairSerializer
 
 
 class SignUpView(GenericAPIView):
@@ -253,4 +231,9 @@ class VerifySubscription(APIView):
             return Response({"message": f"Other exception: {e.__str__()}", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+class UserDetailView(RetrieveAPIView, GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserReadSerializer
 
+    def get_object(self):
+        return self.request.user

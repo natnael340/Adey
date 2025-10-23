@@ -14,7 +14,7 @@ const ChatAddToggle = () => {
         onClick={toggleFormOpen}
       >
         <Plus size={32} />
-        <span>Add Chat</span>
+        <span>Add Bot</span>
       </button>
     </DialogTrigger>
   );

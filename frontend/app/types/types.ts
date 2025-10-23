@@ -257,3 +257,18 @@ export type SessionListMessages = {
   previous: MessageFlag;
   results: SessionListMessageType[];
 };
+
+export type AuthErrorMessage = {
+  messages: string[];
+  code?: string;
+};
+
+export type ResponseErrorType = {
+  message: string;
+  code: string;
+};
+
+export type UserType = {
+  email: string;
+  is_verified: boolean;
+};

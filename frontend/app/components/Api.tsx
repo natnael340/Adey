@@ -12,6 +12,7 @@ import {
   ThemeType,
   UserMessageType,
   UserMessageDataWithPagination,
+  UserType,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -36,6 +37,11 @@ class Api {
 
   get_token() {
     return this.token;
+  }
+
+  async get_user_info() {
+    const { data } = await this.axios.get<UserType>("user/me");
+    return data;
   }
 
   async get_chatbots() {

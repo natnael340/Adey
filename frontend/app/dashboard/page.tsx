@@ -1,4 +1,4 @@
-import Layout from "./_layout";
+import Layout from "./layout";
 import {
   BotMessageSquare,
   CircleUser,
@@ -26,7 +26,7 @@ const Page = async () => {
   const data = await api.get_dashboard();
 
   return (
-    <Layout page="dashboard">
+    <main>
       <div className="container space-y-5">
         <div className="flex flex-row justify-between items-center">
           <div className="space-y-1">
@@ -204,7 +204,7 @@ const Page = async () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </main>
   );
 };
 
