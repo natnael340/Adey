@@ -54,6 +54,12 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+
+class UserReadSerializer(serializers.Serializer):
+    email = serializers.EmailField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
+
+
 class EmailVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, write_only=True)
 

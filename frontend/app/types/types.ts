@@ -267,3 +267,8 @@ export type ResponseErrorType = {
   message: string;
   code: string;
 };
+
+export type UserType = {
+  email: string;
+  is_verified: boolean;
+};

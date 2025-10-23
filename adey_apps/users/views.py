@@ -20,7 +20,7 @@ from django_filters import rest_framework as filters
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, TokenGenerationLog
-from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer
+from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer, UserReadSerializer
 from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email, send_password_reset_email
 from adey_apps.users.tokens import account_activation_token
 
@@ -231,4 +231,9 @@ class VerifySubscription(APIView):
             return Response({"message": f"Other exception: {e.__str__()}", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+class UserDetailView(RetrieveAPIView, GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserReadSerializer
 
+    def get_object(self):
+        return self.request.user
