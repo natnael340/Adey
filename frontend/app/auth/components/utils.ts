@@ -53,7 +53,7 @@ export const handleLoginWithPassword = async (
   const formData = new FormData(form);
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  console.log("handleLoginWithPassword", { email, password });
+
   try {
     setLoading && setLoading(true);
     const response = await signIn("credentials", {

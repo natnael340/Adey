@@ -22,7 +22,7 @@ const ChatCard = ({
   return (
     <a
       className="shadow-lg flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-6 justify-between hover:shadow-2xl transition-shadow duration-150"
-      href={`bots/${slug}`}
+      href={`/dashboard/bots/${slug}`}
     >
       <div className="flex flex-col justify-between w-full">
         <div>

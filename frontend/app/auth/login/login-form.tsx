@@ -159,6 +159,7 @@ export function LoginForm({
                     <div className="absolute right-0.5 top-1/2 -translate-y-1/2">
                       <Button
                         variant="ghost"
+                        aria-label="Toggle password visibility"
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (

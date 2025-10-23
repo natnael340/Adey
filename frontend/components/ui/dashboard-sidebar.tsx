@@ -40,11 +40,6 @@ const BUILD_FEATURES = [
   { title: "Docs", icon: File, href: "/docs" },
 ];
 
-const ACCOUNT = [
-  { title: "Account", icon: UserCircle, href: "/dashboard/account" },
-  { title: "Logout", icon: LogOut, href: "/api/auth/signout" },
-];
-
 type PropType = {
   username: string;
 };

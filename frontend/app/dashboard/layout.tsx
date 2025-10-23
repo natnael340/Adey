@@ -1,9 +1,7 @@
 import React from "react";
-import Sidebar from "../components/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/ui/dashboard-sidebar";
 import { authApi } from "../components/protected_api";
-import { signOut } from "next-auth/react";
 
 type Props = {
   children: React.ReactElement;
