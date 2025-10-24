@@ -23,11 +23,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 from adey_apps.rag.utils import URLTextLoader, URLPdfLoader
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
+from adey_apps.rag.filters import MessageFilter
 from adey_apps.rag.serializers import (
     ChatSerializer, 
     ChatCreateSerializer, 
@@ -307,6 +309,8 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
     serializer_class = MessageListSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
@@ -319,11 +323,19 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
         )
         return Message.objects.filter(pk__in=latest_per_pair).select_related('chat')
     
-    @action(detail=False, methods=["GET"], url_path=r"(?P<session_id>[^/.]+)/")
+    @action(detail=False, methods=["GET"], url_path=r"(?P<session_id>[^/.]+)")
     def message_by_session(self, request, *args, **kwargs):
         session_id = kwargs.get("session_id")
+        
         user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
         messages = Message.objects.filter(session_id=session_id, chat_id__in=user_chats).order_by("created")
 
+        queryset = self.filter_queryset(messages)
 
-        return MessageListSerializer(messages, many=True).data
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

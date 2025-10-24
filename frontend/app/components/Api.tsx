@@ -56,18 +56,20 @@ class Api {
     const { data } = await this.axios.post<ChatFormType>("rag/chat/", chatForm);
     return data;
   }
-  async get_messages(page?: string) {
+  async get_messages(page?: string, query_params?: Record<string, string>) {
     const url = page
       ? page.replace(`${BASE_URL}/api/v1/`, "")
-      : `rag/chat/messages/`;
-    const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
+      : `rag/messages/`;
+    const { data } = await this.axios.get<UserMessageDataWithPagination>(url, {
+      params: query_params,
+    });
     return data;
   }
 
   async get_messages_by_session(session_id: string, page?: string) {
     const url = page
       ? page.replace(`${BASE_URL}/api/v1/`, "")
-      : `rag/chat/messages/${session_id}/`;
+      : `rag/messages/${session_id}/`;
     const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
     return data;
   }
