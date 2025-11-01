@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Api from "@/app/components/Api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -69,14 +69,22 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
       .replace("AM", "am")
       .replace("PM", "pm");
 
+  const onTakeoverChange = async (checked: boolean) => {
+    try {
+      await api.send_human_handoff(botSlug, sessionId, { is_handoff: checked });
+      setTakeover(checked);
+    } catch (e) {
+      console.error("Human takeover failed.");
+    }
+  };
+
   const onSend = async () => {
     if (!takeover || !text.trim()) return;
     const payload = text.trim();
     setText("");
     try {
-      // TODO: ADD human handoff
-      //const created = await api.send_human_message(sessionId, payload);
-      // optimistic fallback if API returns nothing useful
+      // TODO: HANDOFF WS implementation
+
       const msg: UserMessageType = {
         username: "Agent",
         message: payload,
@@ -101,7 +109,7 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
               <Switch
                 id="takeover"
                 checked={takeover}
-                onCheckedChange={(v) => setTakeover(Boolean(v))}
+                onCheckedChange={(v) => onTakeoverChange(Boolean(v))}
               />
               <Label htmlFor="takeover" className="text-sm">
                 {takeover
@@ -115,7 +123,7 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
         <CardContent className="pt-0 h-[calc(100%-56px)] flex flex-col gap-3">
           {/* Thread */}
           <ScrollArea
-            ref={areaRef as any}
+            ref={areaRef}
             className="flex-1 rounded-md border bg-white p-3"
           >
             <div className="space-y-3">
@@ -171,6 +179,7 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
           <div className="flex gap-2">
             <Textarea
               value={text}
+              disabled={!takeover}
               onChange={(e) => setText(e.target.value)}
               placeholder={
                 takeover ? "Type a reply…" : "Enable takeover to reply"

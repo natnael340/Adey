@@ -17,7 +17,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
@@ -41,10 +41,19 @@ from adey_apps.rag.serializers import (
     ChatBotAnalyticsSerializer,
     ChatDetailSerializer,
     MessageListSerializer,
-    WidgetPreferenceSerializer
+    WidgetPreferenceSerializer,
+    HumanHandOffSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices, AgentTool, WidgetPreference
+from adey_apps.rag.models import (
+    Chat, 
+    Resource, 
+    Message, 
+    MessageTypeChoices, 
+    AgentTool, 
+    WidgetPreference,
+    HumanHandOff,
+)
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
@@ -345,3 +354,20 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+
+class HumanHandOffViewSet(ChatMixin, CreateModelMixin, GenericViewSet):
+    serializer_class = HumanHandOffSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+    def create(self, request, *args, **kwargs):
+        humanhandoff = HumanHandOff.objects.filter(bot=request.chat, session_id=self.kwargs.get("session_id")).first()
+
+        serializer = self.get_serializer(data=request.data, instance=humanhandoff,)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+

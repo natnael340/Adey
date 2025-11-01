@@ -13,6 +13,8 @@ import {
   UserMessageType,
   UserMessageDataWithPagination,
   UserType,
+  HandoffType,
+  MessageType,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -77,6 +79,19 @@ class Api {
     const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
     return data;
   }
+  async send_human_handoff(
+    bot_slug: string,
+    session_id: string,
+    req_data: HandoffType
+  ) {
+    const { data } = await this.axios.post<HandoffType>(
+      `rag/${bot_slug}/${session_id}/handoff/`,
+      req_data
+    );
+
+    return data;
+  }
+
   async add_tool(chat_slug: string, tool: string) {
     const { data } = await this.axios.post<GenericResponseType>(
       `rag/chat/${chat_slug}/tools/${tool}`

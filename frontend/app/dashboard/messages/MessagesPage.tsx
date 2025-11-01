@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Messages from "./Messages";
 import SessionMessages from "./SessionMessages";
 import { ChatType, UserMessageDataWithPagination } from "@/app/types/types";

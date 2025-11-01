@@ -1,4 +1,3 @@
-from rest_framework import generics
 from django_filters import rest_framework as filters
 from adey_apps.rag.models import Message, Chat
 
