@@ -22,6 +22,7 @@ from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAP
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from adey_apps.rag.utils import URLTextLoader, URLPdfLoader
@@ -321,14 +322,19 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
                 .annotate(last_pk=Max('pk'))
                 .values_list('last_pk', flat=True)
         )
-        return Message.objects.filter(pk__in=latest_per_pair).select_related('chat')
+        return Message.objects.filter(pk__in=latest_per_pair).order_by("-created").select_related('chat')
     
-    @action(detail=False, methods=["GET"], url_path=r"(?P<session_id>[^/.]+)")
+    @action(detail=False, methods=["GET"], url_path=r"(?P<bot_slug>[^/.]+)/(?P<session_id>[^/.]+)")
     def message_by_session(self, request, *args, **kwargs):
+        bot_slug = kwargs.get("bot_slug")
         session_id = kwargs.get("session_id")
+
+        try:
+            chat = Chat.objects.get(slug=bot_slug, user=request.user)
+        except Chat.DoesNotExist:
+            raise NotFound("Bot not found.")
         
-        user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
-        messages = Message.objects.filter(session_id=session_id, chat_id__in=user_chats).order_by("created")
+        messages = Message.objects.filter(session_id=session_id, chat=chat).order_by("created")
 
         queryset = self.filter_queryset(messages)
 

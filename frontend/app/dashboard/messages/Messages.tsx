@@ -28,9 +28,15 @@ function RoleBadge({ role }: { role: string }) {
 interface Props {
   initialData: UserMessageDataWithPagination;
   token: string;
-  onSelect: (id: string) => void;
+  onSelect: ({
+    sessionId,
+    botSlug,
+  }: {
+    sessionId: string;
+    botSlug: string;
+  }) => void;
   botFilter: string; // "ALL" or chat.slug
-  selectedId?: string | null; // to style the active card
+  selectedId?: { sessionId: string; botSlug: string } | null; // to style the active card
 }
 
 const Messages = ({
@@ -117,11 +123,17 @@ const Messages = ({
         ) : (
           <Card
             key={`msg-${idx}`}
-            onClick={() => onSelect(row.msg.session_id)}
+            onClick={() =>
+              onSelect({
+                sessionId: row.msg.session_id,
+                botSlug: row.msg.chat.slug,
+              })
+            }
             className={[
               "cursor-pointer bg-white border-zinc-200 transition",
               "hover:shadow-md hover:border-amber-300/60 hover:bg-amber-50/30",
-              selectedId === row.msg.session_id
+              selectedId?.sessionId === row.msg.session_id &&
+              selectedId?.botSlug === row.msg.chat.slug
                 ? "ring-2 ring-amber-400 border-amber-400 bg-amber-50"
                 : "",
             ].join(" ")}

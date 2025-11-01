@@ -13,11 +13,12 @@ import { UserMessageType } from "@/app/types/types";
 import { Send } from "lucide-react";
 
 interface Props {
+  botSlug: string;
   sessionId: string;
   token: string;
 }
 
-export default function SessionMessages({ sessionId, token }: Props) {
+export default function SessionMessages({ botSlug, sessionId, token }: Props) {
   const api = new Api(token);
   const [messages, setMessages] = useState<UserMessageType[]>([]);
   const [next, setNext] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export default function SessionMessages({ sessionId, token }: Props) {
     (async () => {
       try {
         // ⬇️ If your API is different, replace this call:
-        const data = await api.get_messages_by_session(sessionId);
+        const data = await api.get_messages_by_session(botSlug, sessionId);
         if (cancelled) return;
         setMessages(data.results || []);
         setNext(data.next || null);

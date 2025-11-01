@@ -19,7 +19,10 @@ interface Props {
 }
 
 const MessagesPage = ({ initialData, token, bots }: Props) => {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{
+    sessionId: string;
+    botSlug: string;
+  } | null>(null);
   const [bot, setBot] = useState<string>("ALL");
 
   return (
@@ -53,7 +56,11 @@ const MessagesPage = ({ initialData, token, bots }: Props) => {
 
       <div className="flex-1">
         {selected ? (
-          <SessionMessages sessionId={selected} token={token} />
+          <SessionMessages
+            sessionId={selected.sessionId}
+            botSlug={selected.botSlug}
+            token={token}
+          />
         ) : (
           <div className="h-full flex items-center justify-center bg-white rounded-xl">
             <span className="text-gray-500">Select a conversation</span>

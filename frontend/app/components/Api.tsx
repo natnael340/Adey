@@ -66,10 +66,14 @@ class Api {
     return data;
   }
 
-  async get_messages_by_session(session_id: string, page?: string) {
+  async get_messages_by_session(
+    bot_slug: string,
+    session_id: string,
+    page?: string
+  ) {
     const url = page
       ? page.replace(`${BASE_URL}/api/v1/`, "")
-      : `rag/messages/${session_id}/`;
+      : `rag/messages/${bot_slug}/${session_id}/`;
     const { data } = await this.axios.get<UserMessageDataWithPagination>(url);
     return data;
   }
