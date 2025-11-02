@@ -17,17 +17,20 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 from adey_apps.rag.utils import URLTextLoader, URLPdfLoader
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
+from adey_apps.rag.filters import MessageFilter
 from adey_apps.rag.serializers import (
     ChatSerializer, 
     ChatCreateSerializer, 
@@ -38,10 +41,19 @@ from adey_apps.rag.serializers import (
     ChatBotAnalyticsSerializer,
     ChatDetailSerializer,
     MessageListSerializer,
-    WidgetPreferenceSerializer
+    WidgetPreferenceSerializer,
+    HumanHandOffSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.models import Chat, Resource, Message, MessageTypeChoices, AgentTool, WidgetPreference
+from adey_apps.rag.models import (
+    Chat, 
+    Resource, 
+    Message, 
+    MessageTypeChoices, 
+    AgentTool, 
+    WidgetPreference,
+    HumanHandOff,
+)
 from adey_apps.rag.tasks import get_rag_response
 from adey_apps.rag.utils import Url
 from adey_apps.adey_commons.paginations import StandardResultsSetPagination
@@ -307,6 +319,8 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
     serializer_class = MessageListSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = MessageFilter
 
     def get_queryset(self):
         user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
@@ -317,13 +331,43 @@ class MessagesViewSet(ListModelMixin, GenericViewSet):
                 .annotate(last_pk=Max('pk'))
                 .values_list('last_pk', flat=True)
         )
-        return Message.objects.filter(pk__in=latest_per_pair).select_related('chat')
+        return Message.objects.filter(pk__in=latest_per_pair).order_by("-created").select_related('chat')
     
-    @action(detail=False, methods=["GET"], url_path=r"(?P<session_id>[^/.]+)/")
+    @action(detail=False, methods=["GET"], url_path=r"(?P<bot_slug>[^/.]+)/(?P<session_id>[^/.]+)")
     def message_by_session(self, request, *args, **kwargs):
+        bot_slug = kwargs.get("bot_slug")
         session_id = kwargs.get("session_id")
-        user_chats = Chat.objects.filter(user=self.request.user).values_list('id', flat=True)
-        messages = Message.objects.filter(session_id=session_id, chat_id__in=user_chats).order_by("created")
+
+        try:
+            chat = Chat.objects.get(slug=bot_slug, user=request.user)
+        except Chat.DoesNotExist:
+            raise NotFound("Bot not found.")
+        
+        messages = Message.objects.filter(session_id=session_id, chat=chat).order_by("created")
+
+        queryset = self.filter_queryset(messages)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-        return MessageListSerializer(messages, many=True).data
+
+class HumanHandOffViewSet(ChatMixin, CreateModelMixin, GenericViewSet):
+    serializer_class = HumanHandOffSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+    def create(self, request, *args, **kwargs):
+        humanhandoff = HumanHandOff.objects.filter(bot=request.chat, session_id=self.kwargs.get("session_id")).first()
+
+        serializer = self.get_serializer(data=request.data, instance=humanhandoff,)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+

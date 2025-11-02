@@ -272,3 +272,7 @@ export type UserType = {
   email: string;
   is_verified: boolean;
 };
+
+export type HandoffType = {
+  is_handoff: boolean;
+};

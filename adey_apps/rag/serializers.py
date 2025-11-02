@@ -11,8 +11,8 @@ from django.db.models.functions import TruncDate
 from django.db.models import Count
 from django.core.validators import FileExtensionValidator
 
-from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool, WidgetPreference
-from adey_apps.adey_commons.serializers import ManyToManyListField
+from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool, WidgetPreference, HumanHandOff
+from adey_apps.adey_commons.serializers import ManyToManyListField, SessionDefault, BotDefault
 
 class AssistantCharacterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -376,3 +376,13 @@ class ChatBotSerializer(serializers.Serializer):
                 return request.build_absolute_uri(obj.assistant_picture.url)
             return obj.assistant_picture.url
         return ""
+
+
+class HumanHandOffSerializer(serializers.ModelSerializer):
+    session_id = serializers.HiddenField(default=SessionDefault())
+    bot = serializers.HiddenField(default=BotDefault())
+    is_handoff = serializers.BooleanField()
+
+    class Meta:
+        model = HumanHandOff
+        fields = ("session_id", "bot", "is_handoff")
