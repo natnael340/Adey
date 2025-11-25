@@ -193,7 +193,7 @@ export default function AccountPage() {
         kind: "success",
         text: "Profile photo updated (not yet saved).",
       });
-      if (fileRef.current) fileRef.current.value = "";
+      URL.revokeObjectURL(objectUrl);
     }
     img.onerror = () => {
       setBanner({ kind: "error", text: "The selected file is not a valid image." });
@@ -230,8 +230,8 @@ export default function AccountPage() {
     setPwBusy(true);
     setPwError(null);
     try {
-      if (!pwValid)
-        throw new Error("Passwords must match and be at least 8 characters.");
+      if (!oldPw.trim())
+        throw new Error("Please enter your current password.");
       
       await api.change_password({ old_password: oldPw, new_password: pw, confirm_new_password: pwConfirm });
       
@@ -254,8 +254,7 @@ export default function AccountPage() {
     try {
       await api.delete_account();
       setOpenDelete(false);
-      setBanner({ kind: "success", text: "Your account was removed." });
-      // TODO: redirect or sign-out
+
       await signOut({ callbackUrl: "/auth/login"});
     } catch (e) {
       setBanner({
