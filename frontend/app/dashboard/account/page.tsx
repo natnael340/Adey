@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { signOut } from 'next-auth/react';
 import {
   Card,
   CardHeader,
@@ -20,10 +21,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Upload, X, Trash2, ImageIcon, Lock } from "lucide-react";
+import { Loader2, Upload, X, Trash2, Lock } from "lucide-react";
 
 import { useSession } from "next-auth/react";
 import Api from "../../components/Api";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
 /********************************
  * Helpers
@@ -73,7 +78,7 @@ function Banner({
 /********************************
  * Account Page (Name, Photo, Password, Delete)
  ********************************/
-export default function AccountPage() {
+export default function AccountPage() {  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -85,8 +90,9 @@ export default function AccountPage() {
 
   const { data: session } = useSession();
   const api = useMemo(() => {
-    // @ts-ignore
-    return session?.accessToken ? new Api(session.accessToken as string) : null;
+    const accessToken = (session as {accessToken?: string})?.accessToken;
+
+    return accessToken ? new Api(accessToken): null;
   }, [session]);
 
   const [name, setName] = useState("");
@@ -138,23 +144,64 @@ export default function AccountPage() {
     })();
   }, [api]);
 
+  const refreshUserInfo = async () => {
+    if (!api) return;
+    setLoading(true);
+    
+    try {
+      const me = await api.get_user_info();
+      setName(me.name || "");
+      setEmail(me.email);
+      setAvatarUrl(me.avatar || "");
+    } catch (e) {
+      setBanner({
+        kind: "error",
+        text: "Failed to refresh your profile. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onPickFile = () => fileRef.current?.click();
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setBanner({ kind: "error", text: "Please choose an image file." });
+    
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setBanner({ kind: "error", text: "Only JPEG, PNG, GIF, and WebP images are allowed." });
       return;
     }
     
-    setSelectedFile(file);
+    if (file.size > MAX_FILE_SIZE) {
+      setBanner({ kind: "error", text: "Image must be less than 5MB." });
+      return;
+    }
+
+    if (!ALLOWED_EXTENSIONS.some(ext => file.name.toLowerCase().endsWith(ext))) {
+      setBanner({ kind: "error", text: "File extension not allowed. Please use JPEG, PNG, GIF, or WebP." });
+      return;
+    }
+
     const objectUrl = URL.createObjectURL(file);
-    setAvatarUrl(objectUrl);
-    setBanner({
+    const img = new window.Image();
+    img.onload = () => {
+      setSelectedFile(file);
+      setAvatarUrl(objectUrl);
+      setBanner({
         kind: "success",
         text: "Profile photo updated (not yet saved).",
-    });
+      });
+      if (fileRef.current) fileRef.current.value = "";
+    }
+    img.onerror = () => {
+      setBanner({ kind: "error", text: "The selected file is not a valid image." });
+      URL.revokeObjectURL(objectUrl);
+    };
+    
+    
+    img.src = objectUrl;
     
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -162,15 +209,19 @@ export default function AccountPage() {
   const onSave = async () => {
     if (!api) return;
     setSaving(true);
+    selectedFile && setUploading(true);
+    selectedFile && setUploadPct(0);
     setBanner(null);
     try {
-      await api.update_profile({ name: name.trim(), avatar: selectedFile || undefined });
+      const result = await api.update_profile({ name: name.trim(), avatar: selectedFile || undefined }, selectedFile ? setUploadPct : undefined);
       setBanner({ kind: "success", text: "Profile saved." });
+      setAvatarUrl(result.avatar || avatarUrl);
       setSelectedFile(null);
     } catch (e: any) {
       setBanner({ kind: "error", text: e?.message || "Save failed." });
     } finally {
       setSaving(false);
+      selectedFile && setUploading(false);
     }
   };
 
@@ -182,21 +233,6 @@ export default function AccountPage() {
       if (!pwValid)
         throw new Error("Passwords must match and be at least 8 characters.");
       
-      // We need old password too, but the UI only asks for new password.
-      // The backend requires old_password.
-      // I should update the UI to ask for old password or update backend to not require it (unsafe).
-      // For now, I'll assume the UI needs to be updated to include old password field.
-      // But I can't easily change the UI structure without more context.
-      // Wait, the mock API didn't ask for old password.
-      // The backend `ChangePasswordSerializer` requires `old_password`.
-      // I must add `old_password` field to the UI.
-      
-      // For this step, I will just call the API and let it fail if I don't send old_password,
-      // but I should add the field.
-      // Let's add the field in the JSX later.
-      // Here I will send what I have, but I need `old_password`.
-      
-      // Let's assume I will add `oldPw` state.
       await api.change_password({ old_password: oldPw, new_password: pw, confirm_new_password: pwConfirm });
       
       setPw("");
@@ -220,7 +256,7 @@ export default function AccountPage() {
       setOpenDelete(false);
       setBanner({ kind: "success", text: "Your account was removed." });
       // TODO: redirect or sign-out
-      window.location.href = "/auth/login";
+      await signOut({ callbackUrl: "/auth/login"});
     } catch (e) {
       setBanner({
         kind: "error",
@@ -314,7 +350,7 @@ export default function AccountPage() {
           <div className="flex gap-2">
             <Button
               variant="secondary"
-              onClick={() => window.location.reload()}
+              onClick={refreshUserInfo}
               disabled={saving || loading}
             >
               <X className="mr-2 h-4 w-4" /> Reset

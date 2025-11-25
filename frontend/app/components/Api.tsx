@@ -15,6 +15,7 @@ import {
   UserType,
   HandoffType,
   MessageType,
+  PasswordChangeType,
 } from "../types/types";
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_BACKEND_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_DOMAIN}`;
@@ -46,16 +47,21 @@ class Api {
     return data;
   }
 
-  async update_profile(profileData: { name?: string; avatar?: File }) {
+  async update_profile(profileData: { name?: string; avatar?: File }, onProgress?: (progress: number) => void) {
     const form = new FormData();
     if (profileData.name) form.append("name", profileData.name);
     if (profileData.avatar) form.append("avatar", profileData.avatar);
 
-    const { data } = await this.axios.patch<UserType>("user/me", form);
+    const { data } = await this.axios.patch<UserType>("user/me", form, {onUploadProgress: (event) => {
+      if(!onProgress || !event.total) return;
+      const pct = Math.round((event.loaded * 100) / event.total);
+      onProgress(pct);
+    }});
+
     return data;
   }
 
-  async change_password(passwordData: any) {
+  async change_password(passwordData: PasswordChangeType) {
     const { data } = await this.axios.post("user/me/password", passwordData);
     return data;
   }

@@ -14,7 +14,6 @@ from adey_apps.users.views import (
     EmailVerificationView,
     PasswordResetView,
     PasswordResetConfirmView,
-    PasswordResetConfirmView,
     UserViewSet,
 )
 

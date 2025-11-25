@@ -1,6 +1,9 @@
 import pytest
 from adey_apps.users.serializers import ChangePasswordSerializer
 
+pytestmark = pytest.mark.django_db
+
+
 def test_change_password_serializer_valid():
     data = {
         'old_password': 'old_password',

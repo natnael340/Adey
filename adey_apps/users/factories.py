@@ -10,5 +10,5 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     email = factory.Faker("email")
     name = factory.Faker("name")
-    avatar = factory.Faker("image_url")
+    avatar = factory.django.ImageField()
     is_verified = True

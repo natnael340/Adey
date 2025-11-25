@@ -257,8 +257,8 @@ class UserViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Gener
         
         user = request.user
         if not user.check_password(serializer.validated_data.get("old_password")):
-            return Response({"message": "Wrong password.", "serializer_class": serializer.__class__.__name__ }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False, "message": "Wrong password."}, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(serializer.validated_data.get("new_password"))
         user.save()
-        return Response({"message": "Password changed successfully."})
+        return Response({"success": True, "message": "Password changed successfully."})

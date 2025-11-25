@@ -1,6 +1,5 @@
 import pytest
 from adey_apps.users.serializers import UserDetailSerializer
-from adey_apps.users.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 

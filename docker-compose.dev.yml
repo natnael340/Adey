@@ -54,6 +54,10 @@ services:
     depends_on:
       - broker
       - adey_backend
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/frontend
+      - /usr/src/app/chat_widget
     networks:
       - adey_network
     command: /bin/bash -c "celery -A adey worker --loglevel=info"
