@@ -271,6 +271,8 @@ export type ResponseErrorType = {
 export type UserType = {
   email: string;
   is_verified: boolean;
+  name?: string;
+  avatar?: string;
 };
 
 export type HandoffType = {

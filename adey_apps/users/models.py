@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.encoding import force_str
 
 from adey_apps.adey_commons.models import BaseModel
+from adey_apps.adey_commons.utils import get_user_avatar_upload_path
 
 
 # Create your models here.
@@ -43,10 +44,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     identifier = models.UUIDField(
         "Identifier", unique=True, db_index=True, editable=False, default=uuid4
     )
+    name = models.CharField("Name", max_length=256, blank=True, null=True)
     email = models.EmailField("Email", max_length=255, unique=True)
     is_verified = models.BooleanField("IsVerified", default=False)
     is_staff = models.BooleanField("IsStaff", default=False)
     is_superuser = models.BooleanField("IsSuperuser", default=False)
+
+    avatar = models.ImageField(upload_to=get_user_avatar_upload_path, blank=True, null=True, default=None)
     
     objects = UserManager()
 

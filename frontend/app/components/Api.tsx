@@ -46,6 +46,25 @@ class Api {
     return data;
   }
 
+  async update_profile(profileData: { name?: string; avatar?: File }) {
+    const form = new FormData();
+    if (profileData.name) form.append("name", profileData.name);
+    if (profileData.avatar) form.append("avatar", profileData.avatar);
+
+    const { data } = await this.axios.patch<UserType>("user/me", form);
+    return data;
+  }
+
+  async change_password(passwordData: any) {
+    const { data } = await this.axios.post("user/me/password", passwordData);
+    return data;
+  }
+
+  async delete_account() {
+    const { data } = await this.axios.delete("user/me");
+    return data;
+  }
+
   async get_chatbots() {
     const { data } = await this.axios.get<ChatType[]>("rag/chats");
     return data;

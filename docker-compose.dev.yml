@@ -1,5 +1,3 @@
-version: "3.9"
-
 volumes:
   adey_backend_db_data: {}
 
@@ -19,24 +17,11 @@ services:
     networks:
       - adey_network
 
-  broker:
-    image: rabbitmq:3-management
-    hostname: rabbit1
-    env_file:
-      - .env
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    expose:
-      - "5672"
-    networks:
-      - adey_network
-
   adey_backend:
     image: adey_backend
     container_name: adey_backend
     build:
-      dockerfile: ./devops/docker/python/Dockerfile
+      dockerfile: ./devops/docker/python/local/Dockerfile
       context: ./
     restart: on-failure
     ports:
@@ -52,9 +37,34 @@ services:
       - /usr/src/app/chat_widget
     networks:
       - adey_network
-    command: /bin/bash -c "python manage.py migrate && celery -A adey worker --loglevel=info & python manage.py runserver 0.0.0.0:8000"
+    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     stdin_open: true
     tty: true
+  
+  worker:
+    image: adey_celery_worker
+    container_name: adey_celery_worker
+    build:
+      dockerfile: ./devops/docker/python/local/Dockerfile
+      context: ./
+    restart: on-failure
+    working_dir: /usr/src/app
+    env_file:
+      - .env
+    depends_on:
+      - broker
+      - adey_backend
+    networks:
+      - adey_network
+    command: /bin/bash -c "celery -A adey worker --loglevel=info"
+
+  broker:
+    image: rabbitmq:3-management
+    hostname: rabbit1
+    env_file:
+      - .env
+    networks:
+      - adey_network
 
 networks:
   adey_network:
