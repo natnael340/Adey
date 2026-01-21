@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { FileText, MessageSquare, ArrowUpRight } from "lucide-react";
 
 type PropTypes = {
   slug: string;
@@ -10,6 +11,7 @@ type PropTypes = {
   conversations: number;
   image: string;
 };
+
 const ChatCard = ({
   slug,
   name,
@@ -21,46 +23,55 @@ const ChatCard = ({
 }: PropTypes) => {
   return (
     <a
-      className="shadow-lg flex flex-row gap-x-2 cursor-pointer bg-white rounded-xl p-6 justify-between hover:shadow-2xl transition-shadow duration-150"
+      className="group relative flex flex-col bg-white rounded-2xl border border-slate-200/60 p-5 transition-all duration-300 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50"
       href={`/dashboard/bots/${slug}`}
     >
-      <div className="flex flex-col justify-between w-full">
-        <div>
-          <div className="flex flex-row items-center space-x-2 mb-4">
-            <div>
-              <Image
-                src={image}
-                width={100}
-                height={100}
-                className="rounded-full h-14 w-14"
-                alt="assistant image"
-                quality={100}
-              />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold capitalize">{name}</h1>
-              <span className="text-sm text-gray-400 capitalize">
-                {characters.join(" | ")}
-              </span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 my-2 text-ellipsis line-clamp-3 overflow-hidden">
-            {description}
-          </p>
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 group-hover:bg-slate-900 group-hover:text-white transition-colors">
+          <ArrowUpRight className="h-4 w-4" />
         </div>
-        <div className="flex flex-row gap-2 flex-wrap">
-          <div className="flex rounded-full flex-row gap-x-2 items-center bg-[#EDD447]">
-            <p className="pl-3 text-sm text-[#59595B]">Resources</p>
-            <div className="rounded-full text-sm w-7 h-7 flex items-center justify-center text-white bg-[#C3A811]">
-              {resources}
-            </div>
-          </div>
-          <div className="flex rounded-full flex-row gap-x-2 items-center bg-[#EDD447]">
-            <p className="pl-3 text-sm text-[#59595B]">Conversations</p>
-            <div className="rounded-full text-sm w-7 h-7 flex items-center justify-center text-white bg-[#C3A811]">
-              {conversations}
-            </div>
-          </div>
+      </div>
+
+      <div className="flex items-start gap-4 mb-4">
+        <div className="relative shrink-0">
+          <Image
+            src={image}
+            width={56}
+            height={56}
+            className="rounded-xl h-14 w-14 object-cover ring-2 ring-slate-100"
+            alt={`${name} avatar`}
+            quality={100}
+          />
+          <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white" />
+        </div>
+        <div className="min-w-0 flex-1 pr-8">
+          <h2 className="text-base font-semibold text-slate-800 capitalize truncate">
+            {name}
+          </h2>
+          {characters.length > 0 && (
+            <p className="text-sm text-slate-500 capitalize truncate">
+              {characters.join(" · ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {description && (
+        <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mb-4">
+          {description}
+        </p>
+      )}
+
+      <div className="mt-auto pt-4 border-t border-slate-100 flex items-center gap-4">
+        <div className="flex items-center gap-1.5 text-slate-500">
+          <FileText className="h-4 w-4" />
+          <span className="text-sm font-medium">{resources}</span>
+          <span className="text-xs text-slate-400">resources</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-slate-500">
+          <MessageSquare className="h-4 w-4" />
+          <span className="text-sm font-medium">{conversations}</span>
+          <span className="text-xs text-slate-400">chats</span>
         </div>
       </div>
     </a>
