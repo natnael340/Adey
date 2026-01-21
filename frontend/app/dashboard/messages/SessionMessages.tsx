@@ -2,15 +2,12 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Api from "@/app/components/Api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserMessageType } from "@/app/types/types";
-import { Send } from "lucide-react";
+import { Send, Loader2, Bot, User, Headphones } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   botSlug: string;
@@ -25,11 +22,9 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
   const [prev, setPrev] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // human takeover state
   const [takeover, setTakeover] = useState(false);
   const [text, setText] = useState("");
 
-  // initial fetch
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -39,7 +34,6 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
     setTakeover(false);
     (async () => {
       try {
-        // ⬇️ If your API is different, replace this call:
         const data = await api.get_messages_by_session(botSlug, sessionId);
         if (cancelled) return;
         setMessages(data.results || []);
@@ -52,13 +46,11 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId, token]);
 
-  // scroll to bottom on new messages
-  const areaRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const el = areaRef.current;
+    const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [messages]);
@@ -83,8 +75,6 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
     const payload = text.trim();
     setText("");
     try {
-      // TODO: HANDOFF WS implementation
-
       const msg: UserMessageType = {
         username: "Agent",
         message: payload,
@@ -99,103 +89,167 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
+  };
+
   return (
-    <div className="h-full p-4">
-      <Card className="h-full">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">Conversation</CardTitle>
-            <div className="flex items-center gap-2">
-              <Switch
-                id="takeover"
-                checked={takeover}
-                onCheckedChange={(v) => onTakeoverChange(Boolean(v))}
-              />
-              <Label htmlFor="takeover" className="text-sm">
-                {takeover
-                  ? "You are taking over"
-                  : "AI is handling the conversation"}
-              </Label>
-            </div>
+    <div className="h-full flex flex-col bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+            <Headphones className="h-5 w-5 text-slate-600" />
           </div>
-        </CardHeader>
+          <div>
+            <h3 className="font-semibold text-slate-800">Conversation</h3>
+            <p className="text-xs text-slate-500">
+              Session: {sessionId.slice(0, 8)}...
+            </p>
+          </div>
+        </div>
 
-        <CardContent className="pt-0 h-[calc(100%-56px)] flex flex-col gap-3">
-          {/* Thread */}
-          <ScrollArea
-            ref={areaRef}
-            className="flex-1 rounded-md border bg-white p-3"
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+              takeover
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-slate-100 text-slate-600"
+            )}
           >
-            <div className="space-y-3">
-              {loading && <div className="text-sm text-zinc-500">Loading…</div>}
-              {!loading &&
-                messages.map((m, i) => {
-                  const mine = m.message_type === "HUMAN";
-                  return (
-                    <div
-                      className={`flex ${
-                        mine ? "justify-end" : "justify-start"
-                      }`}
-                      key={m.created + i}
-                    >
-                      {!mine && (
-                        <Avatar className="mr-2 h-6 w-6">
-                          <AvatarImage
-                            src={m.chat.assistant_picture_url || ""}
-                          />
-                          <AvatarFallback>🤖</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <div
-                        className={[
-                          "max-w-[75%] rounded-2xl px-3 py-2 text-sm",
-                          mine
-                            ? "bg-amber-400 text-amber-950"
-                            : "bg-zinc-300 text-zinc-900",
-                        ].join(" ")}
-                      >
-                        <p className="whitespace-pre-wrap">{m.message}</p>
-                        <div
-                          className={`mt-1 text-[10px] ${
-                            mine ? "text-amber-900/70" : "text-zinc-700"
-                          }`}
-                        >
-                          {fmtTime(m.created)}
-                        </div>
-                      </div>
-                      {mine && (
-                        <Avatar className="ml-2 h-6 w-6">
-                          <AvatarImage src="" />
-                          <AvatarFallback>🙂</AvatarFallback>
-                        </Avatar>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </ScrollArea>
+            {takeover ? (
+              <>
+                <User className="h-3.5 w-3.5" />
+                You&apos;re responding
+              </>
+            ) : (
+              <>
+                <Bot className="h-3.5 w-3.5" />
+                AI handling
+              </>
+            )}
+          </div>
+          <Switch
+            id="takeover"
+            checked={takeover}
+            onCheckedChange={(v) => onTakeoverChange(Boolean(v))}
+          />
+        </div>
+      </div>
 
-          {/* Composer */}
-          <div className="flex gap-2">
-            <Textarea
+      {/* Messages area */}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/50"
+      >
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
+        )}
+
+        {!loading && messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <p className="text-sm text-slate-500">No messages in this conversation</p>
+          </div>
+        )}
+
+        {!loading &&
+          messages.map((m, i) => {
+            const isHuman = m.message_type === "HUMAN";
+            return (
+              <div
+                key={m.created + i}
+                className={cn("flex gap-3", isHuman ? "flex-row-reverse" : "")}
+              >
+                <Avatar
+                  className={cn(
+                    "h-8 w-8 shrink-0",
+                    isHuman ? "ring-2 ring-slate-200" : "ring-2 ring-emerald-200"
+                  )}
+                >
+                  {!isHuman && m.chat.assistant_picture_url ? (
+                    <AvatarImage src={m.chat.assistant_picture_url} />
+                  ) : null}
+                  <AvatarFallback
+                    className={cn(
+                      isHuman
+                        ? "bg-slate-700 text-white"
+                        : "bg-emerald-100 text-emerald-700"
+                    )}
+                  >
+                    {isHuman ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div
+                  className={cn(
+                    "max-w-[70%] rounded-2xl px-4 py-2.5",
+                    isHuman
+                      ? "bg-slate-900 text-white rounded-tr-md"
+                      : "bg-white border border-slate-200 text-slate-800 rounded-tl-md"
+                  )}
+                >
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {m.message}
+                  </p>
+                  <p
+                    className={cn(
+                      "text-[10px] mt-1.5",
+                      isHuman ? "text-slate-400" : "text-slate-400"
+                    )}
+                  >
+                    {fmtTime(m.created)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Composer */}
+      <div className="p-4 border-t border-slate-100 bg-white">
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <textarea
               value={text}
               disabled={!takeover}
               onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={
-                takeover ? "Type a reply…" : "Enable takeover to reply"
+                takeover
+                  ? "Type your message... (Enter to send)"
+                  : "Enable takeover to respond"
               }
-              className="min-h-[44px]"
+              rows={1}
+              className={cn(
+                "w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all",
+                !takeover && "bg-slate-50 cursor-not-allowed"
+              )}
             />
-            <Button
-              onClick={onSend}
-              disabled={!takeover || !text.trim()}
-              className="self-end"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            onClick={onSend}
+            disabled={!takeover || !text.trim()}
+            className="h-[46px] px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+        {!takeover && (
+          <p className="text-xs text-slate-400 mt-2 text-center">
+            Toggle the switch above to take over this conversation
+          </p>
+        )}
+      </div>
     </div>
   );
 }
