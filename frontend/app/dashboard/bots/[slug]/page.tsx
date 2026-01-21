@@ -3,13 +3,13 @@ import React from "react";
 import Api from "@/app/components/Api";
 import ChatBox from "../../components/ChatBox";
 import Code from "../../components/Code";
-import Resources from "./Resources";
 import AllowedURLList from "./AllowedURLList";
 import ChatDetailContext from "./ChatDetailContext";
 import ChatDetail from "./ChatDetail";
 import { authToken } from "@/app/components/protected_api";
 import Tools from "./Tools";
 import Preferences from "./Preferences";
+import { Code2 } from "lucide-react";
 
 type PropType = {
   params: {
@@ -17,7 +17,7 @@ type PropType = {
   };
 };
 
-const page = async ({ params: { slug } }: PropType) => {
+const BotDetailPage = async ({ params: { slug } }: PropType) => {
   const token = await authToken();
   const api = new Api(token);
   const chat = await api.get_chatbot(slug);
@@ -25,66 +25,98 @@ const page = async ({ params: { slug } }: PropType) => {
 
   return (
     <ChatDetailContext bot={chat} identifier={slug} token={token}>
-      <div className="px-5 py-5 flex flex-col gap-y-5">
+      <div className="flex flex-col gap-6 min-w-0">
         <ChatDetail />
-        <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
-          <h3 className="font-bold text-xl mb-3">
-            Integration Guide: Chatbot Integration
-          </h3>
-          <p>
-            To integrate our chatbot into your website or web application,
-            please follow the steps below:
-          </p>
-          <h5 className="font-semibold text-lg">
-            Step 1: Add Your Chat Identifier
-          </h5>
-          <p>
-            In the &lt;head&gt; section of your HTML page, add the following
-            meta tag to specify the chat identifier:
-          </p>
-          <Code
-            code={`<meta name="adey_chat_id" content="${chat.identifier}" />`}
-          />
-          <h5 className="font-semibold text-lg">Step 2: Add CSS for Widget</h5>
-          <p>
-            To style the chatbot widget, add the following CSS link tag in the
-            &lt;head&gt; section of your HTML page:
-          </p>
-          <Code
-            code={`<link rel="stylesheet" crossorigin href="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.css" />`}
-          />
-          <p>
-            This link tag will load the CSS file required for the chatbot
-            widget. Ensure that the href attribute points to the correct
-            location of the CSS file.
-          </p>
-          <h5 className="font-semibold text-lg">
-            Step 3: Add Script for Widget
-          </h5>
-          <p>
-            At the end of your HTML page, just before the closing
-            &lt;/body&gt;tag, add the following script tag to load the chatbot
-            script:
-          </p>
-          <Code
-            code={`<script type="module" crossorigin src="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js"></script>`}
-          />
-          <p>
-            This script tag will load the JavaScript code responsible for
-            initializing and displaying the chatbot. Make sure that the src
-            attribute points to the correct location of the JavaScript file.
-          </p>
+
+        {/* Integration Guide */}
+        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+              <Code2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Integration Guide</h3>
+              <p className="text-xs text-slate-500">
+                Add the chatbot widget to your website
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Step 1 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">
+                  1
+                </span>
+                <h4 className="font-medium text-slate-800">
+                  Add Your Chat Identifier
+                </h4>
+              </div>
+              <p className="text-sm text-slate-600 ml-8">
+                In the <code className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">&lt;head&gt;</code> section of your HTML page, add the following meta tag:
+              </p>
+              <div className="ml-8">
+                <Code
+                  code={`<meta name="adey_chat_id" content="${chat.identifier}" />`}
+                />
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">
+                  2
+                </span>
+                <h4 className="font-medium text-slate-800">
+                  Add CSS for Widget
+                </h4>
+              </div>
+              <p className="text-sm text-slate-600 ml-8">
+                Add the following CSS link tag in the <code className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">&lt;head&gt;</code> section:
+              </p>
+              <div className="ml-8">
+                <Code
+                  code={`<link rel="stylesheet" crossorigin href="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.css" />`}
+                />
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-medium text-white">
+                  3
+                </span>
+                <h4 className="font-medium text-slate-800">
+                  Add Script for Widget
+                </h4>
+              </div>
+              <p className="text-sm text-slate-600 ml-8">
+                Just before the closing <code className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono">&lt;/body&gt;</code> tag, add this script:
+              </p>
+              <div className="ml-8">
+                <Code
+                  code={`<script type="module" crossorigin src="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js"></script>`}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <AllowedURLList />
-        <div className="bg-white p-5 rounded-xl text-gray-900 space-y-3">
+
+        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
           <Tools initialData={chat.resources} tools={chat.tools} />
         </div>
+
         <Preferences preferences={preferences} />
-        {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : <></>}
+
+        {chat.identifier ? <ChatBox chat_id={chat.identifier} /> : null}
       </div>
     </ChatDetailContext>
   );
 };
 
-export default page;
+export default BotDetailPage;

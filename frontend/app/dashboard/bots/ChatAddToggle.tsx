@@ -10,11 +10,11 @@ const ChatAddToggle = () => {
   return (
     <DialogTrigger asChild>
       <button
-        className="w-32 flex flex-row items-center space-x-1 justify-center bg-[#EDD447] text-[#45464B] py-1 rounded-lg"
+        className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
         onClick={toggleFormOpen}
       >
-        <Plus size={32} />
-        <span>Add Bot</span>
+        <Plus className="h-4 w-4" />
+        <span>Create Bot</span>
       </button>
     </DialogTrigger>
   );
