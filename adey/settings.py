@@ -179,18 +179,20 @@ PASSWORD_RESET_TIMEOUT = env.int("PASSWORD_RESET_TIMEOUT", 10800)
 
 
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "adey_apps.adey_commons.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         )
 }
 
+UPDATE_LAST_LOGIN = True
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
-    "UPDATE_LAST_LOGIN": True,
+    "UPDATE_LAST_LOGIN": UPDATE_LAST_LOGIN,
     "SIGNING_KEY": env.str("JWT_SECRET", "simplejwtkey"),
     "ALGORITHM": "HS512"
 }

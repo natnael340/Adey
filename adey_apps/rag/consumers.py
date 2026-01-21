@@ -3,7 +3,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from channels.exceptions import DenyConnection
 from django.conf import settings
 from adey_apps.rag.agent_v2 import Agent
-from adey_apps.rag.models import Chat, Message, MessageTypeChoices
+from adey_apps.rag.models import Chat, Message, MessageTypeChoices, HumanHandOff
 from adey_apps.adey_commons.permissions import has_chat_request_permission
 from adey_apps.rag.utils import key_value_to_dict
 import logging
@@ -20,13 +20,14 @@ class ChatConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.room_name = None
+        self.humanhandoff = False
 
     def connect(self):
         headers = dict(self.scope["headers"])
         
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
         cookie = headers.get(b"cookie", None)
-        print
+        
         if cookie:
             cookie = key_value_to_dict(cookie.decode("utf-8"))
             if cookie.get("user_session_id"):
@@ -36,13 +37,17 @@ class ChatConsumer(JsonWebsocketConsumer):
         else:
             raise DenyConnection("Unauthorized")
 
-        try:
+        try:        
             chat = Chat.objects.get(identifier=self.chat_id)
             if not self.check_permission(headers, chat):
                 raise DenyConnection("Origin denied.")
+            
+            self.humanhandoff = HumanHandOff.objects.filter(session_id=self.session_id, is_handoff=True, ).exists()
             self.chat = chat
-            self.agent = Agent(chat)
             initial_message_exists = Message.objects.filter(chat=chat, session_id=self.session_id).exists()
+            if not self.humanhandoff:
+                self.agent = Agent(chat)
+                
             if not initial_message_exists and self.session_id:
                 self.accept()
                 Message.objects.create(
@@ -51,7 +56,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                     message=chat.intro_text,
                     message_type=MessageTypeChoices.AI,
                 )
-                #self.agent.setup_chain(self.session_id, new_chat=True)
+                
                 self.send_json({
                     "message_type": MessageTypeChoices.AI,
                     "message": chat.intro_text,
@@ -60,7 +65,8 @@ class ChatConsumer(JsonWebsocketConsumer):
                 raise DenyConnection("Session ID not set")
             else:
                 self.session_id = self.session_id
-                #self.agent.setup_chain(self.session_id)
+                
+                
                 self.accept()        
         except Chat.DoesNotExist:
             raise DenyConnection("Chat with this identifier does not exist.")
@@ -77,8 +83,17 @@ class ChatConsumer(JsonWebsocketConsumer):
         return origin in chat.allowed_urls
 
 
-    def receive_json(self, content, **kwargs):
+    def receive_json(self, content, **kwargs):  
         if content["type"] == "message":
+            if self.humanhandoff:
+                Message.objects.create(
+                    chat=self.chat, 
+                    session_id=self.session_id, 
+                    message=content["message"],
+                    message_type=MessageTypeChoices.HUMAN,
+                )
+                return
+            
             if not has_chat_request_permission(self.chat.user):
                self.send_json({
                 "type": "error",

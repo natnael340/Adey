@@ -165,3 +165,19 @@ class AgentTool(BaseModel):
         if not self.slug:
             self.slug = slugify(self.name)
         return super().save(**kwargs)
+
+
+class HumanHandOff(BaseModel):
+    session_id = models.CharField("Session ID", max_length=256)
+    bot = models.ForeignKey(to=Chat, verbose_name="Bot", on_delete=models.CASCADE)
+    is_handoff = models.BooleanField("Is Handoff", default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("session_id", "bot"), name="unique_together_session_and_bot"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.bot.slug} - {self.session_id} - {self.is_handoff}"

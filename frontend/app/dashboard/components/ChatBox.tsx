@@ -14,7 +14,7 @@ import Message from "./ChatMessage";
 import useWebSocket from "react-use-websocket";
 import { AI, HUMAN } from "@/app/constants/consts";
 import { MessageType, PreferenceType, ProfileType } from "@/app/types/types";
-import { Context } from "../chats/[slug]/ChatDetailContext";
+import { Context } from "../bots/[slug]/ChatDetailContext";
 
 type PropType = {
   chat_id: string;

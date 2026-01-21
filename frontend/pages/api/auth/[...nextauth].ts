@@ -5,6 +5,7 @@ import {
   AuthenticatedUserToken,
   AuthenticationResponseType,
 } from "@/app/types/types";
+import { APIError } from "@/pages/api/auth/errors";
 import axios, { AxiosError } from "axios";
 import NextAuth, {
   Account,
@@ -77,7 +78,7 @@ export const authOptions: NextAuthOptions = {
         email: {
           label: "Email",
           type: "email",
-          placeholder: "malik@gmail.com",
+          placeholder: "jondoe@gmail.com",
         },
         password: {
           label: "Password",
@@ -94,39 +95,39 @@ export const authOptions: NextAuthOptions = {
           });
           const user: AuthenticatedUser = {
             id: "user_id",
-            accessToken: data.token,
+            accessToken: data.access,
             refreshToken: data.refresh,
           };
           return user;
         } catch (error: any) {
-          console.error(error);
           const x: AxiosError = error;
           if (x.response?.data) {
+            throw new APIError(x.response.data as { [key: string]: string });
             // console.error(x.response?.data, x.message);
             // @ts-ignore
-            if (x.response?.data?.non_field_errors) {
-              throw new Error(
-                JSON.stringify({
-                  // @ts-ignore
-                  message: x.response?.data?.non_field_errors?.[0],
-                  code: 1,
-                })
-              );
-            }
-            // @ts-ignore
-            else if (typeof x.response?.data?.message == "string") {
-              throw new Error(
-                // @ts-ignore
-                JSON.stringify({ message: x.response?.data?.message, code: 2 })
-              );
-            } else {
-              throw new Error(
-                JSON.stringify({
-                  message: x.response?.data,
-                  code: 0,
-                })
-              );
-            }
+            // if (x.response?.data?.non_field_errors) {
+            //   throw new Error(
+            //     JSON.stringify({
+            //       // @ts-ignore
+            //       message: x.response?.data?.non_field_errors?.[0],
+            //       code: 1,
+            //     })
+            //   );
+            // }
+            // // @ts-ignore
+            // else if (typeof x.response?.data?.message == "string") {
+            //   throw new Error(
+            //     // @ts-ignore
+            //     JSON.stringify({ message: x.response?.data?.message, code: 2 })
+            //   );
+            // } else {
+            //   throw new Error(
+            //     JSON.stringify({
+            //       message: x.response?.data,
+            //       code: 0,
+            //     })
+            //   );
+            // }
           }
         }
         return null;
