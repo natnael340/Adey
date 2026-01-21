@@ -42,7 +42,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             if not self.check_permission(headers, chat):
                 raise DenyConnection("Origin denied.")
             
-            self.humanhandoff = HumanHandOff.objects.filter(session_id=self.session_id, is_active=True, ).exists()
+            self.humanhandoff = HumanHandOff.objects.filter(session_id=self.session_id, is_handoff=True, ).exists()
             self.chat = chat
             initial_message_exists = Message.objects.filter(chat=chat, session_id=self.session_id).exists()
             if not self.humanhandoff:

@@ -13,9 +13,11 @@ async function layout({ children }: Props) {
   return (
     <SidebarProvider>
       <DashboardSidebar username={user.email} />
-      <section className="container p-5 bg-[#F8F9FC] h-screen">
-        {children}
-      </section>
+      <main className="flex-1 min-h-screen bg-gray-50/80">
+        <div className="container max-w-7xl mx-auto p-6 lg:p-8">
+          {children}
+        </div>
+      </main>
     </SidebarProvider>
   );
 }
