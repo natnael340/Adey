@@ -14,7 +14,7 @@ from adey_apps.users.views import (
     EmailVerificationView,
     PasswordResetView,
     PasswordResetConfirmView,
-    UserDetailView,
+    UserViewSet,
 )
 
 
@@ -29,12 +29,14 @@ urlpatterns = [
     path("auth/password/reset", PasswordResetView.as_view(), name="password_reset_request"),
     path("auth/password/reset/<token>", PasswordResetConfirmView.as_view(), name="reset_password"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("user/me", UserDetailView.as_view(), name="user_detail"),
+    path("user/me", UserViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name="user_detail"),
+    path("user/me/password", UserViewSet.as_view({'post': 'change_password'}), name="user_change_password"),
     path("user/subscription", SubscriptionApiView.as_view(), name="user_subscription"),
     path("user/subscribe/<uuid:identifier>", Subscribe.as_view(), name="subscribe"),
     path("user/subscription/check/<str:checkout_id>", VerifySubscription.as_view(), name="verify_sub"),
 ]
 
 router.register("plans", PlanViewSet, "plans")
+
 
 urlpatterns += router.urls

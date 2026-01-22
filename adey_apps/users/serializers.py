@@ -132,3 +132,26 @@ class AdTokenObtainPairSerializer(TokenObtainSerializer):
             update_last_login(None, self.user)
 
         return data
+
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(read_only=True)
+    name = serializers.CharField(required=False)
+    is_verified = serializers.BooleanField(read_only=True)
+    avatar = serializers.ImageField(required=False)
+    
+    class Meta:
+        model = User
+        fields = ('email', 'name', 'is_verified', 'avatar')
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+    confirm_new_password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        if attrs.get('new_password') != attrs.get("confirm_new_password"):
+            raise serializers.ValidationError("New password and confirm password do not match")
+        return attrs

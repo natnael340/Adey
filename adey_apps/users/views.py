@@ -5,8 +5,11 @@ from typing import Any, List
 from datetime import datetime, timedelta
 
 from rest_framework import status
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -20,7 +23,7 @@ from django_filters import rest_framework as filters
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, TokenGenerationLog
-from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer, UserReadSerializer
+from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer, UserDetailSerializer, ChangePasswordSerializer
 from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email, send_password_reset_email
 from adey_apps.users.tokens import account_activation_token
 
@@ -231,9 +234,31 @@ class VerifySubscription(APIView):
             return Response({"message": f"Other exception: {e.__str__()}", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-class UserDetailView(RetrieveAPIView, GenericAPIView):
+class UserViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserReadSerializer
+    serializer_class = UserDetailSerializer
 
     def get_object(self):
         return self.request.user
+
+    
+    def get_serializer_class(self):
+        if self.action in ["retrieve", "partial_update"]:
+            return UserDetailSerializer
+        elif self.action == "change_password":
+            return ChangePasswordSerializer
+        
+        raise MethodNotAllowed(f"{self.action} Method not allowed")
+
+    @action(detail=False, methods=['post'])
+    def change_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        if not user.check_password(serializer.validated_data.get("old_password")):
+            return Response({"success": False, "message": "Wrong password."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(serializer.validated_data.get("new_password"))
+        user.save()
+        return Response({"success": True, "message": "Password changed successfully."})

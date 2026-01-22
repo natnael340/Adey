@@ -26,7 +26,7 @@ services:
     image: adey_backend
     container_name: adey_backend
     build:
-      dockerfile: ./devops/docker/python/Dockerfile
+      dockerfile: ./devops/docker/python/production/Dockerfile
       context: ./
     restart: on-failure
     working_dir: /usr/src/app
