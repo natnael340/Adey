@@ -1,27 +1,8 @@
 volumes:
-  adey_backend_db_data: {}
   certbot_conf:
   certbot_www:
 
 services:
-  db:
-    container_name: adey_db
-    image: ankane/pgvector
-    restart: on-failure
-    env_file:
-      - .production.env
-    command: -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c max_locks_per_transaction=1024
-    volumes:
-      - adey_backend_db_data:/var/lib/postgresql/data
-    networks:
-      - adey_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U adey_backend"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
   adey_backend:
     image: adey_backend
     container_name: adey_backend
@@ -32,9 +13,6 @@ services:
     working_dir: /usr/src/app
     env_file:
       - .production.env
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - adey_network
     expose:

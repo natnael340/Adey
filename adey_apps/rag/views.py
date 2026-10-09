@@ -4,14 +4,11 @@ import os
 from django.utils import timezone
 from django.http import Http404
 from django.conf import settings
-from django.utils.encoding import force_str
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
 
-from langchain_community.vectorstores import PGVector
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -45,6 +42,7 @@ from adey_apps.rag.serializers import (
     HumanHandOffSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
+from adey_apps.rag.db import get_vectorstore
 from adey_apps.rag.models import (
     Chat, 
     Resource, 
@@ -210,13 +208,7 @@ class ChatBotBuildApiView(ChatMixin, APIView):
                 documents.extend(loader.load())
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             chunks = text_splitter.split_documents(documents)
-            embedding = OpenAIEmbeddings()
-            PGVector.from_documents(
-                embedding=embedding,
-                documents=chunks,
-                collection_name=force_str(request.chat.identifier),
-                connection_string=settings.PG_VECTOR_DB_URL,
-            )
+            get_vectorstore(request.chat.identifier).add_documents(chunks)
             request.chat.status = "finished"
             request.chat.save()
         except Chat.DoesNotExist:
@@ -281,11 +273,7 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             # Avoid bulk_delete to ensure post_delete signals are sent
             for resource in Resource.objects.filter(chat=chat):
                 resource.delete()
-            PGVector(
-                collection_name=force_str(chat.identifier),
-                connection_string=settings.PG_VECTOR_DB_URL,
-                embedding_function=OpenAIEmbeddings()
-            ).delete_collection()
+            get_vectorstore(chat.identifier).delete_collection()
         
         return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)
 
