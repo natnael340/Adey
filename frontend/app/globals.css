@@ -97,4 +97,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Brand pages paint the canvas too, so overscroll bounce doesn't show white */
+  body:has([data-canvas="meadow"]) {
+    @apply bg-adey-meadow;
+  }
 }
