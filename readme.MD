@@ -32,14 +32,16 @@ cd Adey
 2️⃣ **Build the Docker containers**:
 
 ```
-docker compose build
+docker compose -f docker-compose.dev.yml build
 ```
 
 3️⃣ **Start the application**:
 
 ```
-docker compose up
+docker compose -f docker-compose.dev.yml up
 ```
+
+For production, use `docker-compose.prod.yml` instead.
 
 ## 🤝 Contributing
 
