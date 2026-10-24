@@ -39,12 +39,17 @@ const Messages = ({
   botFilter,
   selectedId,
 }: Props) => {
+  const [hasMounted, setHasMounted] = useState(false);
   const [messages, setMessages] = useState<UserMessageType[]>(
     initialData.results
   );
   const [next, setNext] = useState<string | null>(initialData.next);
   const [prev, setPrev] = useState<string | null>(initialData.prev);
   const api = new Api(token);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const fetchPage = async (
     url?: string,
@@ -66,10 +71,11 @@ const Messages = ({
 
   const rows: Row[] = useMemo(() => {
     const toDay = (iso: string) =>
-      new Date(iso).toLocaleDateString(undefined, {
+      new Date(iso).toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
         day: "2-digit",
+        ...(hasMounted ? {} : { timeZone: "UTC" }),
       });
     const out: Row[] = [];
     let last = "";
@@ -82,7 +88,7 @@ const Messages = ({
       out.push({ type: "msg", msg: m });
     }
     return out;
-  }, [messages]);
+  }, [messages, hasMounted]);
 
   useEffect(() => {
     let canceled = false;
@@ -103,7 +109,11 @@ const Messages = ({
 
   const fmtTime = (iso: string) =>
     new Date(iso)
-      .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      .toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        ...(hasMounted ? {} : { timeZone: "UTC" }),
+      })
       .replace("AM", "am")
       .replace("PM", "pm");
 
