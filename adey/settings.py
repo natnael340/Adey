@@ -98,6 +98,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=list)
 
+# TLS terminates at nginx, which sets X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"
 
@@ -309,7 +312,7 @@ AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME", "us-east-2")
 
 DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE", "django.core.files.storage.FileSystemStorage")
-STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.core.files.storage.FileSystemStorage")
+STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.contrib.staticfiles.storage.StaticFilesStorage")
 
 STATICFILES_LOCATION = "static/" 
 MEDIAFILES_LOCATION = "media/"

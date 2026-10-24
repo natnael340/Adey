@@ -10,6 +10,9 @@ const nextConfig = {
       {
         hostname: "192.168.51.172",
       },
+      {
+        hostname: "localhost",
+      },
     ],
   },
   output: "standalone",
