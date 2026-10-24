@@ -1,5 +1,5 @@
 import pytest
-from adey_apps.rag.utils import URLTextLoader
+from adey_apps.rag.utils import URLTextLoader, clean_text
 
 pytestmark = pytest.mark.django_db
 
@@ -14,4 +14,7 @@ def test_url_text_loader_success(mocker):
     loader = URLTextLoader(test_url)
     result = loader.load()
 
-    assert result == expected_text, "The loader should return the expected text."
+    assert len(result) == 1
+    assert result[0].page_content == clean_text(expected_text), "The loader should return the cleaned text."
+    assert result[0].metadata == {"source": test_url}
+    mocked_request.return_value.raise_for_status.assert_called_once()

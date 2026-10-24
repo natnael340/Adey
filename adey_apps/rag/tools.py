@@ -1,19 +1,12 @@
-from django.conf import settings
-from django.utils.encoding import force_str
-
 from langchain.tools import tool
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import PGVector
+
+from adey_apps.rag.db import get_vectorstore
 
 
 
 def prepare_rag_tool(chat, agent_tool):
     """Prepare the RAG tool for the given chat."""
-    vectorstore = PGVector(
-            collection_name=force_str(chat.identifier),
-            connection_string=settings.PG_VECTOR_DB_URL,
-            embedding_function=OpenAIEmbeddings()
-        )
+    vectorstore = get_vectorstore(chat.identifier)
 
     @tool
     def lookup_context(keyword: str) -> str:
