@@ -23,3 +23,7 @@ media/*
 *.dump
 
 plan/
+# local-only secrets (certificates, keys); never commit
+.secrets/
+*.pem
+*.key

@@ -126,10 +126,10 @@ export default function PrivacyPolicy() {
               If you have any questions about this Privacy Policy, please
               contact us at{" "}
               <a
-                href="mailto:contact@adey-chatbot.website"
+                href="mailto:contact@getadey.com"
                 className="text-blue-700 hover:underline"
               >
-                contact@adey-chatbot.website
+                contact@getadey.com
               </a>
               .
             </p>

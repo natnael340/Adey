@@ -210,12 +210,12 @@ export default function TermsOfService() {
                 <b>Privacy Policy:</b> Our practices regarding data collection
                 and use are described in our Privacy Policy at{" "}
                 <a
-                  href="https://www.adey-chatbot.website/privacy"
+                  href="https://www.getadey.com/privacy"
                   className="text-blue-700 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  https://www.adey-chatbot.website/privacy
+                  https://www.getadey.com/privacy
                 </a>
                 .
               </li>
@@ -324,10 +324,10 @@ export default function TermsOfService() {
             <p className="text-gray-700">
               Email:{" "}
               <a
-                href="mailto:contact@adey-chatbot.website"
+                href="mailto:contact@getadey.com"
                 className="text-blue-700 hover:underline"
               >
-                contact@adey-chatbot.website
+                contact@getadey.com
               </a>
             </p>
             <p className="text-gray-700">Phone: +48 579 334 867</p>
