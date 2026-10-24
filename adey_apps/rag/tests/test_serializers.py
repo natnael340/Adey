@@ -142,12 +142,14 @@ def test_resource_serializer_raise_error_for_invalid_document_type(setup_resourc
 def test_resource_serializer_create_instance_correctly(rf, chat_factory, user_with_password, setup_resource_serializer_data):
     chat = chat_factory(user=user_with_password, status='prepared')
 
-    request = rf.post('/', setup_resource_serializer_data, format='multipart')
+    # Building a multipart body from the data would consume the uploaded file;
+    # the serializer only needs request.chat.
+    request = rf.post('/')
     request.chat = chat
 
     serializer = ResourceSerializer(data=setup_resource_serializer_data, context={'request': request})
     
-    assert serializer.is_valid()
+    assert serializer.is_valid(), serializer.errors
     resource = serializer.save()
     
     assert resource.name == RESOURCE_SERIALIZER_DATA['name']

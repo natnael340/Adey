@@ -4,8 +4,7 @@ from django.utils.encoding import force_str
 from django.conf import settings
 from adey_apps.users.models import User
 from adey_apps.rag.models import Resource, Chat
-from langchain_community.vectorstores import PGVector
-from langchain_community.embeddings import OpenAIEmbeddings
+from adey_apps.rag.db import get_vectorstore
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
@@ -32,13 +31,8 @@ class Command(BaseCommand):
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
                 docs = loader.load_and_split(text_splitter)
                 self.stdout.write(f"User identifier: {os.environ.get('OPENAI_API_KEY', 'tt')}")
-                embedding = OpenAIEmbeddings()
-                db = PGVector.from_documents(
-                    embedding=embedding,
-                    documents=docs,
-                    collection_name=force_str(chat.identifier),
-                    connection_string=settings.PG_VECTOR_DB_URL,
-                )
+                db = get_vectorstore(chat.identifier)
+                db.add_documents(docs)
                 print(db)
         except User.DoesNotExist:
             self.stderr.write(f"No such user exists with the given email address. Error: {e.__str__()}")

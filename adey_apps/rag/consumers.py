@@ -21,6 +21,7 @@ class ChatConsumer(JsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.room_name = None
         self.humanhandoff = False
+        self.agent = None
 
     def connect(self):
         headers = dict(self.scope["headers"])
@@ -45,9 +46,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             self.humanhandoff = HumanHandOff.objects.filter(session_id=self.session_id, is_handoff=True, ).exists()
             self.chat = chat
             initial_message_exists = Message.objects.filter(chat=chat, session_id=self.session_id).exists()
-            if not self.humanhandoff:
-                self.agent = Agent(chat)
-                
+
             if not initial_message_exists and self.session_id:
                 self.accept()
                 Message.objects.create(
@@ -103,6 +102,10 @@ class ChatConsumer(JsonWebsocketConsumer):
 
             
             try:
+                # Built on the first message rather than on connect: most widget
+                # visitors never send one.
+                if self.agent is None:
+                    self.agent = Agent(self.chat)
                 res = self.agent.query(content["message"], session_id=self.session_id)
             except Exception as e:
                 logger.error(e.__str__())

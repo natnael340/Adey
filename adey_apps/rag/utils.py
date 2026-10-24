@@ -16,16 +16,13 @@ from django.utils.encoding import force_str
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 from adey_apps.rag.models import Chat
+from adey_apps.rag.db import get_vectorstore
 
 openai.api_key = settings.OPENAI_API_KEY
 
 
 def get_db_from_collection(collection_name: str):
-    return PGVector(
-        collection_name=collection_name,
-        connection_string=settings.PG_VECTOR_DB_URL,
-        embedding_function=OpenAIEmbeddings()
-    )
+    return get_vectorstore(collection_name)
 
 
 def query_chat_vector_db(chat: Chat, query: str) -> str:
