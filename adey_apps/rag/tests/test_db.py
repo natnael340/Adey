@@ -28,6 +28,8 @@ def fake_model(*replies):
 def fresh_shared_resources():
     """Every test starts without cached pools and closes the ones it opened."""
     rag_db.get_vector_engine.cache_clear()
+    rag_db._get_vectorstore.cache_clear()
+    rag_db.get_embeddings.cache_clear()
     rag_db.get_checkpointer_pool.cache_clear()
     yield
     if rag_db.get_vector_engine.cache_info().currsize:
@@ -39,6 +41,8 @@ def fresh_shared_resources():
         if hasattr(pool, "close"):
             pool.close()
     rag_db.get_vector_engine.cache_clear()
+    rag_db._get_vectorstore.cache_clear()
+    rag_db.get_embeddings.cache_clear()
     rag_db.get_checkpointer_pool.cache_clear()
 
 
@@ -77,15 +81,46 @@ def test_get_vectorstore_shares_engine_and_skips_extension_creation(settings, mo
     mocker.patch.object(rag_db, "OpenAIEmbeddings")
     pgvector = mocker.patch.object(rag_db, "PGVector")
 
-    rag_db.get_vectorstore("collection-a")
+    store_a = rag_db.get_vectorstore("collection-a")
+    assert rag_db.get_vectorstore("collection-a") is store_a
     rag_db.get_vectorstore("collection-b")
 
     assert rag_db.sqlalchemy.create_engine.call_count == 1
     assert pgvector.call_count == 2
+    assert rag_db.OpenAIEmbeddings.call_count == 1
     for call, name in zip(pgvector.call_args_list, ["collection-a", "collection-b"]):
         assert call.kwargs["connection"] is engine
         assert call.kwargs["create_extension"] is False
         assert call.kwargs["collection_name"] == name
+
+
+def test_delete_vector_collection_invalidates_cached_store(settings, mocker):
+    settings.PG_VECTOR_DB_URL = PG_URL
+    engine = mocker.patch.object(rag_db, "get_vector_engine")
+    connection = engine.return_value.begin.return_value.__enter__.return_value
+    connection.execute.return_value.scalar_one_or_none.side_effect = ["table", "collection-id"]
+    mocker.patch.object(rag_db, "OpenAIEmbeddings")
+    pgvector = mocker.patch.object(rag_db, "PGVector", side_effect=[object(), object()])
+
+    first_store = rag_db.get_vectorstore("collection-a")
+    rag_db.delete_vector_collection("collection-a")
+    second_store = rag_db.get_vectorstore("collection-a")
+
+    assert first_store is not second_store
+    assert pgvector.call_count == 2
+
+
+def test_get_vectorstore_normalizes_uuid_cache_key(settings, mocker):
+    from uuid import UUID
+
+    settings.PG_VECTOR_DB_URL = PG_URL
+    mocker.patch.object(rag_db, "get_vector_engine")
+    mocker.patch.object(rag_db, "OpenAIEmbeddings")
+    pgvector = mocker.patch.object(rag_db, "PGVector")
+    identifier = UUID("12345678-1234-5678-1234-567812345678")
+
+    assert rag_db.get_vectorstore(identifier) is rag_db.get_vectorstore(str(identifier))
+    pgvector.assert_called_once()
 
 
 def test_checkpointer_pool_is_shared_and_pooler_safe(settings, mocker):
@@ -155,6 +190,19 @@ def test_consumer_builds_agent_once_on_first_message(consumer, chat, mocker):
     agent_class.assert_called_once_with(chat)
     assert agent_class.return_value.query.call_count == 2
     assert Message.objects.filter(chat=chat, session_id="session-1", message="answer").count() == 2
+
+
+@pytest.mark.django_db
+def test_consumer_does_not_query_agent_when_quota_is_exceeded(consumer, mocker):
+    mocker.patch("adey_apps.rag.consumers.has_chat_request_permission", return_value=False)
+    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+    mocker.patch.object(consumer, "close")
+    consumer.connect()
+
+    consumer.receive_json({"type": "message", "message": "hi"})
+
+    consumer.close.assert_called_once()
+    agent_class.assert_not_called()
 
 
 # --- integration tests (need a Postgres with the pgvector extension) ---------

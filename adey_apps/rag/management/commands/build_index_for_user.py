@@ -1,6 +1,5 @@
 from typing import Any, Optional
 from django.core.management.base import BaseCommand, CommandParser
-from django.utils.encoding import force_str
 from django.conf import settings
 from adey_apps.users.models import User
 from adey_apps.rag.models import Resource, Chat

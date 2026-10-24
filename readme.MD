@@ -43,6 +43,23 @@ docker compose -f docker-compose.dev.yml up
 
 For production, use `docker-compose.prod.yml` instead.
 
+## 🚢 Deployment
+
+Every push to `main` runs the CI tests, builds an image (`ghcr.io/natnael340/adey:<commit-sha>`) and deploys it to EC2 with a blue/green switch (`devops/scripts/deploy.sh`):
+
+1. run migrations once
+2. start the idle backend color (`backend_blue` / `backend_green`) with the new image
+3. wait for `/health` to pass. If it doesn't, the deploy stops and the live color keeps serving
+4. point nginx at the new color (`devops/nginx/upstream/active.conf`) and reload it gracefully
+5. after a short drain, stop the old color and restart the celery worker
+
+PRs and pushes to `develop` only run checks: missing migrations, `migrate`, and `pytest`.
+
+**Rollback:** re-run the `deploy` job of an older successful run in GitHub Actions, or run `./devops/scripts/deploy.sh <old-sha>` on the server.
+
+The production compose file no longer includes an in-compose `db` service. Configure an external database before deploying, with `DATABASE_URL` and `PG_VECTOR_DB_URL` set in `.production.env`.
+
+
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to open an issue or submit a pull request.

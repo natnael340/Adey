@@ -2,39 +2,59 @@ volumes:
   certbot_conf:
   certbot_www:
 
+# Shared by backend_blue / backend_green. Deploys run devops/scripts/deploy.sh,
+# which starts the idle color, waits for it to be healthy, then switches nginx.
+x-backend: &backend
+  image: ghcr.io/natnael340/adey:${IMAGE_TAG:-latest}
+  # unless-stopped: after a reboot the live color comes back, the idle one stays down
+  restart: unless-stopped
+  working_dir: /usr/src/app
+  env_file:
+    - .production.env
+  networks:
+    - adey_network
+  expose:
+    - 8000
+  stop_grace_period: 5m
+  command: daphne -b 0.0.0.0 -p 8000 adey.asgi:application
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+    interval: 5s
+    timeout: 5s
+    retries: 3
+    start_period: 20s
+
 services:
-  adey_backend:
-    image: adey_backend
-    container_name: adey_backend
-    build:
-      dockerfile: ./devops/docker/python/Dockerfile
-      context: ./
-    restart: on-failure
+  backend_blue:
+    <<: *backend
+
+  backend_green:
+    <<: *backend
+
+  migrate:
+    image: ghcr.io/natnael340/adey:${IMAGE_TAG:-latest}
+    profiles: ["tools"]
     working_dir: /usr/src/app
     env_file:
       - .production.env
     networks:
       - adey_network
-    expose:
-      - 8000
-    command: /bin/bash -c "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 adey.asgi:application "
+    command: python manage.py migrate --noinput
 
   worker:
-    image: adey_celery_worker
+    image: ghcr.io/natnael340/adey:${IMAGE_TAG:-latest}
     container_name: adey_celery_worker
-    build:
-      dockerfile: ./devops/docker/python/Dockerfile
-      context: ./
     restart: on-failure
     working_dir: /usr/src/app
     env_file:
       - .production.env
     depends_on:
       - broker
-      - adey_backend
     networks:
       - adey_network
-    command: /bin/bash -c "celery -A adey worker --loglevel=info"
+    # celery does a warm shutdown on SIGTERM; give running tasks time to finish
+    stop_grace_period: 120s
+    command: celery -A adey worker --loglevel=info
 
   broker:
     image: rabbitmq:3-management
@@ -54,10 +74,9 @@ services:
     volumes:
       - ./devops/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./devops/nginx/conf.d/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./devops/nginx/upstream:/etc/nginx/upstream:ro
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    depends_on:
-      - adey_backend
     networks:
       - adey_network
 
@@ -68,8 +87,6 @@ services:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    depends_on:
-      - adey_backend
     networks:
       - adey_network
 

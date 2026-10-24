@@ -99,6 +99,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 "message": "Request quota limit reached!"
                })
                self.close()
+               return
 
             
             try:
