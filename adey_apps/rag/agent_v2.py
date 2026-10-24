@@ -3,18 +3,14 @@ import importlib
 
 from langchain_core.messages import SystemMessage
 from langchain.tools import tool
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import PGVector
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 from adey_apps.rag.models import Chat
-from django.utils.encoding import force_str
 from django.conf import settings
 from adey_apps.rag.constants import PROMPT_TEMPLATE_V2
 from adey_apps.rag.workflow import AgentWorkflow

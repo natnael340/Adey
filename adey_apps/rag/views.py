@@ -42,7 +42,7 @@ from adey_apps.rag.serializers import (
     HumanHandOffSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.db import get_vectorstore
+from adey_apps.rag.db import delete_vector_collection, get_vectorstore
 from adey_apps.rag.models import (
     Chat, 
     Resource, 
@@ -273,7 +273,7 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             # Avoid bulk_delete to ensure post_delete signals are sent
             for resource in Resource.objects.filter(chat=chat):
                 resource.delete()
-            get_vectorstore(chat.identifier).delete_collection()
+            delete_vector_collection(chat.identifier)
         
         return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)
 

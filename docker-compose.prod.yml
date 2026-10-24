@@ -15,10 +15,10 @@ x-backend: &backend
     - adey_network
   expose:
     - 8000
-  stop_grace_period: 30s
+  stop_grace_period: 5m
   command: daphne -b 0.0.0.0 -p 8000 adey.asgi:application
   healthcheck:
-    test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "--max-time", "3", "http://localhost:8000/health"]
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
     interval: 5s
     timeout: 5s
     retries: 3

@@ -57,6 +57,8 @@ PRs and pushes to `develop` only run checks: missing migrations, `migrate`, and 
 
 **Rollback:** re-run the `deploy` job of an older successful run in GitHub Actions, or run `./devops/scripts/deploy.sh <old-sha>` on the server.
 
+The production compose file no longer includes an in-compose `db` service. Configure an external database before deploying, with `DATABASE_URL` and `PG_VECTOR_DB_URL` set in `.production.env`.
+
 
 ## 🤝 Contributing
 

@@ -133,11 +133,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: GHCR_TOKEN,GHCR_USER,IMAGE_TAG
-          command_timeout: 20m
+          command_timeout: 30m
           script: |
             set -e
             cd ~/Adey
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin
+            git checkout --detach "$IMAGE_TAG"
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
             ./devops/scripts/deploy.sh "$IMAGE_TAG"
