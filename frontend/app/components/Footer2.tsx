@@ -68,7 +68,7 @@ const defaultLegalLinks = [
 
 const Footer7 = ({
   logo = {
-    url: "https://www.adey-chatbot.website",
+    url: "https://www.getadey.com",
     src: "/adey_logo.png",
     alt: "logo",
     title: "Adey",
@@ -76,7 +76,7 @@ const Footer7 = ({
   sections = defaultSections,
   description = "Building delightful chat experiences with AI-driven bots and powerful tools.",
   socialLinks = defaultSocialLinks,
-  copyright = "© 2024 adey-chatbot.website. All rights reserved.",
+  copyright = "© 2024 getadey.com. All rights reserved.",
   legalLinks = defaultLegalLinks,
 }: Footer7Props) => {
   return (

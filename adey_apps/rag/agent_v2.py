@@ -3,21 +3,18 @@ import importlib
 
 from langchain_core.messages import SystemMessage
 from langchain.tools import tool
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import PGVector
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 from adey_apps.rag.models import Chat
-from django.utils.encoding import force_str
 from django.conf import settings
 from adey_apps.rag.constants import PROMPT_TEMPLATE_V2
 from adey_apps.rag.workflow import AgentWorkflow
+from adey_apps.rag.db import get_checkpointer
 
 openai.api_key = settings.OPENAI_API_KEY
 
@@ -62,16 +59,14 @@ class Agent:
         if not self.llm:
             raise ValueError("Chain not initialized.")
         
-        with PostgresSaver.from_conn_string(f"{settings.PG_VECTOR_DB_URL}?sslmode=disable") as memory:
-            agent_executor = create_react_agent(self.llm, self.tools, prompt=self.system_message_content, checkpointer=memory)
+        agent_executor = create_react_agent(self.llm, self.tools, prompt=self.system_message_content, checkpointer=get_checkpointer())
 
-            for step in agent_executor.stream(
-                {"messages": [{"role": "user", "content": question}]},
-                stream_mode="values",
-                config=self.config, 
-            ):
-                step["messages"][-1].pretty_print()
-    
+        for step in agent_executor.stream(
+            {"messages": [{"role": "user", "content": question}]},
+            stream_mode="values",
+            config=self.config, 
+        ):
+            step["messages"][-1].pretty_print()
 
         return step["messages"][-1].content
     
@@ -79,19 +74,14 @@ class Agent:
         if not self.model:
             raise ValueError("Chain not initialized.")
         
-        with PostgresSaver.from_conn_string(f"{settings.PG_VECTOR_DB_URL}?sslmode=disable") as memory:
-            agent = AgentWorkflow(
-                model=self.model, 
-                tools=self.tools, 
-                prompt_template=self.system_message, 
-                saver=memory
-            )
-            # agent.run(
-            #     inputs=question, 
-            #     session_key=session_id,
-            # )
-        
-            for step in agent.run(inputs=question, session_key=session_id):
-                step["messages"][-1].pretty_print()
+        agent = AgentWorkflow(
+            model=self.model, 
+            tools=self.tools, 
+            prompt_template=self.system_message, 
+            saver=get_checkpointer(),
+        )
+
+        for step in agent.run(inputs=question, session_key=session_id):
+            step["messages"][-1].pretty_print()
         
         return step["messages"][-1].content

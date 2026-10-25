@@ -186,7 +186,7 @@ const Footer = () => {
   //           <div>
   //             <p className="text-[#797878] text-sm">Mail</p>
   //             <p className="text-[#C3A811] text-sm font-bold">
-  //               contact@adey-chatbot.website
+  //               contact@getadey.com
   //             </p>
   //           </div>
   //         </div>

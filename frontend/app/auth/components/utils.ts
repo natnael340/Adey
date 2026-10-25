@@ -63,7 +63,12 @@ export const handleLoginWithPassword = async (
       callbackUrl: "/dashboard",
     });
     if (!response?.ok) {
-      const error = JSON.parse(response?.error || "{}");
+      let error = null;
+      try {
+        error = JSON.parse(response?.error || "{}");
+      } catch {
+        // NextAuth returns a plain string (e.g. "CredentialsSignin") when the backend is unreachable
+      }
       if (error) {
         callback(false, parseErrorMessage(error));
       } else {

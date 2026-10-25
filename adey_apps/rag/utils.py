@@ -6,30 +6,20 @@ import os
 from django.conf import settings
 
 import openai
-from langchain_community.vectorstores import PGVector
-from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 from langchain_community.llms import OpenAI
-from django.utils.encoding import force_str
 from urllib.parse import urlparse, parse_qsl, unquote_plus
 
 from adey_apps.rag.models import Chat
+from adey_apps.rag.db import get_vectorstore
 
 openai.api_key = settings.OPENAI_API_KEY
 
 
-def get_db_from_collection(collection_name: str):
-    return PGVector(
-        collection_name=collection_name,
-        connection_string=settings.PG_VECTOR_DB_URL,
-        embedding_function=OpenAIEmbeddings()
-    )
-
-
 def query_chat_vector_db(chat: Chat, query: str) -> str:
-    db = get_db_from_collection(force_str(chat.identifier))
+    db = get_vectorstore(chat.identifier)
     retriever = db.as_retriever(search_kwargs={'k': 3})
     # retriever.get_relevant_documents(query)
     qa = RetrievalQA.from_chain_type(llm=OpenAI(), chain_type="stuff", retriever=retriever)

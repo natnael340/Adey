@@ -24,6 +24,16 @@ const config = {
     },
     extend: {
       colors: {
+        // Adey brand palette, drawn from the Adey Abeba flower
+        adey: {
+          petal: "#F2C230",
+          seed: "#3A2614",
+          highland: "#1E4D3A",
+          meadow: "#F3F6EE",
+          mist: "#D5DDCF",
+          paper: "#FFFFFF",
+          alert: "#B3261E",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -133,6 +143,9 @@ const config = {
         "tremor-small": "0.375rem",
         "tremor-default": "0.5rem",
         "tremor-full": "9999px",
+        control: "4px",
+        bubble: "14px",
+        sheet: "2px",
       },
       keyframes: {
         "accordion-down": {
@@ -151,15 +164,25 @@ const config = {
             height: "0",
           },
         },
+        "highlight-sweep": {
+          from: { backgroundSize: "0% 100%" },
+          to: { backgroundSize: "100% 100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "highlight-sweep": "highlight-sweep 600ms ease-out both",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        // Fallbacks live inside var() so components outside a brandFonts ancestor
+        // get a neutral stack instead of inheriting the body font
+        grotesk: [`var(--font-grotesk, ${fontFamily.sans.join(", ")})`],
+        document: [`var(--font-document, ${fontFamily.serif.join(", ")})`],
       },
       boxShadow: {
+        sheet: "0 1px 0 #D5DDCF, 0 16px 32px -16px rgb(30 77 58 / 0.30)",
         "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",

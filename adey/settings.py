@@ -39,6 +39,10 @@ ALLOWED_HOSTS = [env.str("ALLOWED_HOSTS", "*")]
 
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", "")
 PG_VECTOR_DB_URL = env.str("PG_VECTOR_DB_URL", "")
+# Per-process pool sizes; keep (backend + celery processes) * total under the DB connection limit.
+PG_VECTOR_POOL_SIZE = env.int("PG_VECTOR_POOL_SIZE", 3)
+PG_VECTOR_POOL_MAX_OVERFLOW = env.int("PG_VECTOR_POOL_MAX_OVERFLOW", 2)
+CHECKPOINTER_POOL_SIZE = env.int("CHECKPOINTER_POOL_SIZE", 3)
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 
 AGENT_TOOL_PATH = "adey_apps.rag.tools"
@@ -93,6 +97,9 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=list)
+
+# TLS terminates at nginx, which sets X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # ASGI
 ASGI_APPLICATION = "adey.asgi.application"
@@ -305,7 +312,7 @@ AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME", "us-east-2")
 
 DEFAULT_FILE_STORAGE = env.str("DEFAULT_FILE_STORAGE", "django.core.files.storage.FileSystemStorage")
-STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.core.files.storage.FileSystemStorage")
+STATICFILES_STORAGE = env.str("STATICFILES_STORAGE", "django.contrib.staticfiles.storage.StaticFilesStorage")
 
 STATICFILES_LOCATION = "static/" 
 MEDIAFILES_LOCATION = "media/"

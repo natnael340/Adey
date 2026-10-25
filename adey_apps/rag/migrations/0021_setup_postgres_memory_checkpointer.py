@@ -4,11 +4,14 @@ from django.db import migrations
 from django.conf import settings
 
 from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg import Connection
+
+from adey_apps.rag.db import CHECKPOINTER_CONNECTION_KWARGS
 
 
 def setup_postgres_saver_checkpointer(apps, schema_editor):
-    with PostgresSaver.from_conn_string(f"{settings.PG_VECTOR_DB_URL}?sslmode=disable") as checkpointer:
-        checkpointer.setup()
+    with Connection.connect(settings.PG_VECTOR_DB_URL, **CHECKPOINTER_CONNECTION_KWARGS) as conn:
+        PostgresSaver(conn).setup()
 
 class Migration(migrations.Migration):
 

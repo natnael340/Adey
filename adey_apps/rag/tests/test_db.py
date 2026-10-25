@@ -1,0 +1,260 @@
+from urllib.parse import quote
+
+import pytest
+from django.db import connection
+from langchain_core.embeddings import DeterministicFakeEmbedding
+from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+from langchain_core.messages import AIMessage
+from psycopg.rows import dict_row
+
+from adey_apps.rag import db as rag_db
+from adey_apps.rag.consumers import ChatConsumer
+from adey_apps.rag.models import Message
+from adey_apps.rag.workflow import AgentWorkflow
+
+PG_URL = "postgres://adey:secret@db.example.com:5432/adey?sslmode=require"
+
+
+class FakeChatModel(GenericFakeChatModel):
+    def bind_tools(self, tools, **kwargs):
+        return self
+
+
+def fake_model(*replies):
+    return FakeChatModel(messages=iter([AIMessage(content=reply) for reply in replies]))
+
+
+@pytest.fixture(autouse=True)
+def fresh_shared_resources():
+    """Every test starts without cached pools and closes the ones it opened."""
+    rag_db.get_vector_engine.cache_clear()
+    rag_db._get_vectorstore.cache_clear()
+    rag_db.get_embeddings.cache_clear()
+    rag_db.get_checkpointer_pool.cache_clear()
+    yield
+    if rag_db.get_vector_engine.cache_info().currsize:
+        engine = rag_db.get_vector_engine()
+        if hasattr(engine, "dispose"):
+            engine.dispose()
+    if rag_db.get_checkpointer_pool.cache_info().currsize:
+        pool = rag_db.get_checkpointer_pool()
+        if hasattr(pool, "close"):
+            pool.close()
+    rag_db.get_vector_engine.cache_clear()
+    rag_db._get_vectorstore.cache_clear()
+    rag_db.get_embeddings.cache_clear()
+    rag_db.get_checkpointer_pool.cache_clear()
+
+
+# --- unit tests (no database needed) -----------------------------------------
+
+
+@pytest.mark.parametrize("url, expected", [
+    ("postgres://u:p@h:5432/d?sslmode=require", "postgresql://u:p@h:5432/d?sslmode=require"),
+    ("postgresql://u:p@h:5432/d", "postgresql://u:p@h:5432/d"),
+    ("postgresql+psycopg2://u:p@h/d", "postgresql+psycopg2://u:p@h/d"),
+])
+def test_sqlalchemy_url_normalizes_postgres_scheme(url, expected):
+    assert rag_db._sqlalchemy_url(url) == expected
+
+
+def test_get_vector_engine_is_created_once_with_pool_settings(settings, mocker):
+    settings.PG_VECTOR_DB_URL = PG_URL
+    settings.PG_VECTOR_POOL_SIZE = 4
+    settings.PG_VECTOR_POOL_MAX_OVERFLOW = 1
+    create_engine = mocker.patch.object(rag_db.sqlalchemy, "create_engine")
+
+    assert rag_db.get_vector_engine() is rag_db.get_vector_engine()
+
+    create_engine.assert_called_once_with(
+        "postgresql://adey:secret@db.example.com:5432/adey?sslmode=require",
+        pool_size=4,
+        max_overflow=1,
+        pool_pre_ping=True,
+        pool_recycle=300,
+    )
+
+
+def test_get_vectorstore_shares_engine_and_skips_extension_creation(settings, mocker):
+    settings.PG_VECTOR_DB_URL = PG_URL
+    engine = mocker.patch.object(rag_db.sqlalchemy, "create_engine").return_value
+    mocker.patch.object(rag_db, "OpenAIEmbeddings")
+    pgvector = mocker.patch.object(rag_db, "PGVector")
+
+    store_a = rag_db.get_vectorstore("collection-a")
+    assert rag_db.get_vectorstore("collection-a") is store_a
+    rag_db.get_vectorstore("collection-b")
+
+    assert rag_db.sqlalchemy.create_engine.call_count == 1
+    assert pgvector.call_count == 2
+    assert rag_db.OpenAIEmbeddings.call_count == 1
+    for call, name in zip(pgvector.call_args_list, ["collection-a", "collection-b"]):
+        assert call.kwargs["connection"] is engine
+        assert call.kwargs["create_extension"] is False
+        assert call.kwargs["collection_name"] == name
+
+
+def test_delete_vector_collection_invalidates_cached_store(settings, mocker):
+    settings.PG_VECTOR_DB_URL = PG_URL
+    engine = mocker.patch.object(rag_db, "get_vector_engine")
+    connection = engine.return_value.begin.return_value.__enter__.return_value
+    connection.execute.return_value.scalar_one_or_none.side_effect = ["table", "collection-id"]
+    mocker.patch.object(rag_db, "OpenAIEmbeddings")
+    pgvector = mocker.patch.object(rag_db, "PGVector", side_effect=[object(), object()])
+
+    first_store = rag_db.get_vectorstore("collection-a")
+    rag_db.delete_vector_collection("collection-a")
+    second_store = rag_db.get_vectorstore("collection-a")
+
+    assert first_store is not second_store
+    assert pgvector.call_count == 2
+
+
+def test_get_vectorstore_normalizes_uuid_cache_key(settings, mocker):
+    from uuid import UUID
+
+    settings.PG_VECTOR_DB_URL = PG_URL
+    mocker.patch.object(rag_db, "get_vector_engine")
+    mocker.patch.object(rag_db, "OpenAIEmbeddings")
+    pgvector = mocker.patch.object(rag_db, "PGVector")
+    identifier = UUID("12345678-1234-5678-1234-567812345678")
+
+    assert rag_db.get_vectorstore(identifier) is rag_db.get_vectorstore(str(identifier))
+    pgvector.assert_called_once()
+
+
+def test_checkpointer_pool_is_shared_and_pooler_safe(settings, mocker):
+    settings.PG_VECTOR_DB_URL = PG_URL
+    settings.CHECKPOINTER_POOL_SIZE = 2
+    connection_pool = mocker.patch.object(rag_db, "ConnectionPool")
+    postgres_saver = mocker.patch.object(rag_db, "PostgresSaver")
+
+    rag_db.get_checkpointer()
+    rag_db.get_checkpointer()
+
+    connection_pool.assert_called_once()
+    pool_kwargs = connection_pool.call_args.kwargs
+    # The URL is passed through untouched, so its sslmode applies.
+    assert pool_kwargs["conninfo"] == PG_URL
+    assert pool_kwargs["max_size"] == 2
+    assert pool_kwargs["check"] is connection_pool.check_connection
+    assert pool_kwargs["kwargs"] == {
+        "autocommit": True,
+        "prepare_threshold": None,
+        "row_factory": dict_row,
+    }
+    assert postgres_saver.call_count == 2
+    postgres_saver.assert_called_with(connection_pool.return_value)
+
+
+# --- consumer ----------------------------------------------------------------
+
+
+@pytest.fixture
+def consumer(settings, chat, mocker):
+    settings.FRONTEND_URLS = ["http://localhost:3000"]
+    consumer = ChatConsumer()
+    consumer.scope = {
+        "headers": [
+            (b"cookie", b"user_session_id=session-1"),
+            (b"origin", b"http://localhost:3000"),
+        ],
+        "url_route": {"kwargs": {"chat_id": str(chat.identifier)}},
+    }
+    mocker.patch.object(consumer, "accept")
+    mocker.patch.object(consumer, "send_json")
+    mocker.patch("adey_apps.rag.consumers.has_chat_request_permission", return_value=True)
+    return consumer
+
+
+@pytest.mark.django_db
+def test_consumer_connect_does_not_build_agent(consumer, mocker):
+    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+
+    consumer.connect()
+
+    consumer.accept.assert_called_once()
+    agent_class.assert_not_called()
+    assert consumer.agent is None
+
+
+@pytest.mark.django_db
+def test_consumer_builds_agent_once_on_first_message(consumer, chat, mocker):
+    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+    agent_class.return_value.query.return_value = "answer"
+    consumer.connect()
+
+    consumer.receive_json({"type": "message", "message": "hi"})
+    consumer.receive_json({"type": "message", "message": "again"})
+
+    agent_class.assert_called_once_with(chat)
+    assert agent_class.return_value.query.call_count == 2
+    assert Message.objects.filter(chat=chat, session_id="session-1", message="answer").count() == 2
+
+
+@pytest.mark.django_db
+def test_consumer_does_not_query_agent_when_quota_is_exceeded(consumer, mocker):
+    mocker.patch("adey_apps.rag.consumers.has_chat_request_permission", return_value=False)
+    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+    mocker.patch.object(consumer, "close")
+    consumer.connect()
+
+    consumer.receive_json({"type": "message", "message": "hi"})
+
+    consumer.close.assert_called_once()
+    agent_class.assert_not_called()
+
+
+# --- integration tests (need a Postgres with the pgvector extension) ---------
+
+
+@pytest.fixture
+def pg_vector_db(transactional_db, settings):
+    """
+    Point PG_VECTOR_DB_URL at the pytest-django test database.
+
+    transactional_db is used because the vector store and checkpointer open their
+    own connections, which can't see data inside the test's wrapping transaction.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1 FROM pg_available_extensions WHERE name = 'vector'")
+        if cursor.fetchone() is None:
+            pytest.skip("pgvector extension is not available on the test database")
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
+    db = connection.settings_dict
+    url = (
+        f"postgresql://{quote(db['USER'])}:{quote(db['PASSWORD'])}"
+        f"@{db['HOST'] or 'localhost'}:{db['PORT'] or 5432}/{db['NAME']}"
+    )
+    if db["OPTIONS"].get("sslmode"):
+        url += f"?sslmode={db['OPTIONS']['sslmode']}"
+    settings.PG_VECTOR_DB_URL = url
+    return url
+
+
+def test_vectorstore_add_and_search_through_shared_engine(pg_vector_db, mocker):
+    mocker.patch.object(rag_db, "OpenAIEmbeddings", lambda: DeterministicFakeEmbedding(size=1536))
+
+    writer = rag_db.get_vectorstore("integration-collection")
+    writer.add_texts(["alpha doc", "beta doc", "gamma doc"])
+    reader = rag_db.get_vectorstore("integration-collection")
+
+    assert reader._bind is writer._bind
+    results = reader.similarity_search("beta doc", k=1)
+    assert [doc.page_content for doc in results] == ["beta doc"]
+
+
+def test_checkpointer_persists_history_per_session(pg_vector_db):
+    rag_db.get_checkpointer().setup()
+    model = fake_model("reply 1", "reply 2", "other reply")
+
+    def ask(question, session):
+        workflow = AgentWorkflow(model=model, tools=[], prompt_template="system", saver=rag_db.get_checkpointer())
+        for step in workflow.run(inputs=question, session_key=session):
+            pass
+        return [message.content for message in step["messages"]]
+
+    ask("first", "session-a")
+    assert ask("second", "session-a") == ["first", "reply 1", "second", "reply 2"]
+    assert ask("unrelated", "session-b") == ["unrelated", "other reply"]
