@@ -24,6 +24,11 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
 
   const [takeover, setTakeover] = useState(false);
   const [text, setText] = useState("");
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +62,11 @@ export default function SessionMessages({ botSlug, sessionId, token }: Props) {
 
   const fmtTime = (iso: string) =>
     new Date(iso)
-      .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      .toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        ...(hasMounted ? {} : { timeZone: "UTC" }),
+      })
       .replace("AM", "am")
       .replace("PM", "pm");
 
