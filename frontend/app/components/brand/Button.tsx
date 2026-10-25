@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type Variant = "primary" | "secondary" | "link";
@@ -29,24 +30,48 @@ export function focusRing(onDark = false) {
   );
 }
 
-export default function Button(props: AsLink | AsButton) {
-  const { variant = "primary", onDark = false, className, children, ...rest } = props;
-  const classes = cn(variants[variant], focusRing(onDark), "transition-colors", className);
+// Internal paths go through next/link; external, mailto: and #anchors stay plain <a>
+const isInternal = (href: string) => href.startsWith("/") && !href.startsWith("//");
 
-  if (rest.href !== undefined) {
+const Button = React.forwardRef<HTMLAnchorElement | HTMLButtonElement, AsLink | AsButton>(
+  function Button(props, ref) {
+    const { variant = "primary", onDark = false, className, children, ...rest } = props;
+    const classes = cn(
+      variants[variant],
+      focusRing(onDark),
+      "transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    );
+
+    if (rest.href !== undefined) {
+      const { href, ...anchorProps } = rest as React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+        href: string;
+      };
+      const linkRef = ref as React.Ref<HTMLAnchorElement>;
+      if (isInternal(href)) {
+        return (
+          <Link ref={linkRef} href={href} className={classes} {...anchorProps}>
+            {children}
+          </Link>
+        );
+      }
+      return (
+        <a ref={linkRef} href={href} className={classes} {...anchorProps}>
+          {children}
+        </a>
+      );
+    }
     return (
-      <a className={classes} {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      <button
+        ref={ref as React.Ref<HTMLButtonElement>}
+        type="button"
+        className={classes}
+        {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      >
         {children}
-      </a>
+      </button>
     );
   }
-  return (
-    <button
-      type="button"
-      className={classes}
-      {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
-    >
-      {children}
-    </button>
-  );
-}
+);
+
+export default Button;

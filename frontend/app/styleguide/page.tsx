@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 const palette = [
   { name: "Meadow", hex: "#F3F6EE", cls: "bg-adey-meadow", share: 38, role: "Page background." },
   { name: "Paper", hex: "#FFFFFF", cls: "bg-adey-paper", share: 18, role: "Document sheets and Adey's chat bubbles. Nothing else." },
-  { name: "Mist", hex: "#D5DDCF", cls: "bg-adey-mist", share: 10, role: "Rules, borders and input outlines." },
+  { name: "Mist", hex: "#D5DDCF", cls: "bg-adey-mist", share: 10, role: "Rules and dividers. Too light for input outlines; use Seed at 60%." },
   { name: "Seed", hex: "#3A2614", cls: "bg-adey-seed", share: 14, role: "All text. The brown of the flower's centre stands in for black." },
   { name: "Highland", hex: "#1E4D3A", cls: "bg-adey-highland", share: 13, role: "Dark bands, links, focus rings, customer bubbles and code." },
   { name: "Petal", hex: "#F2C230", cls: "bg-adey-petal", share: 6, role: "The highlighter, and the primary button. Never text." },
@@ -283,7 +283,7 @@ export default function StyleGuide() {
                     id="sg-name"
                     defaultValue="Tana Electronics"
                     className={cn(
-                      "w-full rounded-control border-[1.5px] border-adey-mist bg-adey-paper px-3 py-2.5 hover:border-adey-seed/40",
+                      "w-full rounded-control border-[1.5px] border-adey-seed/60 bg-adey-paper px-3 py-2.5 hover:border-adey-seed",
                       focusRing()
                     )}
                   />

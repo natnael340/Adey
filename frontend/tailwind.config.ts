@@ -176,8 +176,10 @@ const config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
-        grotesk: ["var(--font-grotesk)", ...fontFamily.sans],
-        document: ["var(--font-document)", ...fontFamily.serif],
+        // Fallbacks live inside var() so components outside a brandFonts ancestor
+        // get a neutral stack instead of inheriting the body font
+        grotesk: [`var(--font-grotesk, ${fontFamily.sans.join(", ")})`],
+        document: [`var(--font-document, ${fontFamily.serif.join(", ")})`],
       },
       boxShadow: {
         sheet: "0 1px 0 #D5DDCF, 0 16px 32px -16px rgb(30 77 58 / 0.30)",
