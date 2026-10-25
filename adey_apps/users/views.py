@@ -19,9 +19,9 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django_filters import rest_framework as filters
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from adey_apps.users.models import User, Plan, Subscription, SubscriptionOrder, TokenGenerationLog
+from adey_apps.users.models import User, Plan, Subscription, TokenGenerationLog
 from adey_apps.users.serializers import AdTokenObtainPairSerializer, UserSerializer, PlanSerializer, SubscriptionSerializer, EmailVerificationSerializer, PasswordResetSerializer, UserReadSerializer
-from adey_apps.users.utils import get_subscription, generate_access_token, create_subscription, AESCipher, send_email_verification_email, send_password_reset_email
+from adey_apps.users.utils import AESCipher, send_email_verification_email, send_password_reset_email
 from adey_apps.users.tokens import account_activation_token
 
 
@@ -183,52 +183,6 @@ class SubscriptionApiView(RetrieveAPIView, GenericAPIView):
 
     def get_object(self):
         return self.request.user.subscription
-        
-
-class Subscribe(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, *args, **kwargs):
-        identifier = kwargs.get("identifier")
-
-        try:
-            plan = Plan.objects.get(identifier=identifier)
-            token = generate_access_token(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET)
-            response, status_code = create_subscription(token, plan)
-            if response.get("id", None):
-                SubscriptionOrder.objects.create(order_id=response.get("id"), user=request.user)
-
-            return Response(response, status=status_code)
-        except Plan.DoesNotExist:
-            return Response({"message": f"Plan with this identifier does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(e.__str__())
-            return Response({"message": f"Server Error!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-class VerifySubscription(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, *args, **kwargs):
-        checkout_id = kwargs.get('checkout_id')
-        try:
-            token = generate_access_token(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET)
-            response, status_code = get_subscription(token, checkout_id)
-            
-            if status_code == 200:
-                plan = Plan.objects.get(paypal_price_id=response.get("plan_id"))
-                sub = request.user.subscription
-                sub.plan = plan
-                sub.paypal_order_id =  response.get("id")   
-                sub.save(update_fields=["plan", "paypal_order_id"])
-                
-                return Response({"message": f"Successfully subscribed to {plan.name} - {plan.period} plan.", "error": False}, status=status.HTTP_200_OK)
-            return Response({"error": True, "data": response}, status=status_code)
-        except requests.RequestException as e:
-            return Response({"message": e.__str__(), "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            return Response({"message": f"Other exception: {e.__str__()}", "error": True}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 class UserDetailView(RetrieveAPIView, GenericAPIView):

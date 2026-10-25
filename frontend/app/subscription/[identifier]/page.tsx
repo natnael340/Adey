@@ -4,10 +4,9 @@ import Api from "@/app/components/Api";
 import { AxiosError } from "axios";
 import { redirect } from "next/navigation";
 import { PlanType } from "@/app/types/types";
-import PaypalPayment from "./PaypalPayment";
-import { PaypalOptions } from "@/app/constants/consts";
 import Features from "./Features";
 import { Gem } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type ParamList = {
   params: {
@@ -50,11 +49,9 @@ const page = async ({ params: { identifier } }: ParamList) => {
         </div>
         <Features data={data} />
 
-        <PaypalPayment
-          data={data}
-          token={api.get_token()}
-          options={PaypalOptions}
-        />
+        <Button className="w-60" disabled>
+          Payments coming soon
+        </Button>
       </div>
     </div>
   );

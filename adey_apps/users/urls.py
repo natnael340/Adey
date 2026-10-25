@@ -8,8 +8,6 @@ from adey_apps.users.views import (
     GoogleLogin, 
     PlanViewSet, 
     SubscriptionApiView, 
-    Subscribe,
-    VerifySubscription,
     EmailVerificationRequestView,
     EmailVerificationView,
     PasswordResetView,
@@ -31,8 +29,6 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("user/me", UserDetailView.as_view(), name="user_detail"),
     path("user/subscription", SubscriptionApiView.as_view(), name="user_subscription"),
-    path("user/subscribe/<uuid:identifier>", Subscribe.as_view(), name="subscribe"),
-    path("user/subscription/check/<str:checkout_id>", VerifySubscription.as_view(), name="verify_sub"),
 ]
 
 router.register("plans", PlanViewSet, "plans")

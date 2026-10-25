@@ -65,13 +65,4 @@ export const TEST_PLAN: PlanType[] = [
   },
 ];
 
-export const PaypalOptions = {
-  clientId: process.env.PAYPAL_CLIENT_ID || "test_id",
-  enableFunding: "paylater,card",
-  disableFunding: "",
-  dataSdkIntegrationSource: "integrationbuilder_sc",
-  vault: "true",
-  intent: "subscription",
-};
-
 export const BRAND_YELLOW = "#F3E37A";

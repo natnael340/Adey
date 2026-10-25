@@ -4,7 +4,6 @@ import {
   ChatFormType,
   ChatType,
   DashboardDataType,
-  PlanResponseType,
   PlanType,
   ResourceDataTypeWithPagination,
   ResourceFormType,
@@ -200,21 +199,6 @@ class Api {
     return data;
   }
 
-  async checkout(id: string) {
-    const { data } = await this.axios.get<PlanResponseType>(
-      `user/subscribe/${id}`
-    );
-
-    return data;
-  }
-
-  async check_status(id: string) {
-    const { data } = await this.axios.get<GenericResponseType>(
-      `user/subscription/check/${id}`
-    );
-
-    return data;
-  }
   async get_plan(id: string) {
     const { data } = await api.get<PlanType>(`plans/${id}/`);
 

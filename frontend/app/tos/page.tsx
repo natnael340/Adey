@@ -150,8 +150,7 @@ export default function TermsOfService() {
               </li>
               <li>
                 <b>Billing:</b> Subscriptions are billed monthly in advance via
-                the payment processor you select (Google Play, Stripe, or
-                PayPal). All fees are non-refundable, except as required by law.
+                the payment processor you select (Google Play or Stripe). All fees are non-refundable, except as required by law.
               </li>
               <li>
                 <b>Changes & Cancellations:</b> You may upgrade, downgrade, or
