@@ -39,7 +39,6 @@ export default function RootLayout({
         /> */}
       </head>
 
-      <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription"></Script>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -48,11 +47,14 @@ export default function RootLayout({
       >
         <AuthProvider>{children}</AuthProvider>
 
-        <script
+        <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription" />
+        {/* Loaded after hydration so the widget's DOM injection doesn't cause a mismatch */}
+        <Script
           type="module"
           crossOrigin="anonymous"
-          src={`https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js`}
-        ></script>
+          strategy="afterInteractive"
+          src="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js"
+        />
       </body>
     </html>
   );
