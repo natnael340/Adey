@@ -47,7 +47,6 @@ export default function RootLayout({
       >
         <AuthProvider>{children}</AuthProvider>
 
-        <Script src="https://www.paypal.com/sdk/js?client-id=sb&vault=true&intent=subscription" />
         {/* Loaded after hydration so the widget's DOM injection doesn't cause a mismatch */}
         <Script
           type="module"

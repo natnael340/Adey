@@ -194,15 +194,6 @@ export type PlanType = {
   price: number;
 };
 
-export type PaypalOptionsType = {
-  clientId: string;
-  enableFunding: string;
-  disableFunding: string;
-  dataSdkIntegrationSource: string;
-  vault: string;
-  intent: string;
-};
-
 export type PreferenceType = {
   chatBox: {
     headerBackgroundColor: string;

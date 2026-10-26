@@ -253,12 +253,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_SECRET_TEST_KEY = env.str("STRIPE_SECRET_TEST_KEY")
 
 
-# Paypal
-PAYPAL_CLIENT_ID=env.str("PAYPAL_CLIENT_ID")
-PAYPAL_CLIENT_SECRET=env.str("PAYPAL_CLIENT_SECRET")
-PAYPAL_ACCESS_TOKEN=env.str("PAYPAL_ACCESS_TOKEN")
-PAYPAL_SELLER_ID=env.str("PAYPAL_SELLER_ID")
-
 
 # Email Configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

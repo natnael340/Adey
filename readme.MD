@@ -5,7 +5,6 @@ Adey is an AI-powered chatbot designed to enhance customer support and sales for
 ## 🌟 Key Features
 
 - 🔐 Authentication & Authorization – Secure user access.
-- 💳 Payment Processing – Integrated with PayPal for seamless transactions.
 - 📊 Rate Limiting – Controls incoming traffic to ensure service stability.
 - 📦 Containerization – Utilized for scalable deployment.
 - 📜 Logging – Implements logging mechanisms for monitoring and analysis.

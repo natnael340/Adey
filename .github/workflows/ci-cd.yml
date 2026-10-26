@@ -41,10 +41,6 @@ jobs:
       STATICFILES_STORAGE: django.core.files.storage.InMemoryStorage
       OPENAI_API_KEY: sk-ci-dummy
       STRIPE_SECRET_TEST_KEY: ci
-      PAYPAL_CLIENT_ID: ci
-      PAYPAL_CLIENT_SECRET: ci
-      PAYPAL_ACCESS_TOKEN: ci
-      PAYPAL_SELLER_ID: ci
       AWS_ACCESS_KEY_ID: ci
       AWS_SECRET_ACCESS_KEY: ci
       AWS_STORAGE_BUCKET_NAME: ci
