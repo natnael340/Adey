@@ -12,7 +12,7 @@ type ParamType = {
 // The Petal mark means one thing: "the answer came from here".
 // Resting state is fully highlighted, so reduced motion just skips the sweep.
 export const highlightClasses =
-  "box-decoration-clone bg-gradient-to-r from-adey-petal to-adey-petal bg-no-repeat bg-[length:100%_100%] bg-left px-0.5 text-inherit";
+  "box-decoration-clone bg-adey-petal bg-no-repeat bg-left px-0.5 text-inherit";
 
 export default function Highlight({ animate = false, id, className, children }: ParamType) {
   return (

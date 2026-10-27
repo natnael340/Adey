@@ -27,6 +27,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@react-three/fiber": "^8.18.0",
     "@tremor/react": "^3.13.4",
     "autoprefixer": "^10.0.1",
     "axios": "^1.6.3",
@@ -48,6 +49,7 @@
     "sharp": "^0.32.6",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.169.0",
     "typescript": "^5",
     "zod": "^3.24.4"
   },
@@ -59,6 +61,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/three": "^0.169.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.0.4",
     "eslint-plugin-unused-imports": "^2.0.0",

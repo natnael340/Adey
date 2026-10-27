@@ -27,3 +27,7 @@ plan/
 .secrets/
 *.pem
 *.key
+
+.claude
+.agents
+skills-lock.json

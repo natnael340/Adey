@@ -9,6 +9,8 @@ import CodeBlock from "../components/brand/CodeBlock";
 import DocumentSheet from "../components/brand/DocumentSheet";
 import Highlight from "../components/brand/Highlight";
 import Steps from "../components/brand/Steps";
+import Section from "../components/brand/Section";
+import { EMBED_CODE } from "../constants/consts";
 
 export const metadata: Metadata = {
   title: "Adey style guide",
@@ -44,36 +46,6 @@ const voice = [
   { avoid: "Configure webhook integrations", use: "Let Adey look up orders in your system" },
 ];
 
-const embedCode = `<meta name="adey_chat_id" content="YOUR-ASSISTANT-ID" />
-<script type="module" crossorigin src="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js"></script>`;
-
-function Section({
-  id,
-  title,
-  rule,
-  children,
-}: {
-  id: string;
-  title: string;
-  rule: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      aria-labelledby={`${id}-title`}
-      className="grid gap-8 border-t border-adey-mist py-14 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-14 lg:py-20"
-    >
-      <div className="space-y-3">
-        <h2 id={`${id}-title`} className="text-2xl font-extrabold tracking-[-0.02em]">
-          {title}
-        </h2>
-        <div className="max-w-[40ch] text-adey-seed/80">{rule}</div>
-      </div>
-      <div className="min-w-0">{children}</div>
-    </section>
-  );
-}
 
 export default function StyleGuide() {
   return (
@@ -164,7 +136,7 @@ export default function StyleGuide() {
           </ol>
           <DocumentSheet fileName="opening-hours.docx" className="mt-14">
             <p>
-              Our Bole showroom is open Monday to Saturday, 9:00 to 19:00. On public holidays we
+              Our showroom is open Monday to Saturday, 9:00 to 19:00. On public holidays we
               open at 11:00. Repairs can be dropped off at the side entrance until 17:00.
             </p>
           </DocumentSheet>
@@ -208,13 +180,15 @@ export default function StyleGuide() {
           title="Motion"
           rule={
             <p>
-              One motion: the highlight sweeps across the source line when Adey answers. With
-              reduced motion it appears without the sweep. Nothing animates on scroll.
+              The highlight sweeps across the source line when Adey answers, Adey itself, the 3D
+              character on the home page, reacts to the visitor and the conversation, and
+              sections rise in once as they scroll into view. With reduced motion all of it
+              holds still.
             </p>
           }
         >
           <p className="max-w-[60ch] font-document text-[1.0625rem] leading-[1.65]">
-            Delivery inside Addis Ababa is free on orders over 2,000 birr.{" "}
+            Local delivery is free on orders over $50.{" "}
             <Highlight animate>Orders placed before 14:00 arrive the same day.</Highlight>
           </p>
           <p className="mt-4 text-sm text-adey-seed/70">600ms, ease-out, left to right.</p>
@@ -263,7 +237,7 @@ export default function StyleGuide() {
                   },
                   {
                     title: "Paste the embed code",
-                    body: <CodeBlock label="Add to your site's <head>" code={embedCode} className="mt-3" />,
+                    body: <CodeBlock label="Add to your site's <head>" code={EMBED_CODE} className="mt-3" />,
                   },
                 ]}
               />
