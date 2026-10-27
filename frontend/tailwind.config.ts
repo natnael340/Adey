@@ -2,6 +2,18 @@ import type { Config } from "tailwindcss";
 const { fontFamily } = require("tailwindcss/defaultTheme");
 import colors from "tailwindcss/colors";
 
+// Adey brand palette, drawn from the Adey Abeba flower
+const adey = {
+  petal: "#F2C230",
+  seed: "#3A2614",
+  highland: "#1E4D3A",
+  meadow: "#F3F6EE",
+  mist: "#D5DDCF",
+  paper: "#FFFFFF",
+  alert: "#B3261E",
+};
+const petalFill = `linear-gradient(${adey.petal}, ${adey.petal})`;
+
 const config = {
   darkMode: ["class"],
   content: [
@@ -24,16 +36,7 @@ const config = {
     },
     extend: {
       colors: {
-        // Adey brand palette, drawn from the Adey Abeba flower
-        adey: {
-          petal: "#F2C230",
-          seed: "#3A2614",
-          highland: "#1E4D3A",
-          meadow: "#F3F6EE",
-          mist: "#D5DDCF",
-          paper: "#FFFFFF",
-          alert: "#B3261E",
-        },
+        adey,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -164,15 +167,35 @@ const config = {
             height: "0",
           },
         },
+        // Flat Petal at rest; only the sweep paints it as a growing image
         "highlight-sweep": {
-          from: { backgroundSize: "0% 100%" },
-          to: { backgroundSize: "100% 100%" },
+          from: {
+            backgroundColor: "transparent",
+            backgroundImage: petalFill,
+            backgroundSize: "0% 100%",
+          },
+          to: {
+            backgroundColor: "transparent",
+            backgroundImage: petalFill,
+            backgroundSize: "100% 100%",
+          },
+        },
+        "bubble-in": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "none" },
+        },
+        // Leaves upward, the way a chat scrolls, so the next question can rise in below
+        "bubble-out": {
+          from: { opacity: "1", transform: "none" },
+          to: { opacity: "0", transform: "translateY(-6px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "highlight-sweep": "highlight-sweep 600ms ease-out both",
+        "bubble-in": "bubble-in 200ms ease-out both",
+        "bubble-out": "bubble-out 180ms ease-in both",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],

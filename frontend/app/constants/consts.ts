@@ -1,16 +1,8 @@
 import { PlanType } from "../types/types";
 
 export const [HUMAN, AI] = ["HUMAN", "AI"];
-export const CHAT_SAMPLE = [
-  { side: "bot", text: "Hi! How can I help you today?" },
-  { side: "user", text: "Do you still have NVIDIA RTX 4080 GPUs?" },
-  {
-    side: "bot",
-    text: "Sorry, we don’t have it right now. I can add you to the waitlist.",
-  },
-  { side: "user", text: "Can you set an appointment for me?" },
-  { side: "bot", text: "Absolutely—what date works for you?" },
-];
+export const EMBED_CODE = `<meta name="adey_chat_id" content="YOUR-ASSISTANT-ID" />
+<script type="module" crossorigin src="https://s3.us-east-2.amazonaws.com/app.adeychatbot/static/chatbots/index.js"></script>`;
 export const COLORS = [
   "red-500",
   "orange-500",
@@ -65,4 +57,3 @@ export const TEST_PLAN: PlanType[] = [
   },
 ];
 
-export const BRAND_YELLOW = "#F3E37A";

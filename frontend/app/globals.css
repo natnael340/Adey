@@ -101,4 +101,25 @@
   body:has([data-canvas="meadow"]) {
     @apply bg-adey-meadow;
   }
+  body:has([data-canvas="highland"]) {
+    @apply bg-adey-highland;
+  }
+}
+
+/* Rises in as it scrolls into view; without scroll timelines or with reduced motion it just sits there */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
 }

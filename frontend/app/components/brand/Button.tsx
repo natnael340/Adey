@@ -39,7 +39,9 @@ const Button = React.forwardRef<HTMLAnchorElement | HTMLButtonElement, AsLink | 
     const classes = cn(
       variants[variant],
       focusRing(onDark),
-      "transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+      "transition-[color,background-color,border-color,text-decoration-color,transform] duration-100 disabled:cursor-not-allowed disabled:opacity-50",
+      // Press feedback on pointer-down; text links don't shrink
+      variant !== "link" && "active:scale-[0.97] disabled:active:scale-100",
       className
     );
 
