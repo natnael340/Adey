@@ -7,15 +7,7 @@ type Step = {
 };
 
 // Only for content that really is a sequence, like setup
-export default function Steps({
-  steps,
-  tone = "light",
-  className,
-}: {
-  steps: Step[];
-  tone?: "light" | "dark";
-  className?: string;
-}) {
+export default function Steps({ steps, className }: { steps: Step[]; className?: string }) {
   return (
     <ol className={cn("space-y-8", className)}>
       {steps.map((step, i) => (
@@ -25,10 +17,7 @@ export default function Steps({
         >
           <span
             aria-hidden
-            className={cn(
-              "text-4xl font-extrabold leading-none tracking-[-0.02em]",
-              tone === "dark" ? "text-adey-petal" : "text-adey-highland",
-            )}
+            className="text-4xl font-extrabold leading-none tracking-[-0.02em] text-adey-highland"
           >
             {i + 1}
           </span>

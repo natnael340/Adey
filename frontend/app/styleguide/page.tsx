@@ -169,8 +169,8 @@ export default function StyleGuide() {
               </p>
             </div>
             <div className="space-y-4">
-              <div className="h-24 rounded-sheet bg-adey-paper shadow-sheet" />
-              <p className="text-sm text-adey-seed/70">Sheets: 2px, the only shadow</p>
+              <div className="h-24 rounded-sheet border border-adey-mist bg-adey-paper" />
+              <p className="text-sm text-adey-seed/70">Sheets: 2px, a hairline border, no shadow</p>
             </div>
           </div>
         </Section>

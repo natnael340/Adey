@@ -24,7 +24,7 @@ export default function CodeBlock({ code, label, className }: ParamType) {
   };
 
   return (
-    <div className={cn("rounded-control bg-adey-highland text-adey-meadow", className)}>
+    <div data-ui className={cn("rounded-control bg-adey-highland text-adey-meadow", className)}>
       <div className="flex items-center justify-between gap-4 border-b border-adey-meadow/15 px-4 py-2 text-sm">
         <span className="text-adey-meadow/75">{label}</span>
         <button

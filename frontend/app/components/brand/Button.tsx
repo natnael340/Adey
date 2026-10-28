@@ -30,6 +30,18 @@ export function focusRing(onDark = false) {
   );
 }
 
+// A pressable choice in a set, like the hero's questions; the selected one fills with Highland
+export function chip(selected: boolean) {
+  return cn(
+    "cursor-pointer rounded-control border-[1.5px] border-adey-seed/25 px-3 py-2 text-sm font-medium transition-[color,background-color,border-color,transform] duration-150 ease-out active:scale-[0.97]",
+    // Hover only where there is a pointer, so taps don't leave a stuck highlight
+    selected
+      ? "border-adey-highland bg-adey-highland text-adey-paper"
+      : "[@media(hover:hover)]:hover:border-adey-seed/60 [@media(hover:hover)]:hover:bg-adey-seed/[0.06]",
+    focusRing(),
+  );
+}
+
 // Internal paths go through next/link; external, mailto: and #anchors stay plain <a>
 const isInternal = (href: string) => href.startsWith("/") && !href.startsWith("//");
 

@@ -205,7 +205,6 @@ const config = {
         document: [`var(--font-document, ${fontFamily.serif.join(", ")})`],
       },
       boxShadow: {
-        sheet: "0 1px 0 #D5DDCF, 0 16px 32px -16px rgb(30 77 58 / 0.30)",
         "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
         "tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
