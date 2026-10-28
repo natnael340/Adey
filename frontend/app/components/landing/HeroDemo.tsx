@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import AdeyCharacter from "./AdeyCharacter";
 import type { Mood } from "./AdeyScene";
 import ChatBubble from "../brand/ChatBubble";
 import SourceChip from "../brand/SourceChip";
-import { focusRing } from "../brand/Button";
+import { chip } from "../brand/Button";
 
 type Exchange = {
   label: string;
@@ -103,7 +102,7 @@ export default function HeroDemo({ children }: { children: React.ReactNode }) {
           className="absolute bottom-full left-1/2 z-10 w-44 -translate-x-1/2 translate-y-8 sm:w-52"
         />
 
-        <div className="relative rounded-bubble bg-adey-paper text-adey-seed">
+        <div data-ui className="relative rounded-bubble bg-adey-paper text-adey-seed">
           <div className="flex items-center gap-2 px-5 pb-3 pt-10 font-bold">
             <img src="/brand/adey-mark.svg" alt="" className="h-6 w-6" />
             Adey
@@ -149,14 +148,7 @@ export default function HeroDemo({ children }: { children: React.ReactNode }) {
                   type="button"
                   aria-pressed={i === turn.index}
                   onClick={() => ask(i)}
-                  className={cn(
-                    "cursor-pointer rounded-control border-[1.5px] border-adey-seed/25 px-3 py-2 text-sm font-medium transition-[color,background-color,border-color,transform] duration-150 ease-out active:scale-[0.97]",
-                    // Hover only where there is a pointer, so taps don't leave a stuck highlight
-                    i === turn.index
-                      ? "border-adey-highland bg-adey-highland text-adey-paper"
-                      : "[@media(hover:hover)]:hover:border-adey-seed/60 [@media(hover:hover)]:hover:bg-adey-seed/[0.06]",
-                    focusRing(),
-                  )}
+                  className={chip(i === turn.index)}
                 >
                   {e.label}
                 </button>

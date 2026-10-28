@@ -4,85 +4,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../pages/api/auth/[...nextauth]";
 import { brandFonts } from "./fonts";
 import { cn } from "@/lib/utils";
-import { EMBED_CODE } from "./constants/consts";
 import HeroDemo from "./components/landing/HeroDemo";
+import SetupSequence from "./components/landing/SetupSequence";
+import SourceCarousel from "./components/landing/SourceCarousel";
 import Button, { focusRing } from "./components/brand/Button";
-import CodeBlock from "./components/brand/CodeBlock";
-import DocumentSheet from "./components/brand/DocumentSheet";
-import Highlight from "./components/brand/Highlight";
 import Section from "./components/brand/Section";
-import Steps from "./components/brand/Steps";
 
-// Edge to edge with a fluid gutter: no centred max-width column
-const shell = "px-[clamp(1rem,5vw,6rem)]";
+// Edge to edge with a fluid gutter (--gutter, globals.css): no centred max-width column
+const shell = "px-[var(--gutter)]";
 
 const navLink = cn(
   "rounded-control font-medium hover:underline hover:underline-offset-[3px]",
   focusRing(true),
 );
-
-// Each row's highlight is what a hero answer's source chip scrolls to
-const sources = [
-  {
-    title: "Your documents",
-    body: "Upload PDFs, CSV files, web pages or plain text. Every answer links to the passage it came from.",
-    artifact: (
-      <DocumentSheet fileName="returns-policy.pdf" page={2}>
-        <p>
-          Unopened items can be returned within 30 days of delivery for a full
-          refund.
-        </p>
-        <p>
-          <Highlight id="source-documents">
-            Opened items can be exchanged within 14 days of delivery, provided
-            all original accessories are included.
-          </Highlight>
-        </p>
-      </DocumentSheet>
-    ),
-  },
-  {
-    title: "Your systems",
-    body: "Connect an API and Adey looks things up mid-conversation: order status, stock, bookings.",
-    artifact: (
-      <DocumentSheet fileName="Order 4471, from your order system">
-        <p>Customer: Alex M.</p>
-        <p>
-          <Highlight id="source-systems">
-            Status: out for delivery, expected by 17:00 today
-          </Highlight>
-        </p>
-      </DocumentSheet>
-    ),
-  },
-  {
-    title: "Your calendar",
-    body: "Adey books appointments into your Google Calendar from an ordinary chat.",
-    artifact: (
-      <DocumentSheet fileName="Repairs calendar, Thursday">
-        <p>09:00 Screen replacement</p>
-        <p>
-          <Highlight id="source-calendar">
-            10:00 Phone repair, booked by Adey
-          </Highlight>
-        </p>
-        <p>11:00 Free</p>
-      </DocumentSheet>
-    ),
-  },
-  {
-    title: "Your team",
-    body: "When a customer asks for a person, the chat goes to your team with everything said so far.",
-    artifact: (
-      <DocumentSheet fileName="Handed to Maya at 14:02">
-        <p>
-          The customer would like to talk to a person. They asked about a phone
-          repair on Thursday, booked for 10:00.
-        </p>
-      </DocumentSheet>
-    ),
-  },
-];
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -157,7 +91,8 @@ export default async function Home() {
         </HeroDemo>
       </section>
 
-      <div className={shell}>
+      {/* One light chapter between the green hero and the green close: sources on white, setup a tone down */}
+      <div className={cn(shell, "bg-adey-paper")}>
         <Section
           id="sources"
           title="Where answers come from"
@@ -168,26 +103,11 @@ export default async function Home() {
             </p>
           }
         >
-          <div className="space-y-16 lg:space-y-24">
-            {sources.map((s) => (
-              <div
-                key={s.title}
-                className="reveal grid gap-6 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16"
-              >
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-extrabold leading-snug tracking-[-0.02em]">
-                    {s.title}
-                  </h3>
-                  <p className="max-w-[40ch] text-lg">{s.body}</p>
-                </div>
-                {s.artifact}
-              </div>
-            ))}
-          </div>
+          <SourceCarousel />
         </Section>
       </div>
 
-      <div className={cn(shell, "bg-adey-highland text-adey-paper")}>
+      <div className={cn(shell, "bg-adey-meadow")}>
         <Section
           id="setup"
           title="Live on your site in three steps"
@@ -195,92 +115,51 @@ export default async function Home() {
             <p>No code until the last step, and then it&apos;s two lines.</p>
           }
         >
-          <Steps
-            tone="dark"
-            steps={[
-              {
-                title: "Upload your documents",
-                body: "Price lists, policies, FAQs and product sheets.",
-              },
-              {
-                title: "Choose where Adey can appear",
-                body: "Add the websites allowed to load your assistant.",
-              },
-              {
-                title: "Paste the embed code",
-                body: (
-                  <CodeBlock
-                    label="Add to your site's <head>"
-                    code={EMBED_CODE}
-                    className="mt-3 bg-adey-seed"
-                  />
-                ),
-              },
-            ]}
-          />
+          <SetupSequence />
         </Section>
       </div>
 
-      <section
-        aria-labelledby="start-title"
-        className="overflow-hidden bg-adey-petal"
-      >
-        <div
-          className={cn(
-            shell,
-            "reveal grid items-center gap-10 py-20 md:grid-cols-[minmax(0,1fr)_auto] lg:py-32",
-          )}
-        >
-          <div>
-            <h2
-              id="start-title"
-              className="text-balance text-5xl font-extrabold leading-[0.95] tracking-[-0.03em] lg:text-[clamp(3.5rem,5vw,5.5rem)]"
-            >
-              Start with one document
-            </h2>
-            <p className="mt-6 max-w-[48ch] text-lg sm:text-xl">
+      <div className={cn(shell, "bg-adey-highland text-adey-paper")}>
+        <Section
+          id="start"
+          title="Start with one document"
+          rule={
+            <p>
               Upload your returns policy or price list and ask Adey about it
               before you put it on your site.
             </p>
-            <Button
-              href="/auth/signup"
-              className="mt-8 bg-adey-seed text-adey-paper hover:bg-adey-highland"
-            >
-              Create your assistant
-            </Button>
-          </div>
-          <img
-            src="/brand/adey-mark-mono-3a2614.svg"
-            alt=""
-            className="hidden h-48 w-48 md:block lg:h-56 lg:w-56"
-          />
-        </div>
-      </section>
+          }
+        >
+          <Button href="/auth/signup" onDark>
+            Create your assistant
+          </Button>
+        </Section>
 
-      <footer className={cn(shell, "bg-adey-highland py-14 text-adey-paper")}>
-        <img
-          src="/brand/adey-lockup-horizontal-reversed.svg"
-          alt="Adey"
-          className="h-10 w-auto"
-        />
-        <div className="mt-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/features" className={navLink}>
-              Features
-            </Link>
-            <Link href="/privacy" className={navLink}>
-              Privacy
-            </Link>
-            <Link href="/tos" className={navLink}>
-              Terms
-            </Link>
-            <a href="https://github.com/natnael340/Adey" className={navLink}>
-              GitHub
-            </a>
-          </nav>
-          <p>© {new Date().getFullYear()} Adey</p>
-        </div>
-      </footer>
+        <footer className="pb-14">
+          <img
+            src="/brand/adey-lockup-horizontal-reversed.svg"
+            alt="Adey"
+            className="h-10 w-auto"
+          />
+          <div className="mt-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link href="/features" className={navLink}>
+                Features
+              </Link>
+              <Link href="/privacy" className={navLink}>
+                Privacy
+              </Link>
+              <Link href="/tos" className={navLink}>
+                Terms
+              </Link>
+              <a href="https://github.com/natnael340/Adey" className={navLink}>
+                GitHub
+              </a>
+            </nav>
+            <p>© {new Date().getFullYear()} Adey</p>
+          </div>
+        </footer>
+      </div>
     </main>
   );
 }

@@ -123,3 +123,8 @@
     transform: translateY(24px);
   }
 }
+
+/* The home page's side margin; full-bleed parts pull back out by the same amount */
+:root {
+  --gutter: clamp(1rem, 5vw, 6rem);
+}
