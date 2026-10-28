@@ -51,7 +51,7 @@ AGENT_PASSES = {
     "rag": "adey_apps.rag.rag_pass.RagPass",
     "agent": "adey_apps.rag.passes.LegacyAgentPass",
 }
-AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "agent")
+AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "rag")
 
 # Application definition
 

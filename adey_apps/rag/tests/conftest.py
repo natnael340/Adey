@@ -5,6 +5,7 @@ import pytest
 import sqlalchemy
 from django.db import connection
 from langchain_core.embeddings import DeterministicFakeEmbedding
+from langchain_core.messages import AIMessage
 
 from adey_apps.rag import db as rag_db
 
@@ -97,3 +98,32 @@ def pg_vector_db(transactional_db, settings):
 @pytest.fixture
 def fake_rag_embeddings(mocker):
     mocker.patch.object(rag_db, "get_rag_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
+
+
+class ScriptedLLM:
+    """FIFO-scripted chat model: str replies for invoke(), pydantic objects for structured output."""
+
+    def __init__(self, *replies):
+        self.replies = list(replies)
+        self.calls = []
+
+    def _pop(self, messages, expect_str):
+        self.calls.append(messages)
+        assert self.replies, "ScriptedLLM queue is empty"
+        reply = self.replies.pop(0)
+        assert isinstance(reply, str) == expect_str, f"wrong reply kind for this call: {reply!r}"
+        return reply
+
+    def invoke(self, messages):
+        return AIMessage(content=self._pop(messages, True))
+
+    def with_structured_output(self, schema):
+        outer = self
+
+        class _Structured:
+            def invoke(self, messages):
+                reply = outer._pop(messages, False)
+                assert isinstance(reply, schema), f"expected {schema.__name__}, got {reply!r}"
+                return reply
+
+        return _Structured()
