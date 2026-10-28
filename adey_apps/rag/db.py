@@ -12,9 +12,18 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import PGVector
+from langchain_core.embeddings import Embeddings
+from langchain_openai import OpenAIEmbeddings as RagOpenAIEmbeddings
+from langchain_postgres import Column, PGEngine, PGVectorStore
+from langchain_postgres.v2.hybrid_search_config import HybridSearchConfig
 from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
+
+RAG_EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_DIMENSIONS = 1536
+CHUNK_TABLE = "rag_chunks"
+DENSE_TOP_K = 20
 
 # prepare_threshold=None disables server-side prepared statements, which
 # transaction-mode poolers (PgBouncer, Neon/Supabase pooled endpoints) don't support.
@@ -114,3 +123,74 @@ def get_checkpointer_pool() -> ConnectionPool:
 
 def get_checkpointer() -> PostgresSaver:
     return PostgresSaver(get_checkpointer_pool())
+
+
+def _async_url(url: str) -> str:
+    for scheme in ("postgres://", "postgresql://"):
+        if url.startswith(scheme):
+            return "postgresql+psycopg://" + url[len(scheme):]
+    return url
+
+
+@lru_cache(maxsize=1)
+def get_rag_embeddings() -> Embeddings:
+    return RagOpenAIEmbeddings(model=RAG_EMBEDDING_MODEL)
+
+
+@lru_cache(maxsize=1)
+def get_pg_engine() -> PGEngine:
+    return PGEngine.from_connection_string(
+        _async_url(settings.PG_VECTOR_DB_URL),
+        pool_size=settings.PG_VECTOR_POOL_SIZE,
+        max_overflow=settings.PG_VECTOR_POOL_MAX_OVERFLOW,
+        pool_pre_ping=True,
+        pool_recycle=300,
+    )
+
+
+def chunk_search_config() -> HybridSearchConfig:
+    # 'simple' because bots are not English-only. primary_top_k is the dense limit
+    # PGVectorStore uses when a hybrid config is set (it ignores k). tsv_column must be
+    # explicit: the store only fills the tsvector column on insert when it is set.
+    return HybridSearchConfig(
+        tsv_column="content_tsv", tsv_lang="pg_catalog.simple", primary_top_k=DENSE_TOP_K
+    )
+
+
+def create_chunk_table(engine: PGEngine) -> None:
+    with get_vector_engine().begin() as connection:
+        exists = connection.execute(
+            sqlalchemy.text("SELECT to_regclass('public.rag_chunks')")
+        ).scalar_one_or_none()
+    if exists is None:
+        engine.init_vectorstore_table(
+            CHUNK_TABLE,
+            EMBEDDING_DIMENSIONS,
+            id_column=Column("langchain_id", "TEXT"),
+            metadata_columns=[Column("chat_id", "TEXT", nullable=False)],
+            hybrid_search_config=chunk_search_config(),
+        )
+    # No HNSW index: per-chat searches filter on chat_id first, so exact scans stay small.
+    with get_vector_engine().begin() as connection:
+        connection.execute(sqlalchemy.text(
+            "CREATE INDEX IF NOT EXISTS rag_chunks_content_tsv_idx ON rag_chunks USING GIN (content_tsv)"
+        ))
+        connection.execute(sqlalchemy.text(
+            "CREATE INDEX IF NOT EXISTS rag_chunks_chat_id_idx ON rag_chunks (chat_id)"
+        ))
+
+
+@lru_cache(maxsize=1)
+def get_chunk_store() -> PGVectorStore:
+    return PGVectorStore.create_sync(
+        engine=get_pg_engine(),
+        embedding_service=get_rag_embeddings(),
+        table_name=CHUNK_TABLE,
+        id_column="langchain_id",
+        metadata_columns=["chat_id"],
+        hybrid_search_config=chunk_search_config(),
+    )
+
+
+def delete_chat_chunks(chat_id: str) -> None:
+    get_chunk_store().delete(filter={"chat_id": chat_id})
