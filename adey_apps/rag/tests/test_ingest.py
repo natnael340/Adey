@@ -103,3 +103,13 @@ def test_reindex_chats_reports_failures_and_continues(db, mocker, capsys, chat_f
     out = capsys.readouterr().out
     assert f"{bad.slug}: FAILED boom" in out
     assert f"{good.slug}: 3 chunks" in out
+
+
+def test_split_documents_splits_back_to_back_markdown_tables(db, resource_factory):
+    md = b"# A\n| a | b |\n|---|---|\n| 1 | 2 |\n\n| c | d |\n|---|---|\n| 3 | 4 |"
+    resource = resource_factory(name="T", document_type="MD", document=ContentFile(md, name="t.md"))
+    chunks = [c.page_content for c in split_documents(load_resource(resource))]
+    assert len(chunks) == 2
+    first, second = chunks
+    assert "| a | b |" in first and "| 1 | 2 |" in first and "| c | d |" not in first
+    assert "\n\n| c | d |\n|---|---|\n" in second and "| 3 | 4 |" in second

@@ -67,7 +67,9 @@ def _split_markdown_tables(text: str) -> list[tuple[str, list[str]]]:
                 parts.append(("", ["\n".join(prose)]))
                 prose = []
             header, i, rows = "\n".join(lines[i:i + 2]), i + 2, []
-            while i < len(lines) and lines[i].startswith("|"):
+            # a "|" line followed by a separator starts the next table
+            while (i < len(lines) and lines[i].startswith("|")
+                   and not (i + 1 < len(lines) and _SEPARATOR_LINE.match(lines[i + 1]))):
                 rows.append(lines[i])
                 i += 1
             parts.append((header, rows))
