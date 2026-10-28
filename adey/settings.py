@@ -47,6 +47,11 @@ CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 
 AGENT_TOOL_PATH = "adey_apps.rag.tools"
 RAG_CHAT_MODEL = env.str("RAG_CHAT_MODEL", "gpt-4o-mini")
+AGENT_PASSES = {
+    "rag": "adey_apps.rag.rag_pass.RagPass",
+    "agent": "adey_apps.rag.passes.LegacyAgentPass",
+}
+AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "agent")
 
 # Application definition
 

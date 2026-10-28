@@ -9,6 +9,7 @@ from psycopg.rows import dict_row
 from adey_apps.rag import db as rag_db
 from adey_apps.rag.consumers import ChatConsumer
 from adey_apps.rag.models import Message
+from adey_apps.rag.passes import PassResult
 from adey_apps.rag.workflow import AgentWorkflow
 
 PG_URL = "postgres://adey:secret@db.example.com:5432/adey?sslmode=require"
@@ -145,41 +146,41 @@ def consumer(settings, chat, mocker):
 
 
 @pytest.mark.django_db
-def test_consumer_connect_does_not_build_agent(consumer, mocker):
-    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+def test_consumer_connect_does_not_answer(consumer, mocker):
+    answer = mocker.patch("adey_apps.rag.consumers.answer")
 
     consumer.connect()
 
     consumer.accept.assert_called_once()
-    agent_class.assert_not_called()
-    assert consumer.agent is None
+    answer.assert_not_called()
 
 
 @pytest.mark.django_db
-def test_consumer_builds_agent_once_on_first_message(consumer, chat, mocker):
-    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
-    agent_class.return_value.query.return_value = "answer"
+def test_consumer_answers_message_and_sends_sources(consumer, chat, mocker):
+    sources = [{"title": "T", "page": 2}]
+    answer = mocker.patch("adey_apps.rag.consumers.answer", return_value=PassResult("answer", sources))
     consumer.connect()
 
     consumer.receive_json({"type": "message", "message": "hi"})
-    consumer.receive_json({"type": "message", "message": "again"})
 
-    agent_class.assert_called_once_with(chat)
-    assert agent_class.return_value.query.call_count == 2
-    assert Message.objects.filter(chat=chat, session_id="session-1", message="answer").count() == 2
+    answer.assert_called_once_with(chat, "session-1", "hi")
+    consumer.send_json.assert_called_with(
+        {"type": "message", "message_type": "AI", "message": "answer", "sources": sources}
+    )
+    assert Message.objects.filter(chat=chat, session_id="session-1", message="answer").count() == 1
 
 
 @pytest.mark.django_db
-def test_consumer_does_not_query_agent_when_quota_is_exceeded(consumer, mocker):
+def test_consumer_does_not_answer_when_quota_is_exceeded(consumer, mocker):
     mocker.patch("adey_apps.rag.consumers.has_chat_request_permission", return_value=False)
-    agent_class = mocker.patch("adey_apps.rag.consumers.Agent")
+    answer = mocker.patch("adey_apps.rag.consumers.answer")
     mocker.patch.object(consumer, "close")
     consumer.connect()
 
     consumer.receive_json({"type": "message", "message": "hi"})
 
     consumer.close.assert_called_once()
-    agent_class.assert_not_called()
+    answer.assert_not_called()
 
 
 # --- integration tests (need a Postgres with the pgvector extension) ---------

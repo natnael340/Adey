@@ -2,7 +2,7 @@ from uuid import uuid4
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels.exceptions import DenyConnection
 from django.conf import settings
-from adey_apps.rag.agent_v2 import Agent
+from adey_apps.rag.passes import answer
 from adey_apps.rag.models import Chat, Message, MessageTypeChoices, HumanHandOff
 from adey_apps.adey_commons.permissions import has_chat_request_permission
 from adey_apps.rag.utils import key_value_to_dict
@@ -21,7 +21,6 @@ class ChatConsumer(JsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.room_name = None
         self.humanhandoff = False
-        self.agent = None
 
     def connect(self):
         headers = dict(self.scope["headers"])
@@ -103,11 +102,7 @@ class ChatConsumer(JsonWebsocketConsumer):
 
             
             try:
-                # Built on the first message rather than on connect: most widget
-                # visitors never send one.
-                if self.agent is None:
-                    self.agent = Agent(self.chat)
-                res = self.agent.query(content["message"], session_id=self.session_id)
+                result = answer(self.chat, self.session_id, content["message"])
             except Exception as e:
                 logger.error(e.__str__())
                 self.send_json({
@@ -124,14 +119,15 @@ class ChatConsumer(JsonWebsocketConsumer):
                 Message.objects.create(
                     chat=self.chat, 
                     session_id=self.session_id, 
-                    message=res,
+                    message=result.answer,
                     message_type=MessageTypeChoices.AI,
                 )
 
                 self.send_json({
                     "type": "message",
                     "message_type": MessageTypeChoices.AI,
-                    "message": res,
+                    "message": result.answer,
+                    "sources": result.sources,
                 })
         elif content["type"] == "instruction":
             if content["action"] == "message_seen":
