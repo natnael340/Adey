@@ -1,17 +1,9 @@
-import requests
 import re
-import tempfile
-import os
 
 from django.conf import settings
 
 import openai
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
 from urllib.parse import urlparse, parse_qsl, unquote_plus
-
-from adey_apps.rag.models import Chat
-from adey_apps.rag.db import get_vectorstore
 
 openai.api_key = settings.OPENAI_API_KEY
 
@@ -36,67 +28,7 @@ def key_value_to_dict(value) -> dict:
 
 
 def clean_text(text: str) -> str:
-    
-    cleaned = re.sub(r'[^A-Za-z0-9 ]+', ' ', text)
-
-    return cleaned
-
-
-class URLTextLoader:
-    """
-    A class to load text data from a specified URL.
-
-    Attributes:
-        url (str): The URL from which to load the text.
-
-    Methods:
-        load(): Fetches and returns the text from the URL.
-    """
-    def __init__(self, url):
-        """
-        Constructs all the necessary attributes for the URLTextLoader object.
-
-        Parameters:
-            url (str): The URL from which to load the text.
-        """
-        self.url = url
-
-    def load(self):
-        """
-        Fetches the text from the specified URL.
-
-        Raises:
-            HTTPError: An error occurs from the HTTP request.
-
-        Returns:
-            str: The text retrieved from the URL.
-        """
-        response = requests.get(self.url)
-        response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
-        cleaned_text = clean_text(response.text)
-
-        return [Document(page_content=cleaned_text, metadata={"source": self.url})]
-
-
-class URLPdfLoader:
-    def __init__(self, url):
-        self.url = url
-
-    def load(self):
-        response = requests.get(self.url)
-        response.raise_for_status()  # Will raise HTTPError for bad HTTP responses
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
-            tmp.write(response.content)
-            tmp.flush()
-            loader = PyPDFLoader(tmp.name)
-        
-        docs = loader.load()
-        try:
-            os.unlink(tmp.name)
-        except OSError:
-            pass
-
-        return docs
-
-
+    """Whitespace-only cleanup. Tabs stay: they separate columns in tab-separated tables."""
+    text = re.sub(r" {2,}", " ", text)
+    text = re.sub(r" +$", "", text, flags=re.MULTILINE)
+    return re.sub(r"\n{3,}", "\n\n", text)
