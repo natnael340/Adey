@@ -29,6 +29,7 @@ def key_value_to_dict(value) -> dict:
 
 def clean_text(text: str) -> str:
     """Whitespace-only cleanup. Tabs stay: they separate columns in tab-separated tables."""
+    text = re.sub(r"\r\n?", "\n", text)
     text = re.sub(r" {2,}", " ", text)
     text = re.sub(r" +$", "", text, flags=re.MULTILINE)
     return re.sub(r"\n{3,}", "\n\n", text)

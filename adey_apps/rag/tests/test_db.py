@@ -250,3 +250,14 @@ def test_chunk_store_round_trip_and_delete_by_chat(pg_vector_db, fake_rag_embedd
     rag_db.delete_chat_chunks("a")
     assert store.similarity_search("alpha", k=5, filter={"chat_id": "a"}) == []
     assert len(store.similarity_search("beta", k=5, filter={"chat_id": "b"})) == 1
+
+
+def test_get_pg_engine_disables_prepared_statements(settings, mocker):
+    settings.PG_VECTOR_DB_URL = "postgresql://u:p@h/d"
+    rag_db.get_pg_engine.cache_clear()
+    mock = mocker.patch.object(rag_db.PGEngine, "from_connection_string")
+    try:
+        rag_db.get_pg_engine()
+    finally:
+        rag_db.get_pg_engine.cache_clear()
+    assert mock.call_args.kwargs["connect_args"] == {"prepare_threshold": None}

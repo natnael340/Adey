@@ -45,12 +45,16 @@ def test_run_refuses_invalid_answers(db, chat, mocker, answer):
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
     result = RagPass(chat, llm=ScriptedLLM(PassageSelection(ids=[1]), answer)).run("q", "s", [])
     assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
+    assert result.sources == []
 
 
 def test_condense_uses_history_only_when_present(db, chat):
     llm = ScriptedLLM("price of the premium plan")
     rag = RagPass(chat, llm=llm)
     assert rag.condense("how much?", []) == "how much?" and llm.calls == []
+    # the consumer stores the bot's intro as an AI message, so AI-only history is still "no history"
+    assert rag.condense("how much?", [AIMessage("Hello! How can I assist you today?")]) == "how much?"
+    assert llm.calls == []
     assert rag.condense("how much?", [HumanMessage("tell me about premium"), AIMessage("Premium is...")]) \
         == "price of the premium plan"
 
@@ -59,3 +63,27 @@ def test_select_drops_bad_ids_and_caps_top_n(db, chat):
     chunks = [Chunk(id=str(i), text=str(i), metadata={}) for i in range(8)]
     llm = ScriptedLLM(PassageSelection(ids=[3, 3, 0, 99, 1, 2, 4, 5, 6]))
     assert [c.id for c in RagPass(chat, llm=llm).select("q", chunks)] == ["2", "0", "1", "3", "4"]
+
+
+def test_run_maps_citations_to_selected_passages_in_order(db, chat, mocker):
+    chunks = [Chunk(id=str(i), text=t, metadata={"title": t, "page": None}) for i, t in enumerate("ABC", 1)]
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=chunks)
+    llm = ScriptedLLM(PassageSelection(ids=[3, 1]),
+                      GroundedAnswer(answerable=True, answer="x", citations=[2, 1, 2]))
+    result = RagPass(chat, llm=llm).run("q", "s", [])
+    assert result.sources == [{"title": "A", "page": None}, {"title": "C", "page": None}]
+
+
+def test_run_sends_question_passages_and_company_to_model(db, chat, mocker):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
+    llm = ScriptedLLM(PassageSelection(ids=[2]),
+                      GroundedAnswer(answerable=True, answer="30 days.", citations=[1]))
+    RagPass(chat, llm=llm).run("what is the return window?", "s", [])
+    select_text, generate_system = (m[0].content for m in llm.calls)
+    assert "what is the return window?" in select_text
+    assert '<passage id="1">' in select_text and chat.business_name in select_text
+    assert chat.assistant_name in generate_system and chat.business_name in generate_system
+    assert "Returns within 30 days." in generate_system
+    for messages in llm.calls:
+        for m in messages:
+            assert not any(p in m.content for p in ("{company_name}", "{passages}", "{question}", "{assistant_name}"))

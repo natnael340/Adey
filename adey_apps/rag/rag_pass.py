@@ -39,7 +39,7 @@ class RagPass:
         self.llm = llm
 
     def condense(self, question: str, history: list[BaseMessage]) -> str:
-        if not history:
+        if not any(isinstance(m, HumanMessage) for m in history):
             return question
         system = RAG_CONDENSE_PROMPT.format(company_name=self.chat.business_name)
         reply = self.llm.invoke([SystemMessage(system), *history, HumanMessage(question)])

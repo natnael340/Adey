@@ -138,6 +138,7 @@ def get_rag_embeddings() -> Embeddings:
 
 
 @lru_cache(maxsize=1)
+# Must stay lazy: never create at import or before a Celery fork (PGEngine's loop thread doesn't survive fork).
 def get_pg_engine() -> PGEngine:
     return PGEngine.from_connection_string(
         _async_url(settings.PG_VECTOR_DB_URL),
@@ -145,6 +146,7 @@ def get_pg_engine() -> PGEngine:
         max_overflow=settings.PG_VECTOR_POOL_MAX_OVERFLOW,
         pool_pre_ping=True,
         pool_recycle=300,
+        connect_args={"prepare_threshold": None},  # transaction-mode poolers, see CHECKPOINTER_CONNECTION_KWARGS
     )
 
 
@@ -194,3 +196,13 @@ def get_chunk_store() -> PGVectorStore:
 
 def delete_chat_chunks(chat_id: str) -> None:
     get_chunk_store().delete(filter={"chat_id": chat_id})
+
+
+def delete_stale_chat_chunks(chat_id: str, keep_ids: list[str]) -> None:
+    with get_vector_engine().begin() as connection:
+        connection.execute(
+            sqlalchemy.text(
+                f"DELETE FROM {CHUNK_TABLE} WHERE chat_id = :chat_id AND NOT (langchain_id = ANY(:ids))"
+            ),
+            {"chat_id": chat_id, "ids": keep_ids},
+        )

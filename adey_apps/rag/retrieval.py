@@ -20,7 +20,10 @@ def keyword_query(question: str) -> str:
 
 
 def dense_search(chat_id: str, query: str, k: int) -> list[Chunk]:
-    docs = get_chunk_store().similarity_search(query, k=k, filter={"chat_id": chat_id})[:k]
+    docs = get_chunk_store().similarity_search(
+        # no hybrid config: the library would also run its own keyword search and cache the first query on the shared config
+        query, k=k, filter={"chat_id": chat_id}, hybrid_search_config=None
+    )
     return [Chunk(d.id, d.page_content, dict(d.metadata)) for d in docs]
 
 

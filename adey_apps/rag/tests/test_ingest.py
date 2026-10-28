@@ -113,3 +113,18 @@ def test_split_documents_splits_back_to_back_markdown_tables(db, resource_factor
     first, second = chunks
     assert "| a | b |" in first and "| 1 | 2 |" in first and "| c | d |" not in first
     assert "\n\n| c | d |\n|---|---|\n" in second and "| 3 | 4 |" in second
+
+
+def test_index_chat_keeps_old_index_when_embedding_fails(pg_vector_db, fake_rag_embeddings, mocker, chat, resource_factory):
+    resource_factory(chat=chat, document_type="TXT", document=ContentFile(b"keep me", name="a.txt"))
+    index_chat(chat)
+    mocker.patch.object(rag_db.get_chunk_store(), "add_documents", side_effect=RuntimeError("openai down"))
+    with pytest.raises(RuntimeError):
+        index_chat(chat)
+    docs = rag_db.get_chunk_store().similarity_search("x", k=10, filter={"chat_id": str(chat.identifier)})
+    assert len(docs) == 1
+
+
+def test_clean_text_normalizes_line_endings():
+    assert clean_text("a  \r\nb\r\n\r\n\r\n\r\nc") == "a\nb\n\nc"
+    assert clean_text("a\rb") == "a\nb"

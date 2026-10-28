@@ -43,16 +43,14 @@ def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
     rows = []
     for case in cases:
         start = time.perf_counter()
-        result = runner.run(case.question, f"eval-{uuid4().hex}", [])
-        ms = (time.perf_counter() - start) * 1000
-        rows.append({
-            "question": case.question,
-            "pass": pass_name,
-            "answer": result.answer,
-            "sources": result.sources,
-            "refused": is_refusal(result.answer),
-            "ms": ms,
-        })
+        row = {"question": case.question, "pass": pass_name}
+        try:
+            result = runner.run(case.question, f"eval-{uuid4().hex}", [])
+            row |= {"answer": result.answer, "sources": result.sources, "refused": is_refusal(result.answer)}
+        except Exception as e:  # one bad case must not abort a long real-LLM run
+            row |= {"answer": "", "sources": [], "refused": False, "error": f"{type(e).__name__}: {e}"}
+        row["ms"] = (time.perf_counter() - start) * 1000
+        rows.append(row)
     pairs = list(zip(cases, rows))
     answerable = [(c, r) for c, r in pairs if c.answerable]
     unanswerable = [(c, r) for c, r in pairs if not c.answerable]
@@ -63,9 +61,10 @@ def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
     times = [r["ms"] for r in rows]
     return {
         "pass": pass_name,
-        "answered_rate": _rate(sum(not r["refused"] for _, r in answerable), len(answerable)),
+        "answered_rate": _rate(sum(not r["refused"] and "error" not in r for _, r in answerable), len(answerable)),
         "refusal_rate": _rate(sum(r["refused"] for _, r in unanswerable), len(unanswerable)),
         "source_hit_rate": _rate(hits, len(with_sources)),
+        "errors": sum("error" in r for r in rows),
         "p50_ms": _percentile(times, 0.5),
         "p95_ms": _percentile(times, 0.95),
         "rows": rows,

@@ -13,7 +13,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
-from adey_apps.rag.db import delete_chat_chunks, get_chunk_store
+from adey_apps.rag.db import delete_chat_chunks, delete_stale_chat_chunks, get_chunk_store
 from adey_apps.rag.models import Chat, Resource
 from adey_apps.rag.utils import clean_text
 
@@ -139,8 +139,12 @@ def index_chat(chat: Chat) -> int:
     for resource in chat.resource_set.all():
         docs.extend(load_resource(resource))
     chunks = split_documents(docs)
-    # shortcut: delete-then-add leaves a brief empty index, wrap both in one transaction if bots get rebuilt while busy
-    delete_chat_chunks(str(chat.identifier))
-    if chunks:
-        get_chunk_store().add_documents(chunks, ids=[c.metadata["chunk_id"] for c in chunks])
+    chat_id = str(chat.identifier)
+    if not chunks:
+        delete_chat_chunks(chat_id)
+        return 0
+    # Upsert first so a failed embedding call keeps the old index; searches may briefly see old and new chunks together.
+    ids = [c.metadata["chunk_id"] for c in chunks]
+    get_chunk_store().add_documents(chunks, ids=ids)
+    delete_stale_chat_chunks(chat_id, ids)
     return len(chunks)

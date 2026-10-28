@@ -2,7 +2,7 @@ import pytest
 from langchain_core.documents import Document
 
 from adey_apps.rag import db as rag_db
-from adey_apps.rag.retrieval import Chunk, hybrid_search, keyword_query, keyword_search, rrf_fuse
+from adey_apps.rag.retrieval import Chunk, dense_search, hybrid_search, keyword_query, keyword_search, rrf_fuse
 
 
 @pytest.mark.parametrize("question, expected", [
@@ -42,3 +42,12 @@ def test_hybrid_search_never_crosses_bots(pg_vector_db, fake_rag_embeddings):
 
 def test_keyword_search_handles_hostile_input(pg_vector_db):
     assert keyword_search("a", "'); DROP TABLE rag_chunks; -- & | !", k=5) == []
+
+
+def test_dense_search_does_not_touch_store_search_config(pg_vector_db, fake_rag_embeddings):
+    add_chunks("a", ["We print mugs.", "Shipping takes 3 days."])
+    dense_search("a", "mugs", k=2)
+    dense_search("a", "shipping", k=2)
+    config = rag_db.get_chunk_store()._PGVectorStore__vs.hybrid_search_config
+    assert config.fts_query == ""
+    assert len(dense_search("a", "mugs", k=1)) == 1

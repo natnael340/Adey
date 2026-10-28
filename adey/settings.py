@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [env.str("ALLOWED_HOSTS", "*")]
 OPENAI_API_KEY = env.str("OPENAI_API_KEY", "")
 PG_VECTOR_DB_URL = env.str("PG_VECTOR_DB_URL", "")
 # Per-process pool sizes; keep (backend + celery processes) * total under the DB connection limit.
+# Each process holds three pools: the sync vector engine, the async rag_chunks engine (same sizes) and the checkpointer.
 PG_VECTOR_POOL_SIZE = env.int("PG_VECTOR_POOL_SIZE", 3)
 PG_VECTOR_POOL_MAX_OVERFLOW = env.int("PG_VECTOR_POOL_MAX_OVERFLOW", 2)
 CHECKPOINTER_POOL_SIZE = env.int("CHECKPOINTER_POOL_SIZE", 3)
@@ -51,7 +52,7 @@ AGENT_PASSES = {
     "rag": "adey_apps.rag.rag_pass.RagPass",
     "agent": "adey_apps.rag.passes.LegacyAgentPass",
 }
-AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "rag")
+AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "agent")
 
 # Application definition
 
