@@ -12,11 +12,15 @@ type ParamType = {
   className?: string;
 };
 
+// Fired on the passage before scrolling, so a carousel holding it can bring it forward
+export const SHOW_SOURCE = "showsource";
+
 export default function SourceChip({ fileName, page, targetId, className }: ParamType) {
   const showSource = () => {
     if (!targetId) return;
     const el = document.getElementById(targetId);
     if (!el) return;
+    el.dispatchEvent(new Event(SHOW_SOURCE, { bubbles: true }));
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
     if (reduced) return;

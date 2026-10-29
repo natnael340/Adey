@@ -13,7 +13,7 @@
 | `adey-mark-mono-3a2614.svg` | All seed brown, on yellow backgrounds (e.g. the home-page hero) |
 | `adey-lockup-horizontal.svg` / `-512h.png` | **Primary logo**: mark + "Adey", on white/light |
 | `adey-lockup-horizontal-on-yellow.svg` | Brown mark + ink name, on yellow backgrounds |
-| `adey-lockup-horizontal-reversed.svg` | Yellow mark + cream name, on highland green/dark |
+| `adey-lockup-horizontal-reversed.svg` | Yellow petals, Seed-brown bubble + cream name, on highland green/dark |
 | `adey-lockup-horizontal-black.svg` | One colour |
 | `adey-lockup-stacked*.svg` / `-1024h.png` | Same four versions, stacked, for square spaces |
 | `adey-wordmark.svg` | Name only, for places where the mark already appears |

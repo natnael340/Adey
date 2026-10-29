@@ -13,7 +13,7 @@ export default function DocumentSheet({ fileName, page, className, children }: P
   return (
     <figure
       className={cn(
-        "rounded-sheet bg-adey-paper px-6 pb-8 pt-4 shadow-sheet sm:px-10",
+        "rounded-sheet border border-adey-mist bg-adey-paper px-6 pb-8 pt-4 sm:px-10",
         className
       )}
     >
