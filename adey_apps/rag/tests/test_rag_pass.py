@@ -13,8 +13,8 @@ CHUNKS = [Chunk(id=f"c:faq:{i}", text=t, metadata={"title": "FAQ", "page": None}
 
 def test_run_answers_with_cited_sources(db, chat, mocker):
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
-    llm = ScriptedLLM(PassageSelection(ids=[1]),
-                      GroundedAnswer(answerable=True, answer="It takes 3 days.", citations=[1]))
+    llm = ScriptedLLM(PassageSelection(ids=["P1"]),
+                      GroundedAnswer(answerable=True, answer="It takes 3 days.", citations=["P1"]))
     result = RagPass(chat, llm=llm).run("how long is shipping?", "s", [])
     assert result == PassResult("It takes 3 days.", [{"title": "FAQ", "page": None}])
 
@@ -38,12 +38,13 @@ def test_run_refuses_greeting_without_generating(db, chat, mocker):
 @pytest.mark.parametrize("answer", [
     GroundedAnswer(answerable=False, answer="", citations=[]),
     GroundedAnswer(answerable=True, answer="Made up.", citations=[]),   # no citations
-    GroundedAnswer(answerable=True, answer="Made up.", citations=[7]),  # cites a passage it wasn't given
-    GroundedAnswer(answerable=True, answer="  ", citations=[1]),
+    GroundedAnswer(answerable=True, answer="Made up.", citations=["P7"]),  # cites a passage it wasn't given
+    GroundedAnswer(answerable=True, answer="Right.", citations=["1"]),  # a number from the text, not a passage id
+    GroundedAnswer(answerable=True, answer="  ", citations=["P1"]),
 ])
 def test_run_refuses_invalid_answers(db, chat, mocker, answer):
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
-    result = RagPass(chat, llm=ScriptedLLM(PassageSelection(ids=[1]), answer)).run("q", "s", [])
+    result = RagPass(chat, llm=ScriptedLLM(PassageSelection(ids=["P1"]), answer)).run("q", "s", [])
     assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
     assert result.sources == []
 
@@ -61,27 +62,27 @@ def test_condense_uses_history_only_when_present(db, chat):
 
 def test_select_drops_bad_ids_and_caps_top_n(db, chat):
     chunks = [Chunk(id=str(i), text=str(i), metadata={}) for i in range(8)]
-    llm = ScriptedLLM(PassageSelection(ids=[3, 3, 0, 99, 1, 2, 4, 5, 6]))
+    llm = ScriptedLLM(PassageSelection(ids=["P3", "P3", "P0", "P99", "4", "P1", "P2", "P4", "P5", "P6"]))
     assert [c.id for c in RagPass(chat, llm=llm).select("q", chunks)] == ["2", "0", "1", "3", "4"]
 
 
 def test_run_maps_citations_to_selected_passages_in_order(db, chat, mocker):
     chunks = [Chunk(id=str(i), text=t, metadata={"title": t, "page": None}) for i, t in enumerate("ABC", 1)]
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=chunks)
-    llm = ScriptedLLM(PassageSelection(ids=[3, 1]),
-                      GroundedAnswer(answerable=True, answer="x", citations=[2, 1, 2]))
+    llm = ScriptedLLM(PassageSelection(ids=["P3", "P1"]),
+                      GroundedAnswer(answerable=True, answer="x", citations=["P2", "P1", "P2"]))
     result = RagPass(chat, llm=llm).run("q", "s", [])
     assert result.sources == [{"title": "A", "page": None}, {"title": "C", "page": None}]
 
 
 def test_run_sends_question_passages_and_company_to_model(db, chat, mocker):
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
-    llm = ScriptedLLM(PassageSelection(ids=[2]),
-                      GroundedAnswer(answerable=True, answer="30 days.", citations=[1]))
+    llm = ScriptedLLM(PassageSelection(ids=["P2"]),
+                      GroundedAnswer(answerable=True, answer="30 days.", citations=["P1"]))
     RagPass(chat, llm=llm).run("what is the return window?", "s", [])
     select_text, generate_system = (m[0].content for m in llm.calls)
     assert "what is the return window?" in select_text
-    assert '<passage id="1">' in select_text and chat.business_name in select_text
+    assert '<passage id="P1">' in select_text and chat.business_name in select_text
     assert chat.assistant_name in generate_system and chat.business_name in generate_system
     assert "Returns within 30 days." in generate_system
     for messages in llm.calls:

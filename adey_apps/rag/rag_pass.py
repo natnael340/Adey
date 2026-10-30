@@ -16,17 +16,22 @@ RERANK_TOP_N = 5
 
 
 class PassageSelection(BaseModel):
-    ids: list[int]
+    ids: list[str]
 
 
 class GroundedAnswer(BaseModel):
     answerable: bool
     answer: str
-    citations: list[int]
+    citations: list[str]
+
+
+def label_passages(chunks: list[Chunk]) -> dict[str, Chunk]:
+    # "P1", not "1": documents number their own sections, and the model cited those numbers instead
+    return {f"P{n}": c for n, c in enumerate(chunks, 1)}
 
 
 def render_passages(chunks: list[Chunk]) -> str:
-    return "\n".join(f'<passage id="{n}">{c.text}</passage>' for n, c in enumerate(chunks, 1))
+    return "\n".join(f'<passage id="{label}">{c.text}</passage>' for label, c in label_passages(chunks).items())
 
 
 class RagPass:
@@ -50,8 +55,8 @@ class RagPass:
             company_name=self.chat.business_name, question=query, passages=render_passages(chunks)
         )
         picked = self.llm.with_structured_output(PassageSelection).invoke([HumanMessage(prompt)])
-        ids = [i for i in dict.fromkeys(picked.ids) if 1 <= i <= len(chunks)]
-        return [chunks[i - 1] for i in ids[:RERANK_TOP_N]]
+        labels = label_passages(chunks)
+        return [labels[i] for i in dict.fromkeys(picked.ids) if i in labels][:RERANK_TOP_N]
 
     def generate(self, question: str, history: list[BaseMessage], chunks: list[Chunk]) -> GroundedAnswer:
         system = RAG_ANSWER_PROMPT.format(
@@ -86,12 +91,13 @@ class RagPass:
         result = self.generate(question, history, picked)
         if not (result.answerable and result.answer.strip()):
             return finish("refused: not answerable")
-        if not result.citations or not all(1 <= c <= selected for c in result.citations):
+        labels = label_passages(picked)
+        if not result.citations or not all(c in labels for c in result.citations):
             return finish("refused: invalid citations")
 
         sources = []
         for c in result.citations:
-            meta = picked[c - 1].metadata
+            meta = labels[c].metadata
             source = {"title": meta.get("title"), "page": meta.get("page")}
             if source not in sources:
                 sources.append(source)
