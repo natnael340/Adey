@@ -1,3 +1,4 @@
+import json
 import time
 import base64
 from datetime import datetime
@@ -132,12 +133,24 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
 
+EXTENSION_TYPES = {
+    "pdf": Resource.DocumentTypeChoices.PDF,
+    "txt": Resource.DocumentTypeChoices.TXT,
+    "md": Resource.DocumentTypeChoices.MD,
+    "markdown": Resource.DocumentTypeChoices.MD,
+    "csv": Resource.DocumentTypeChoices.CSV,
+    "json": Resource.DocumentTypeChoices.JSON,
+    "html": Resource.DocumentTypeChoices.HTML,
+    "htm": Resource.DocumentTypeChoices.HTML,
+}
+
+
 class ResourceSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256)
     slug = serializers.SlugField(max_length=256, required=False, allow_blank=True)
     document = serializers.FileField(
         allow_empty_file=False,
-        validators=[FileExtensionValidator(allowed_extensions=["txt", "pdf"])],
+        validators=[FileExtensionValidator(allowed_extensions=list(EXTENSION_TYPES))],
     )
     document_type = serializers.ChoiceField(choices=Resource.DocumentTypeChoices, default=Resource.DocumentTypeChoices.TXT)
     
@@ -163,17 +176,27 @@ class ResourceSerializer(serializers.ModelSerializer):
         file.seek(0)  # reset pointer for further processing
         detected_mime = magic.from_buffer(initial_bytes, mime=True)
 
-        mime_map = {
-            "text/plain": Resource.DocumentTypeChoices.TXT,
-            "application/pdf": Resource.DocumentTypeChoices.PDF,
-        }
-        if detected_mime not in mime_map:
+        # libmagic can't tell markdown/csv from plain text, so the extension picks the type and the content must agree
+        extension = file.name.rsplit(".", 1)[-1].lower()
+        document_type = EXTENSION_TYPES[extension]
+        if document_type == Resource.DocumentTypeChoices.PDF:
+            content_matches = detected_mime == "application/pdf"
+        else:
+            content_matches = detected_mime.startswith("text/") or detected_mime == "application/json"
+        if not content_matches:
             raise serializers.ValidationError({
-                'document': f'Unsupported file type: {detected_mime}. Only .txt and .pdf allowed.'
+                'document': f'File content ({detected_mime}) does not match its .{extension} extension.'
             })
 
-        # Override document_type based on actual file content
-        attrs['document_type'] = mime_map[detected_mime]
+        if document_type == Resource.DocumentTypeChoices.JSON:
+            try:
+                json.loads(file.read())
+            except ValueError:
+                raise serializers.ValidationError({'document': 'Invalid JSON file.'})
+            finally:
+                file.seek(0)
+
+        attrs['document_type'] = document_type
         return attrs
 
 class ResourceReadSerializer(serializers.ModelSerializer):

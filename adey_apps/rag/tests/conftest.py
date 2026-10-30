@@ -98,6 +98,7 @@ def pg_vector_db(transactional_db, settings):
 @pytest.fixture
 def fake_rag_embeddings(mocker):
     mocker.patch.object(rag_db, "get_rag_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
+    mocker.patch.object(rag_db, "get_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
 
 
 class ScriptedLLM:

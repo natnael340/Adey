@@ -160,7 +160,7 @@ const ResourceForm = ({
           <Input
             type="file"
             id="resource_file"
-            accept=".pdf,.txt"
+            accept=".pdf,.txt,.md,.markdown,.csv,.json,.html,.htm"
             onChange={(e) => handleFileUpload(e)}
             className="w-full"
           />

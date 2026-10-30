@@ -34,6 +34,25 @@ def test_split_documents_prefixes_markdown_section_path(db, resource_factory):
     assert chunk.metadata["chunk_id"] == f"{resource.chat.identifier}:{resource.slug}:0"
 
 
+def test_split_documents_turns_html_into_markdown_sections_and_tables(db, resource_factory):
+    html = (b"<html><head><style>p{color:red}</style><script>track()</script></head><body>"
+            b"<h1>Pricing</h1><h2>Plans</h2><p>Billed monthly.</p>"
+            b"<table><tr><th>Plan</th><th>Price</th></tr><tr><td>Gold</td><td>450</td></tr></table></body></html>")
+    resource = resource_factory(name="Site", document_type="HTML", document=ContentFile(html, name="s.html"))
+    chunks = [c.page_content for c in split_documents(load_resource(resource))]
+    assert all(c.startswith("Site › Pricing › Plans\n\n") for c in chunks)
+    assert any("Billed monthly." in c for c in chunks)
+    assert any("| Plan | Price |\n| --- | --- |\n| Gold | 450 |" in c for c in chunks)
+    assert not any("track()" in c or "color:red" in c for c in chunks)
+
+
+def test_load_resource_pretty_prints_json(db, resource_factory):
+    resource = resource_factory(name="Hours", document_type="JSON",
+                                document=ContentFile('{"open":"9:00","days":["ሰኞ"]}'.encode(), name="h.json"))
+    [doc] = load_resource(resource)
+    assert doc.page_content == '{\n  "open": "9:00",\n  "days": [\n    "ሰኞ"\n  ]\n}'
+
+
 def test_split_table_repeats_header_and_never_cuts_a_row():
     rows = [f"Plan {i},${i}0,{i} bots" for i in range(60)] + ["X" * 1200]
     chunks = split_table("plan,price,limit", rows, chunk_size=200)
@@ -75,6 +94,18 @@ def test_index_chat_is_idempotent_and_drops_removed_resources(pg_vector_db, fake
     assert index_chat(chat) == 1
     docs = rag_db.get_chunk_store().similarity_search("x", k=10, filter={"chat_id": str(chat.identifier)})
     assert [d.metadata["resource"] for d in docs] == [keep.slug]
+
+
+def test_index_chat_also_refreshes_the_legacy_agent_index(pg_vector_db, fake_rag_embeddings, chat, resource_factory):
+    resource = resource_factory(chat=chat, document_type="TXT",
+                                document=ContentFile(b"Refunds are issued as store credit.", name="a.txt"))
+    index_chat(chat)
+    index_chat(chat)                      # rebuild replaces, does not duplicate
+    docs = rag_db.get_vectorstore(chat.identifier).similarity_search("refund", k=10)
+    assert [d.page_content for d in docs] == [f"{resource.name}\n\nRefunds are issued as store credit."]
+    resource.delete()
+    index_chat(chat)
+    assert rag_db.get_vectorstore(chat.identifier).similarity_search("refund", k=10) == []
 
 
 def test_index_chat_leaves_index_untouched_when_a_resource_fails(db, mocker, chat, resource_factory):

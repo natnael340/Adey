@@ -12,6 +12,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import PGVector
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings as RagOpenAIEmbeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
@@ -105,6 +106,14 @@ def delete_vector_collection(collection_name) -> None:
             )
     finally:
         _get_vectorstore.cache_clear()
+
+
+def replace_vector_collection(collection_name, docs: list[Document]) -> None:
+    texts = [d.page_content for d in docs]
+    # embed before deleting so a failed OpenAI call keeps the old collection
+    embeddings = get_embeddings().embed_documents(texts)
+    delete_vector_collection(collection_name)
+    get_vectorstore(collection_name).add_embeddings(texts, embeddings, metadatas=[d.metadata for d in docs])
 
 
 @lru_cache(maxsize=None)

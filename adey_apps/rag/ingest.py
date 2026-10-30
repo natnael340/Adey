@@ -6,14 +6,18 @@ text stays meaningful on its own. Tables are packed row by row under a repeated 
 """
 import csv
 import io
+import json
 import re
 from collections import defaultdict
 
 from langchain_core.documents import Document
 from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
+from markdownify import markdownify
 from pypdf import PdfReader
 
-from adey_apps.rag.db import delete_chat_chunks, delete_stale_chat_chunks, get_chunk_store
+from adey_apps.rag.db import (
+    delete_chat_chunks, delete_stale_chat_chunks, delete_vector_collection, get_chunk_store, replace_vector_collection,
+)
 from adey_apps.rag.models import Chat, Resource
 from adey_apps.rag.utils import clean_text
 
@@ -41,7 +45,15 @@ def load_resource(resource: Resource) -> list[Document]:
             for number, text in enumerate(pages, start=1)
             if text.strip()
         ]
-    text = clean_text(data.decode("utf-8", errors="replace"))
+    text = data.decode("utf-8", errors="replace")
+    if resource.document_type == Resource.DocumentTypeChoices.JSON:
+        # already normalized; clean_text would collapse the indentation that shows nesting
+        text = json.dumps(json.loads(text), indent=2, ensure_ascii=False)
+    elif resource.document_type == Resource.DocumentTypeChoices.HTML:
+        # as markdown, HTML headings and tables go through the markdown splitting below
+        text = clean_text(markdownify(text, heading_style="ATX"))
+    else:
+        text = clean_text(text)
     return [Document(page_content=text, metadata={**metadata, "page": None})]
 
 
@@ -99,7 +111,7 @@ def split_documents(docs: list[Document]) -> list[Document]:
     for doc in docs:
         meta = doc.metadata
         # (section path, text) sections, each later split into tables and prose
-        if meta["type"] == Resource.DocumentTypeChoices.MD:
+        if meta["type"] in (Resource.DocumentTypeChoices.MD, Resource.DocumentTypeChoices.HTML):
             sections = [
                 (
                     [s.metadata[key] for _, key in _MD_HEADERS if key in s.metadata],
@@ -142,9 +154,12 @@ def index_chat(chat: Chat) -> int:
     chat_id = str(chat.identifier)
     if not chunks:
         delete_chat_chunks(chat_id)
+        delete_vector_collection(chat_id)
         return 0
     # Upsert first so a failed embedding call keeps the old index; searches may briefly see old and new chunks together.
     ids = [c.metadata["chunk_id"] for c in chunks]
     get_chunk_store().add_documents(chunks, ids=ids)
     delete_stale_chat_chunks(chat_id, ids)
+    # shortcut: keeps LegacyAgentPass answering while AGENT_DEFAULT_PASS=agent, delete with LegacyAgentPass (rollout step 6)
+    replace_vector_collection(chat_id, chunks)
     return len(chunks)
