@@ -213,9 +213,6 @@ def test_checkpointer_persists_history_per_session(pg_vector_db):
     assert ask("unrelated", "session-b") == ["unrelated", "other reply"]
 
 
-# --- rag_chunks store --------------------------------------------------------
-
-
 @pytest.mark.parametrize("url, expected", [
     ("postgres://u:p@h:5432/d?sslmode=require", "postgresql+psycopg://u:p@h:5432/d?sslmode=require"),
     ("postgresql://u:p@h/d", "postgresql+psycopg://u:p@h/d"),

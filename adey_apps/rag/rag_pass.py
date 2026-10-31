@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
 from adey_apps.rag.constants import RAG_ANSWER_PROMPT, RAG_CONDENSE_PROMPT, RAG_REFUSAL, RAG_SELECT_PROMPT
@@ -38,28 +39,21 @@ def render_passages(chunks: list[Chunk]) -> str:
 class RagPass:
     def __init__(self, chat: Chat, llm: BaseChatModel | None = None):
         self.chat = chat
-        answer_llm = llm
-        if llm is None:
-            from langchain_openai import ChatOpenAI
-
-            llm = ChatOpenAI(model=settings.RAG_CHAT_MODEL, temperature=0)
-            # only the answer step needs the stronger model; rewrite and selection work fine on the cheap one
-            answer_llm = ChatOpenAI(model=settings.RAG_ANSWER_MODEL, temperature=0)
-        self.llm = llm
-        self.answer_llm = answer_llm
+        self.fast_llm = llm or ChatOpenAI(model=settings.RAG_CHAT_MODEL, temperature=0)
+        self.answer_llm = llm or ChatOpenAI(model=settings.RAG_ANSWER_MODEL, temperature=0)
 
     def condense(self, question: str, history: list[BaseMessage]) -> str:
         if not any(isinstance(m, HumanMessage) for m in history):
             return question
         system = RAG_CONDENSE_PROMPT.format(company_name=self.chat.business_name)
-        reply = self.llm.invoke([SystemMessage(system), *history, HumanMessage(question)])
+        reply = self.fast_llm.invoke([SystemMessage(system), *history, HumanMessage(question)])
         return reply.content.strip()
 
     def select(self, query: str, chunks: list[Chunk]) -> list[Chunk]:
         prompt = RAG_SELECT_PROMPT.format(
             company_name=self.chat.business_name, question=query, passages=render_passages(chunks)
         )
-        picked = self.llm.with_structured_output(PassageSelection).invoke([HumanMessage(prompt)])
+        picked = self.fast_llm.with_structured_output(PassageSelection).invoke([HumanMessage(prompt)])
         labels = label_passages(chunks)
         return [labels[i] for i in dict.fromkeys(picked.ids) if i in labels][:RERANK_TOP_N]
 

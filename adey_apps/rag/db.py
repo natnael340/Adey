@@ -24,7 +24,7 @@ from psycopg_pool import ConnectionPool
 RAG_EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIMENSIONS = 1536
 CHUNK_TABLE = "rag_chunks"
-DENSE_TOP_K = 20
+TSV_LANG = "pg_catalog.simple"
 
 # prepare_threshold=None disables server-side prepared statements, which
 # transaction-mode poolers (PgBouncer, Neon/Supabase pooled endpoints) don't support.
@@ -110,7 +110,6 @@ def delete_vector_collection(collection_name) -> None:
 
 def replace_vector_collection(collection_name, docs: list[Document]) -> None:
     texts = [d.page_content for d in docs]
-    # embed before deleting so a failed OpenAI call keeps the old collection
     embeddings = get_embeddings().embed_documents(texts)
     delete_vector_collection(collection_name)
     get_vectorstore(collection_name).add_embeddings(texts, embeddings, metadatas=[d.metadata for d in docs])
@@ -146,8 +145,8 @@ def get_rag_embeddings() -> Embeddings:
     return RagOpenAIEmbeddings(model=RAG_EMBEDDING_MODEL)
 
 
-@lru_cache(maxsize=1)
 # Must stay lazy: never create at import or before a Celery fork (PGEngine's loop thread doesn't survive fork).
+@lru_cache(maxsize=1)
 def get_pg_engine() -> PGEngine:
     return PGEngine.from_connection_string(
         _async_url(settings.PG_VECTOR_DB_URL),
@@ -160,18 +159,16 @@ def get_pg_engine() -> PGEngine:
 
 
 def chunk_search_config() -> HybridSearchConfig:
-    # 'simple' because bots are not English-only. primary_top_k is the dense limit
-    # PGVectorStore uses when a hybrid config is set (it ignores k). tsv_column must be
-    # explicit: the store only fills the tsvector column on insert when it is set.
+    # tsv_column must be explicit: the store only fills the tsvector column on insert when it is set.
     return HybridSearchConfig(
-        tsv_column="content_tsv", tsv_lang="pg_catalog.simple", primary_top_k=DENSE_TOP_K
+        tsv_column="content_tsv", tsv_lang=TSV_LANG
     )
 
 
 def create_chunk_table(engine: PGEngine) -> None:
     with get_vector_engine().begin() as connection:
         exists = connection.execute(
-            sqlalchemy.text("SELECT to_regclass('public.rag_chunks')")
+            sqlalchemy.text(f"SELECT to_regclass('public.{CHUNK_TABLE}')")
         ).scalar_one_or_none()
     if exists is None:
         engine.init_vectorstore_table(
@@ -181,13 +178,12 @@ def create_chunk_table(engine: PGEngine) -> None:
             metadata_columns=[Column("chat_id", "TEXT", nullable=False)],
             hybrid_search_config=chunk_search_config(),
         )
-    # No HNSW index: per-chat searches filter on chat_id first, so exact scans stay small.
     with get_vector_engine().begin() as connection:
         connection.execute(sqlalchemy.text(
-            "CREATE INDEX IF NOT EXISTS rag_chunks_content_tsv_idx ON rag_chunks USING GIN (content_tsv)"
+            f"CREATE INDEX IF NOT EXISTS {CHUNK_TABLE}_content_tsv_idx ON {CHUNK_TABLE} USING GIN (content_tsv)"
         ))
         connection.execute(sqlalchemy.text(
-            "CREATE INDEX IF NOT EXISTS rag_chunks_chat_id_idx ON rag_chunks (chat_id)"
+            f"CREATE INDEX IF NOT EXISTS {CHUNK_TABLE}_chat_id_idx ON {CHUNK_TABLE} (chat_id)"
         ))
 
 

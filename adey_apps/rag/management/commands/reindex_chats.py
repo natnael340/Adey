@@ -1,6 +1,4 @@
-import sys
-
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from adey_apps.rag.ingest import index_chat
 from adey_apps.rag.models import Chat
@@ -24,4 +22,4 @@ class Command(BaseCommand):
                 failed = True
                 self.stdout.write(f"{chat.slug}: FAILED {error}")
         if failed:
-            sys.exit(1)
+            raise CommandError("Some chats failed to reindex.")

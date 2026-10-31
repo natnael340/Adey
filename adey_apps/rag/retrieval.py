@@ -1,10 +1,11 @@
-"""Hybrid retrieval over rag_chunks: dense (pgvector) + keyword (tsvector), fused with RRF."""
 import re
 from dataclasses import dataclass
 
 import sqlalchemy
 
-from adey_apps.rag.db import CHUNK_TABLE, DENSE_TOP_K, get_chunk_store, get_vector_engine
+from adey_apps.rag.db import CHUNK_TABLE, TSV_LANG, get_chunk_store, get_vector_engine
+
+DENSE_TOP_K = 20
 
 
 @dataclass(frozen=True)
@@ -36,8 +37,8 @@ def keyword_search(chat_id: str, query: str, k: int) -> list[Chunk]:
         SELECT langchain_id, content, langchain_metadata, chat_id
         FROM {CHUNK_TABLE}
         WHERE chat_id = :chat_id
-          AND content_tsv @@ to_tsquery('simple', :query)
-        ORDER BY ts_rank_cd(content_tsv, to_tsquery('simple', :query)) DESC
+          AND content_tsv @@ to_tsquery('{TSV_LANG}', :query)
+        ORDER BY ts_rank_cd(content_tsv, to_tsquery('{TSV_LANG}', :query)) DESC
         LIMIT :k
         """
     )
@@ -53,7 +54,6 @@ def rrf_fuse(*rankings: list[Chunk], k: int = 60) -> list[Chunk]:
         for rank, chunk in enumerate(ranking, start=1):
             first_seen.setdefault(chunk.id, chunk)
             scores[chunk.id] = scores.get(chunk.id, 0.0) + 1.0 / (k + rank)
-    # sorted is stable and dicts keep insertion order, so ties keep first-seen order
     return [first_seen[i] for i in sorted(scores, key=scores.get, reverse=True)]
 
 

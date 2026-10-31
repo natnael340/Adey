@@ -23,19 +23,18 @@ def load_cases(path: str) -> list[EvalCase]:
 
 
 def is_refusal(answer: str) -> bool:
-    # Legacy prompt uses curly apostrophes; v2 uses straight ones.
     return answer.replace("’", "'").lower().startswith("i'm sorry, i don't have")
 
 
 def _rate(num: int, den: int):
-    return num / den if den else None  # None when there is nothing to measure
+    return num / den if den else None
 
 
-def _percentile(values: list[float], p: float):
+def _nearest_rank_percentile(values: list[float], p: float):
     if not values:
         return None
     ordered = sorted(values)
-    return ordered[max(math.ceil(p * len(ordered)) - 1, 0)]  # nearest-rank
+    return ordered[max(math.ceil(p * len(ordered)) - 1, 0)]
 
 
 def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
@@ -47,7 +46,7 @@ def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
         try:
             result = runner.run(case.question, f"eval-{uuid4().hex}", [])
             row |= {"answer": result.answer, "sources": result.sources, "refused": is_refusal(result.answer)}
-        except Exception as e:  # one bad case must not abort a long real-LLM run
+        except Exception as e:
             row |= {"answer": "", "sources": [], "refused": False, "error": f"{type(e).__name__}: {e}"}
         row["ms"] = (time.perf_counter() - start) * 1000
         rows.append(row)
@@ -65,7 +64,7 @@ def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
         "refusal_rate": _rate(sum(r["refused"] for _, r in unanswerable), len(unanswerable)),
         "source_hit_rate": _rate(hits, len(with_sources)),
         "errors": sum("error" in r for r in rows),
-        "p50_ms": _percentile(times, 0.5),
-        "p95_ms": _percentile(times, 0.95),
+        "p50_ms": _nearest_rank_percentile(times, 0.5),
+        "p95_ms": _nearest_rank_percentile(times, 0.95),
         "rows": rows,
     }

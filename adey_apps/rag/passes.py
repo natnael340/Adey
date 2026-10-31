@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import TypedDict
 
 from django.conf import settings
 from django.utils.module_loading import import_string
@@ -10,10 +11,15 @@ from adey_apps.rag.models import Chat, Message, MessageTypeChoices
 HISTORY_TURNS = 3
 
 
+class Source(TypedDict):
+    title: str
+    page: int | None
+
+
 @dataclass(frozen=True)
 class PassResult:
     answer: str
-    sources: list = field(default_factory=list)  # [{"title": str, "page": int | None}]
+    sources: list[Source] = field(default_factory=list)
 
 
 def recent_history(chat: Chat, session_id: str, turns: int = HISTORY_TURNS) -> list[BaseMessage]:
@@ -24,15 +30,9 @@ def recent_history(chat: Chat, session_id: str, turns: int = HISTORY_TURNS) -> l
     ]
 
 
-def route(chat: Chat, question: str, history: list[BaseMessage]) -> str:
-    """Pick the pass name for this question. The classifier replaces this body."""
-    return settings.AGENT_DEFAULT_PASS
-
-
 def answer(chat: Chat, session_id: str, question: str) -> PassResult:
     history = recent_history(chat, session_id)
-    name = route(chat, question, history)
-    return import_string(settings.AGENT_PASSES[name])(chat).run(question, session_id, history)
+    return import_string(settings.AGENT_PASSES[settings.AGENT_DEFAULT_PASS])(chat).run(question, session_id, history)
 
 
 class LegacyAgentPass:

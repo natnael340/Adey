@@ -49,17 +49,12 @@ def _clear_shared_caches():
 
 @pytest.fixture(autouse=True)
 def fresh_shared_resources():
-    """Every test starts without cached pools and closes the ones it opened."""
     _clear_shared_caches()
     yield
     if rag_db.get_vector_engine.cache_info().currsize:
-        engine = rag_db.get_vector_engine()
-        if hasattr(engine, "dispose"):
-            engine.dispose()
+        rag_db.get_vector_engine().dispose()
     if rag_db.get_checkpointer_pool.cache_info().currsize:
-        pool = rag_db.get_checkpointer_pool()
-        if hasattr(pool, "close"):
-            pool.close()
+        rag_db.get_checkpointer_pool().close()
     if rag_db.get_pg_engine.cache_info().currsize:
         engine = rag_db.get_pg_engine()
         asyncio.run_coroutine_threadsafe(engine.close(), engine._loop).result()
@@ -69,8 +64,6 @@ def fresh_shared_resources():
 @pytest.fixture
 def pg_vector_db(transactional_db, settings):
     """
-    Point PG_VECTOR_DB_URL at the pytest-django test database.
-
     transactional_db is used because the vector store and checkpointer open their
     own connections, which can't see data inside the test's wrapping transaction.
     """
@@ -102,7 +95,6 @@ def fake_rag_embeddings(mocker):
 
 
 class ScriptedLLM:
-    """FIFO-scripted chat model: str replies for invoke(), pydantic objects for structured output."""
 
     def __init__(self, *replies):
         self.replies = list(replies)

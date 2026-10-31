@@ -1,6 +1,6 @@
 import pytest
 from django.core.files.base import ContentFile
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 
 from adey_apps.rag import db as rag_db
 from adey_apps.rag.ingest import index_chat, load_resource, split_documents, split_table
@@ -60,7 +60,7 @@ def test_split_table_repeats_header_and_never_cuts_a_row():
     assert all(c.startswith("plan,price,limit\n") and len(c) <= 200 for c in chunks[:-1])
     assert chunks[-1] == "plan,price,limit\n" + "X" * 1200
     body_rows = [r for c in chunks for r in c.split("\n")[1:]]
-    assert body_rows == rows                      # every row once, in order, uncut
+    assert body_rows == rows
 
 
 def test_split_documents_repeats_csv_header_in_every_chunk(db, resource_factory):
@@ -89,7 +89,7 @@ def test_index_chat_is_idempotent_and_drops_removed_resources(pg_vector_db, fake
     keep = resource_factory(chat=chat, document_type="TXT", document=ContentFile(b"keep me", name="a.txt"))
     gone = resource_factory(chat=chat, document_type="TXT", document=ContentFile(b"remove me", name="b.txt"))
     assert index_chat(chat) == 2
-    assert index_chat(chat) == 2          # rebuild does not duplicate
+    assert index_chat(chat) == 2
     gone.delete()
     assert index_chat(chat) == 1
     docs = rag_db.get_chunk_store().similarity_search("x", k=10, filter={"chat_id": str(chat.identifier)})
@@ -100,7 +100,7 @@ def test_index_chat_also_refreshes_the_legacy_agent_index(pg_vector_db, fake_rag
     resource = resource_factory(chat=chat, document_type="TXT",
                                 document=ContentFile(b"Refunds are issued as store credit.", name="a.txt"))
     index_chat(chat)
-    index_chat(chat)                      # rebuild replaces, does not duplicate
+    index_chat(chat)
     docs = rag_db.get_vectorstore(chat.identifier).similarity_search("refund", k=10)
     assert [d.page_content for d in docs] == [f"{resource.name}\n\nRefunds are issued as store credit."]
     resource.delete()
@@ -128,9 +128,8 @@ def test_reindex_chats_reports_failures_and_continues(db, mocker, capsys, chat_f
         return 3
 
     mocker.patch("adey_apps.rag.management.commands.reindex_chats.index_chat", side_effect=fake_index)
-    with pytest.raises(SystemExit) as exc:
+    with pytest.raises(CommandError):
         call_command("reindex_chats")
-    assert exc.value.code != 0
     out = capsys.readouterr().out
     assert f"{bad.slug}: FAILED boom" in out
     assert f"{good.slug}: 3 chunks" in out

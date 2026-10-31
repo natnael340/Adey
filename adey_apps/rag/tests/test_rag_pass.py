@@ -36,11 +36,11 @@ def test_run_refuses_greeting_without_generating(db, chat, mocker):
 
 
 @pytest.mark.parametrize("answer", [
-    GroundedAnswer(answerable=False, answer="", citations=[]),
-    GroundedAnswer(answerable=True, answer="Made up.", citations=[]),   # no citations
-    GroundedAnswer(answerable=True, answer="Made up.", citations=["P7"]),  # cites a passage it wasn't given
-    GroundedAnswer(answerable=True, answer="Right.", citations=["1"]),  # a number from the text, not a passage id
-    GroundedAnswer(answerable=True, answer="  ", citations=["P1"]),
+    pytest.param(GroundedAnswer(answerable=False, answer="", citations=[]), id="not-answerable"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Made up.", citations=[]), id="no-citations"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Made up.", citations=["P7"]), id="unknown-passage"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Right.", citations=["1"]), id="text-number-not-passage-id"),
+    pytest.param(GroundedAnswer(answerable=True, answer="  ", citations=["P1"]), id="blank-answer"),
 ])
 def test_run_refuses_invalid_answers(db, chat, mocker, answer):
     mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
@@ -53,7 +53,6 @@ def test_condense_uses_history_only_when_present(db, chat):
     llm = ScriptedLLM("price of the premium plan")
     rag = RagPass(chat, llm=llm)
     assert rag.condense("how much?", []) == "how much?" and llm.calls == []
-    # the consumer stores the bot's intro as an AI message, so AI-only history is still "no history"
     assert rag.condense("how much?", [AIMessage("Hello! How can I assist you today?")]) == "how much?"
     assert llm.calls == []
     assert rag.condense("how much?", [HumanMessage("tell me about premium"), AIMessage("Premium is...")]) \
@@ -92,6 +91,6 @@ def test_run_sends_question_passages_and_company_to_model(db, chat, mocker):
 
 def test_answer_step_uses_its_own_model(db, chat, settings, mocker):
     settings.RAG_CHAT_MODEL, settings.RAG_ANSWER_MODEL = "cheap-model", "strong-model"
-    mocker.patch("langchain_openai.ChatOpenAI", side_effect=lambda model, temperature: model)
+    mocker.patch("adey_apps.rag.rag_pass.ChatOpenAI", side_effect=lambda model, temperature: model)
     rag = RagPass(chat)
-    assert (rag.llm, rag.answer_llm) == ("cheap-model", "strong-model")
+    assert (rag.fast_llm, rag.answer_llm) == ("cheap-model", "strong-model")

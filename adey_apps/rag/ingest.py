@@ -1,9 +1,3 @@
-"""
-Turn a chat's uploaded resources into chunks in the shared ``rag_chunks`` table.
-
-Every chunk starts with a header line (document title and markdown section path) so the
-text stays meaningful on its own. Tables are packed row by row under a repeated header.
-"""
 import csv
 import io
 import json
@@ -47,10 +41,8 @@ def load_resource(resource: Resource) -> list[Document]:
         ]
     text = data.decode("utf-8", errors="replace")
     if resource.document_type == Resource.DocumentTypeChoices.JSON:
-        # already normalized; clean_text would collapse the indentation that shows nesting
         text = json.dumps(json.loads(text), indent=2, ensure_ascii=False)
     elif resource.document_type == Resource.DocumentTypeChoices.HTML:
-        # as markdown, HTML headings and tables go through the markdown splitting below
         text = clean_text(markdownify(text, heading_style="ATX"))
     else:
         text = clean_text(text)
@@ -69,19 +61,20 @@ def split_table(header: str, rows: list[str], chunk_size: int = CHUNK_SIZE) -> l
     return chunks
 
 
-def _split_markdown_tables(text: str) -> list[tuple[str, list[str]]]:
-    """Returns (header, rows) pairs; header is "" for prose, which then has one "row": the text."""
+def _starts_table(lines: list[str], i: int) -> bool:
+    return lines[i].startswith("|") and i + 1 < len(lines) and bool(_SEPARATOR_LINE.match(lines[i + 1]))
+
+
+def _split_markdown_tables(text: str) -> list[str | tuple[str, list[str]]]:
     lines = text.split("\n")
     parts, prose, i = [], [], 0
     while i < len(lines):
-        if lines[i].startswith("|") and i + 1 < len(lines) and _SEPARATOR_LINE.match(lines[i + 1]):
+        if _starts_table(lines, i):
             if prose:
-                parts.append(("", ["\n".join(prose)]))
+                parts.append("\n".join(prose))
                 prose = []
             header, i, rows = "\n".join(lines[i:i + 2]), i + 2, []
-            # a "|" line followed by a separator starts the next table
-            while (i < len(lines) and lines[i].startswith("|")
-                   and not (i + 1 < len(lines) and _SEPARATOR_LINE.match(lines[i + 1]))):
+            while i < len(lines) and lines[i].startswith("|") and not _starts_table(lines, i):
                 rows.append(lines[i])
                 i += 1
             parts.append((header, rows))
@@ -89,7 +82,7 @@ def _split_markdown_tables(text: str) -> list[tuple[str, list[str]]]:
             prose.append(lines[i])
             i += 1
     if prose:
-        parts.append(("", ["\n".join(prose)]))
+        parts.append("\n".join(prose))
     return parts
 
 
@@ -110,7 +103,7 @@ def split_documents(docs: list[Document]) -> list[Document]:
 
     for doc in docs:
         meta = doc.metadata
-        # (section path, text) sections, each later split into tables and prose
+        sections: list[tuple[list[str], str]]
         if meta["type"] in (Resource.DocumentTypeChoices.MD, Resource.DocumentTypeChoices.HTML):
             sections = [
                 (
@@ -129,11 +122,11 @@ def split_documents(docs: list[Document]) -> list[Document]:
                 bodies = split_table(header, rows) if header else []
             else:
                 bodies = []
-                for header, rows in _split_markdown_tables(text):
-                    if header:
-                        bodies += split_table(header, rows)
+                for part in _split_markdown_tables(text):
+                    if isinstance(part, str):
+                        bodies += [b for b in prose_splitter.split_text(part) if b.strip()]
                     else:
-                        bodies += [b for b in prose_splitter.split_text(rows[0]) if b.strip()]
+                        bodies += split_table(*part)
             for body in bodies:
                 key = (meta["chat_id"], meta["resource"])
                 chunk_id = f"{meta['chat_id']}:{meta['resource']}:{counters[key]}"
@@ -146,7 +139,6 @@ def split_documents(docs: list[Document]) -> list[Document]:
 
 
 def index_chat(chat: Chat) -> int:
-    # Load and split everything first so a failing download leaves the old index intact.
     docs = []
     for resource in chat.resource_set.all():
         docs.extend(load_resource(resource))
@@ -156,7 +148,6 @@ def index_chat(chat: Chat) -> int:
         delete_chat_chunks(chat_id)
         delete_vector_collection(chat_id)
         return 0
-    # Upsert first so a failed embedding call keeps the old index; searches may briefly see old and new chunks together.
     ids = [c.metadata["chunk_id"] for c in chunks]
     get_chunk_store().add_documents(chunks, ids=ids)
     delete_stale_chat_chunks(chat_id, ids)
