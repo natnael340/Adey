@@ -1,33 +1,40 @@
 import React from "react";
-import Image from "next/image";
+import Link from "next/link";
 import { NextPage } from "next";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { LoginForm } from "@/app/auth/login/login-form";
+import AuthShell from "@/app/auth/components/AuthShell";
+import { focusRing } from "@/app/components/brand/Button";
+import { cn } from "@/lib/utils";
 
-const login: NextPage = async (props) => {
+const footerLink = cn(
+  "rounded-control underline underline-offset-4 hover:text-adey-highland",
+  focusRing()
+);
+
+const login: NextPage = async () => {
   const session = await getServerSession(authOptions);
   if (session) {
     redirect("/dashboard");
   }
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <Image
-            className="w-8 h-8"
-            src="/adey_logo.png"
-            alt="logo"
-            width={32}
-            height={32}
-          />
-          <span className="text-lg font-bold">Adey</span>
-        </a>
-        <LoginForm />
-      </div>
-    </div>
+    <AuthShell>
+      <LoginForm />
+      <p className="text-balance text-center text-xs text-adey-seed/70">
+        By signing in, you agree to our{" "}
+        <Link href="/tos" className={footerLink}>
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className={footerLink}>
+          Privacy Policy
+        </Link>
+        .
+      </p>
+    </AuthShell>
   );
 };
 
