@@ -1,0 +1,96 @@
+import pytest
+from langchain_core.messages import AIMessage, HumanMessage
+
+from adey_apps.rag.constants import RAG_REFUSAL
+from adey_apps.rag.passes import PassResult
+from adey_apps.rag.rag_pass import GroundedAnswer, PassageSelection, RagPass
+from adey_apps.rag.retrieval import Chunk
+from adey_apps.rag.tests.conftest import ScriptedLLM
+
+CHUNKS = [Chunk(id=f"c:faq:{i}", text=t, metadata={"title": "FAQ", "page": None})
+          for i, t in enumerate(["Shipping takes 3 days.", "Returns within 30 days.", "We print mugs."])]
+
+
+def test_run_answers_with_cited_sources(db, chat, mocker):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
+    llm = ScriptedLLM(PassageSelection(ids=["P1"]),
+                      GroundedAnswer(answerable=True, answer="It takes 3 days.", citations=["P1"]))
+    result = RagPass(chat, llm=llm).run("how long is shipping?", "s", [])
+    assert result == PassResult("It takes 3 days.", [{"title": "FAQ", "page": None}])
+
+
+def test_run_refuses_when_nothing_retrieved(db, chat, mocker):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=[])
+    llm = ScriptedLLM()
+    result = RagPass(chat, llm=llm).run("anything", "s", [])
+    assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name) and result.sources == []
+    assert llm.calls == []
+
+
+def test_run_refuses_greeting_without_generating(db, chat, mocker):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
+    llm = ScriptedLLM(PassageSelection(ids=[]))
+    result = RagPass(chat, llm=llm).run("hi", "s", [])
+    assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
+    assert len(llm.calls) == 1
+
+
+@pytest.mark.parametrize("answer", [
+    pytest.param(GroundedAnswer(answerable=False, answer="", citations=[]), id="not-answerable"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Made up.", citations=[]), id="no-citations"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Made up.", citations=["P7"]), id="unknown-passage"),
+    pytest.param(GroundedAnswer(answerable=True, answer="Right.", citations=["1"]), id="text-number-not-passage-id"),
+    pytest.param(GroundedAnswer(answerable=True, answer="  ", citations=["P1"]), id="blank-answer"),
+])
+def test_run_refuses_invalid_answers(db, chat, mocker, answer):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
+    result = RagPass(chat, llm=ScriptedLLM(PassageSelection(ids=["P1"]), answer)).run("q", "s", [])
+    assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
+    assert result.sources == []
+
+
+def test_condense_uses_history_only_when_present(db, chat):
+    llm = ScriptedLLM("price of the premium plan")
+    rag = RagPass(chat, llm=llm)
+    assert rag.condense("how much?", []) == "how much?" and llm.calls == []
+    assert rag.condense("how much?", [AIMessage("Hello! How can I assist you today?")]) == "how much?"
+    assert llm.calls == []
+    assert rag.condense("how much?", [HumanMessage("tell me about premium"), AIMessage("Premium is...")]) \
+        == "price of the premium plan"
+
+
+def test_select_drops_bad_ids_and_caps_top_n(db, chat):
+    chunks = [Chunk(id=str(i), text=str(i), metadata={}) for i in range(8)]
+    llm = ScriptedLLM(PassageSelection(ids=["P3", "P3", "P0", "P99", "4", "P1", "P2", "P4", "P5", "P6"]))
+    assert [c.id for c in RagPass(chat, llm=llm).select("q", chunks)] == ["2", "0", "1", "3", "4"]
+
+
+def test_run_maps_citations_to_selected_passages_in_order(db, chat, mocker):
+    chunks = [Chunk(id=str(i), text=t, metadata={"title": t, "page": None}) for i, t in enumerate("ABC", 1)]
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=chunks)
+    llm = ScriptedLLM(PassageSelection(ids=["P3", "P1"]),
+                      GroundedAnswer(answerable=True, answer="x", citations=["P2", "P1", "P2"]))
+    result = RagPass(chat, llm=llm).run("q", "s", [])
+    assert result.sources == [{"title": "A", "page": None}, {"title": "C", "page": None}]
+
+
+def test_run_sends_question_passages_and_company_to_model(db, chat, mocker):
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=CHUNKS)
+    llm = ScriptedLLM(PassageSelection(ids=["P2"]),
+                      GroundedAnswer(answerable=True, answer="30 days.", citations=["P1"]))
+    RagPass(chat, llm=llm).run("what is the return window?", "s", [])
+    select_text, generate_system = (m[0].content for m in llm.calls)
+    assert "what is the return window?" in select_text
+    assert '<passage id="P1">' in select_text and chat.business_name in select_text
+    assert chat.assistant_name in generate_system and chat.business_name in generate_system
+    assert "Returns within 30 days." in generate_system
+    for messages in llm.calls:
+        for m in messages:
+            assert not any(p in m.content for p in ("{company_name}", "{passages}", "{question}", "{assistant_name}"))
+
+
+def test_answer_step_uses_its_own_model(db, chat, settings, mocker):
+    settings.RAG_CHAT_MODEL, settings.RAG_ANSWER_MODEL = "cheap-model", "strong-model"
+    mocker.patch("adey_apps.rag.rag_pass.ChatOpenAI", side_effect=lambda model, temperature: model)
+    rag = RagPass(chat)
+    assert (rag.fast_llm, rag.answer_llm) == ("cheap-model", "strong-model")

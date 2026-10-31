@@ -1,30 +1,23 @@
-from typing import Any, Optional
-from django.core.management.base import BaseCommand, CommandParser
-from django.utils.encoding import force_str
-from django.conf import settings
-from adey_apps.users.models import User
-from adey_apps.rag.models import Resource, Chat
-from adey_apps.rag.utils import query_chat_vector_db
-import os
+from django.core.management.base import BaseCommand, CommandError
 
-os.environ["OPENAI_API_KEY"] = settings.OPENAI_API_KEY
+from adey_apps.rag.models import Chat
+from adey_apps.rag.passes import answer
 
 
 class Command(BaseCommand):
-    help = "Query the pg vector index for the user and the chat_slug"
+    help = "Ask a chat a question through the configured pass and print the answer and sources"
 
-    def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument("chat_id", type=str, help="Email of the user")
-        parser.add_argument("query", type=str, help="Email of the user")
-    
-    def handle(self, chat_id, query, **options: Any) -> None:
+    def add_arguments(self, parser):
+        parser.add_argument("chat_identifier", type=str)
+        parser.add_argument("question", type=str)
+
+    def handle(self, chat_identifier, question, **options):
         try:
-            chat = Chat.objects.get(identifier=chat_id)
-            result = query_chat_vector_db(chat, query)
-            print(result)
+            chat = Chat.objects.get(identifier=chat_identifier)
         except Chat.DoesNotExist:
-            self.stderr.write(f"No such Chat exists with the given slug.")
-        except Exception as e:
-            self.stderr.write(f"Exception occurred. Error: {e.__str__()}")
-
-        
+            raise CommandError("No such Chat exists with the given identifier.")
+        result = answer(chat, "cli", question)
+        self.stdout.write(result.answer)
+        for source in result.sources:
+            page = f" (p. {source['page']})" if source.get("page") is not None else ""
+            self.stdout.write(f"- {source['title']}{page}")

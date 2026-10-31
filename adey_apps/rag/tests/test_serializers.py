@@ -159,3 +159,37 @@ def test_resource_serializer_create_instance_correctly(rf, chat_factory, user_wi
 
     chat.refresh_from_db()
     assert chat.status == 'ready'
+
+@pytest.mark.parametrize("name, content, expected", [
+    ("faq.md", b"# FAQ\nShipping takes 3 days.", Resource.DocumentTypeChoices.MD),
+    ("prices.csv", b"plan,price\nGold,450\nSilver,300\n", Resource.DocumentTypeChoices.CSV),
+    ("hours.json", b'{"open": "9:00", "close": "17:00"}', Resource.DocumentTypeChoices.JSON),
+    ("page.HTML", b"<html><body><h1>About</h1><p>We fix phones.</p></body></html>", Resource.DocumentTypeChoices.HTML),
+    ("notes.txt", b"Plain notes.", Resource.DocumentTypeChoices.TXT),
+])
+def test_resource_serializer_sets_document_type_from_extension(name, content, expected, setup_resource_serializer_data):
+    data = {**setup_resource_serializer_data, "document": SimpleUploadedFile(name, content)}
+    data.pop("document_type")
+
+    serializer = ResourceSerializer(data=data)
+
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["document_type"] == expected
+
+
+def test_resource_serializer_rejects_binary_renamed_to_text_extension(setup_resource_serializer_data):
+    data = {**setup_resource_serializer_data, "document": SimpleUploadedFile("evil.md", b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")}
+
+    serializer = ResourceSerializer(data=data)
+
+    assert not serializer.is_valid()
+    assert "does not match its .md extension" in str(serializer.errors["document"])
+
+
+def test_resource_serializer_rejects_invalid_json(setup_resource_serializer_data):
+    data = {**setup_resource_serializer_data, "document": SimpleUploadedFile("bad.json", b'{"open": ')}
+
+    serializer = ResourceSerializer(data=data)
+
+    assert not serializer.is_valid()
+    assert "Invalid JSON file." in str(serializer.errors["document"])

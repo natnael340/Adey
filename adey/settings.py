@@ -46,6 +46,13 @@ CHECKPOINTER_POOL_SIZE = env.int("CHECKPOINTER_POOL_SIZE", 3)
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 
 AGENT_TOOL_PATH = "adey_apps.rag.tools"
+RAG_CHAT_MODEL = env.str("RAG_CHAT_MODEL", "gpt-4o-mini")
+RAG_ANSWER_MODEL = env.str("RAG_ANSWER_MODEL", "gpt-4o")
+AGENT_PASSES = {
+    "rag": "adey_apps.rag.rag_pass.RagPass",
+    "agent": "adey_apps.rag.passes.LegacyAgentPass",
+}
+AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "agent")
 
 # Application definition
 

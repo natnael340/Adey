@@ -8,10 +8,6 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
 
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin
@@ -22,7 +18,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
-from adey_apps.rag.utils import URLTextLoader, URLPdfLoader
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
@@ -42,7 +37,8 @@ from adey_apps.rag.serializers import (
     HumanHandOffSerializer,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.db import delete_vector_collection, get_vectorstore
+from adey_apps.rag.db import delete_chat_chunks, delete_vector_collection
+from adey_apps.rag.ingest import index_chat
 from adey_apps.rag.models import (
     Chat, 
     Resource, 
@@ -191,24 +187,7 @@ class ChatBotBuildApiView(ChatMixin, APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            resources = request.chat.resource_set.all()
-            documents = []
-           
-            for resource in resources:    
-                if resource.document_type == Resource.DocumentTypeChoices.PDF:
-                    if settings.ENVIRONMENT == "production":
-                        loader = URLPdfLoader(resource.document.url)
-                    else:
-                        loader = PyPDFLoader(resource.document.path)
-                else:
-                    if settings.ENVIRONMENT == "production":
-                        loader = URLTextLoader(resource.document.url)
-                    else:
-                        loader = TextLoader(resource.document.path)
-                documents.extend(loader.load())
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-            chunks = text_splitter.split_documents(documents)
-            get_vectorstore(request.chat.identifier).add_documents(chunks)
+            index_chat(request.chat)
             request.chat.status = "finished"
             request.chat.save()
         except Chat.DoesNotExist:
@@ -274,6 +253,7 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             for resource in Resource.objects.filter(chat=chat):
                 resource.delete()
             delete_vector_collection(chat.identifier)
+            delete_chat_chunks(str(chat.identifier))
         
         return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)
 

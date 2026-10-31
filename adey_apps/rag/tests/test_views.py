@@ -51,3 +51,11 @@ def test_chat_update_view_set_update_chat_instance(chat, logged_in_client):
     assert chat.business_name == CHAT_DATA["business_name"]
     assert chat.business_description == CHAT_DATA["business_description"]
     assert all(character.name in CHAT_DATA["assistant_characters"] for character in chat.assistant_characters.all())
+
+def test_build_endpoint_indexes_chat(chat, logged_in_client, mocker):
+    index = mocker.patch("adey_apps.rag.views.index_chat")
+    response = logged_in_client.get(reverse("chat-bot-build", args=[chat.slug]))
+    assert response.status_code == 200
+    index.assert_called_once_with(chat)
+    chat.refresh_from_db()
+    assert chat.status == "finished"

@@ -3,7 +3,7 @@ import importlib
 
 from langchain_core.messages import SystemMessage
 from langchain.tools import tool
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, MessagesState, StateGraph

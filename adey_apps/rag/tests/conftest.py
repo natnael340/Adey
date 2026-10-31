@@ -1,3 +1,14 @@
+import asyncio
+from urllib.parse import quote
+
+import pytest
+import sqlalchemy
+from django.db import connection
+from langchain_core.embeddings import DeterministicFakeEmbedding
+from langchain_core.messages import AIMessage
+
+from adey_apps.rag import db as rag_db
+
 CHAT_DATA = {
         "name": "Customer support",
         "assistant_name": "Helen Doe",
@@ -24,3 +35,88 @@ CHAT_DATA = {
             "2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A56iiigD/2Q=="
         )
     }
+
+
+def _clear_shared_caches():
+    rag_db.get_vector_engine.cache_clear()
+    rag_db._get_vectorstore.cache_clear()
+    rag_db.get_embeddings.cache_clear()
+    rag_db.get_checkpointer_pool.cache_clear()
+    rag_db.get_pg_engine.cache_clear()
+    rag_db.get_chunk_store.cache_clear()
+    rag_db.get_rag_embeddings.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def fresh_shared_resources():
+    _clear_shared_caches()
+    yield
+    if rag_db.get_vector_engine.cache_info().currsize:
+        rag_db.get_vector_engine().dispose()
+    if rag_db.get_checkpointer_pool.cache_info().currsize:
+        rag_db.get_checkpointer_pool().close()
+    if rag_db.get_pg_engine.cache_info().currsize:
+        engine = rag_db.get_pg_engine()
+        asyncio.run_coroutine_threadsafe(engine.close(), engine._loop).result()
+    _clear_shared_caches()
+
+
+@pytest.fixture
+def pg_vector_db(transactional_db, settings):
+    """
+    transactional_db is used because the vector store and checkpointer open their
+    own connections, which can't see data inside the test's wrapping transaction.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1 FROM pg_available_extensions WHERE name = 'vector'")
+        if cursor.fetchone() is None:
+            pytest.skip("pgvector extension is not available on the test database")
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
+    db = connection.settings_dict
+    url = (
+        f"postgresql://{quote(db['USER'])}:{quote(db['PASSWORD'])}"
+        f"@{db['HOST'] or 'localhost'}:{db['PORT'] or 5432}/{db['NAME']}"
+    )
+    if db["OPTIONS"].get("sslmode"):
+        url += f"?sslmode={db['OPTIONS']['sslmode']}"
+    settings.PG_VECTOR_DB_URL = url
+    rag_db.create_chunk_table(rag_db.get_pg_engine())
+    # rag_chunks is not a Django model, so the test database flush doesn't clear it.
+    with rag_db.get_vector_engine().begin() as conn:
+        conn.execute(sqlalchemy.text("DELETE FROM rag_chunks"))
+    return url
+
+
+@pytest.fixture
+def fake_rag_embeddings(mocker):
+    mocker.patch.object(rag_db, "get_rag_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
+    mocker.patch.object(rag_db, "get_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
+
+
+class ScriptedLLM:
+
+    def __init__(self, *replies):
+        self.replies = list(replies)
+        self.calls = []
+
+    def _pop(self, messages, expect_str):
+        self.calls.append(messages)
+        assert self.replies, "ScriptedLLM queue is empty"
+        reply = self.replies.pop(0)
+        assert isinstance(reply, str) == expect_str, f"wrong reply kind for this call: {reply!r}"
+        return reply
+
+    def invoke(self, messages):
+        return AIMessage(content=self._pop(messages, True))
+
+    def with_structured_output(self, schema):
+        outer = self
+
+        class _Structured:
+            def invoke(self, messages):
+                reply = outer._pop(messages, False)
+                assert isinstance(reply, schema), f"expected {schema.__name__}, got {reply!r}"
+                return reply
+
+        return _Structured()
