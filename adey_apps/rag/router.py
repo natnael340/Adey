@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from django.conf import settings
@@ -7,6 +7,7 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from typesafe_sdk import Choice, RetryPolicy, TypeSafeClient
 
 from adey_apps.rag.constants import CONVERSATION_ROUTE_CRITERIA, KNOWLEDGE_ROUTE_CRITERIA, ROUTER_INSTRUCTIONS
+from adey_apps.rag.conversation_pass import ConversationPass
 from adey_apps.rag.models import Chat
 from adey_apps.rag.passes import PassResult
 from adey_apps.rag.rag_pass import RagPass
@@ -64,5 +65,11 @@ class RouterPass:
         decision = route(self.chat, question, history, skills)
         logger.info("router chat=%s route=%s reason=%s", self.chat.pk, decision.name, decision.reason)
         if decision.name == "tools":
-            return ToolPass(self.chat, skills).run(question, session_id, history)
-        return RagPass(self.chat).run(question, session_id, history)
+            result = ToolPass(self.chat, skills).run(question, session_id, history)
+        elif decision.name == CONVERSATION:
+            result = ConversationPass(self.chat).run(question, session_id, history)
+        else:
+            result = RagPass(self.chat).run(question, session_id, history)
+            if result.refused:
+                result = ConversationPass(self.chat, unanswered=True).run(question, session_id, history)
+        return replace(result, route=decision.name)

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 
+from adey_apps.rag.constants import RAG_REFUSAL
 from adey_apps.rag.passes import PassResult
 from adey_apps.rag.router import Route, RouterPass, route
 from adey_apps.rag.skills.clock import ClockNow
@@ -85,7 +86,7 @@ def test_router_sends_knowledge_to_rag(chat, mocker):
     rag = mocker.patch("adey_apps.rag.router.RagPass")
     tool = mocker.patch("adey_apps.rag.router.ToolPass")
     rag.return_value.run.return_value = PassResult("from rag")
-    assert RouterPass(chat).run("refund policy?", "s", []) == PassResult("from rag")
+    assert RouterPass(chat).run("refund policy?", "s", []) == PassResult("from rag", route="knowledge")
     rag.assert_called_once_with(chat)
     rag.return_value.run.assert_called_once_with("refund policy?", "s", [])
     tool.assert_not_called()
@@ -97,7 +98,7 @@ def test_router_sends_tools_to_tool_pass_with_same_instances(chat, mocker):
     route = mocker.patch("adey_apps.rag.router.route", return_value=Route("tools", "chosen:clock.now"))
     tool = mocker.patch("adey_apps.rag.router.ToolPass")
     tool.return_value.run.return_value = PassResult("It's Saturday.")
-    assert RouterPass(chat).run("what day is it?", "s", []) == PassResult("It's Saturday.")
+    assert RouterPass(chat).run("what day is it?", "s", []) == PassResult("It's Saturday.", route="tools")
     assert route.call_args.args[3] is skills
     tool.assert_called_once_with(chat, skills)
 
@@ -108,3 +109,34 @@ def test_router_logs_route_and_reason(chat, mocker, caplog):
     with caplog.at_level(logging.INFO, logger="adey_apps.rag.router"):
         RouterPass(chat).run("q", "s", [])
     assert "route=knowledge reason=router_error" in caplog.text
+
+
+def test_router_sends_conversation_to_conversation_pass(chat, mocker):
+    mocker.patch("adey_apps.rag.router.route", return_value=Route("conversation", "chosen:conversation"))
+    rag = mocker.patch("adey_apps.rag.router.RagPass")
+    conversation = mocker.patch("adey_apps.rag.router.ConversationPass")
+    conversation.return_value.run.return_value = PassResult("Hi there!")
+    assert RouterPass(chat).run("hello", "s", []) == PassResult("Hi there!", route="conversation")
+    conversation.assert_called_once_with(chat)
+    rag.assert_not_called()
+
+
+def test_rag_refusal_is_reworded(chat, mocker):
+    mocker.patch("adey_apps.rag.router.route", return_value=Route("knowledge", "chosen:knowledge"))
+    refusal = PassResult(RAG_REFUSAL.format(company_name=chat.business_name), refused=True)
+    mocker.patch("adey_apps.rag.router.RagPass").return_value.run.return_value = refusal
+    conversation = mocker.patch("adey_apps.rag.router.ConversationPass")
+    conversation.return_value.run.return_value = PassResult("Sorry, I don't have that.", refused=True)
+    result = RouterPass(chat).run("do you sell cars?", "s", [])
+    assert result == PassResult("Sorry, I don't have that.", refused=True, route="knowledge")
+    conversation.assert_called_once_with(chat, unanswered=True)
+    conversation.return_value.run.assert_called_once_with("do you sell cars?", "s", [])
+
+
+def test_rag_answer_is_not_reworded(chat, mocker):
+    mocker.patch("adey_apps.rag.router.route", return_value=Route("knowledge", "chosen:knowledge"))
+    sources = [{"title": "FAQ", "page": None}]
+    mocker.patch("adey_apps.rag.router.RagPass").return_value.run.return_value = PassResult("3 days.", sources)
+    conversation = mocker.patch("adey_apps.rag.router.ConversationPass")
+    assert RouterPass(chat).run("shipping?", "s", []) == PassResult("3 days.", sources, route="knowledge")
+    conversation.assert_not_called()
