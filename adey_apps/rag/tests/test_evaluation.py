@@ -3,9 +3,6 @@ import json
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.utils.module_loading import import_string
-
-from langchain_core.messages import AIMessage, HumanMessage
 
 from adey_apps.rag.evaluation import EvalCase, load_cases, record, run_eval
 from adey_apps.rag.passes import PassResult
@@ -41,23 +38,18 @@ def test_load_cases_parses_history_and_route(tmp_path):
     ]
 
 
-class RecordingPass:
-    seen = []
-
+class EchoHistoryPass:
     def __init__(self, chat):
         pass
 
     def run(self, question, session_id, history):
-        self.seen.append(history)
-        return PassResult("ok")
+        return PassResult(" | ".join(f"{m.type}:{m.content}" for m in history))
 
 
 def test_history_is_sent_alternating(db, chat, settings):
-    settings.AGENT_PASSES = {"recording": "adey_apps.rag.tests.test_evaluation.RecordingPass"}
-    recorder = import_string(settings.AGENT_PASSES["recording"])  # the module is also imported as rag.tests.*
-    recorder.seen = []
-    run_eval(chat, [EvalCase("and abroad?", True, history=["shipping time?", "3 days."])], "recording")
-    assert recorder.seen == [[HumanMessage("shipping time?"), AIMessage("3 days.")]]
+    settings.AGENT_PASSES = {"echo": "adey_apps.rag.tests.test_evaluation.EchoHistoryPass"}
+    report = run_eval(chat, [EvalCase("and abroad?", True, history=["shipping time?", "3 days."])], "echo")
+    assert report["rows"][0]["answer"] == "human:shipping time? | ai:3 days."
 
 
 class KnowledgePass:
