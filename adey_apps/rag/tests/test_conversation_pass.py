@@ -22,7 +22,8 @@ def test_replies_with_llm_text(chat):
     llm = ScriptedLLM("Hi! How can I help?")
     assert ConversationPass(chat, llm=llm).run("hello", "s", []) == PassResult("Hi! How can I help?")
     prompt = system_prompt(llm)
-    assert chat.business_name in prompt and chat.assistant_name in prompt and "Never state facts" in prompt
+    assert chat.business_name in prompt and chat.assistant_name in prompt
+    assert "Never state facts" in prompt and "Never say you did, checked, escalated" in prompt
 
 
 def test_history_and_question_follow_the_prompt(chat):
@@ -30,12 +31,6 @@ def test_history_and_question_follow_the_prompt(chat):
     history = [HumanMessage("do you sell cars?"), AIMessage("I don't have information about that.")]
     ConversationPass(chat, llm=llm).run("why didn't you answer?", "s", history)
     assert llm.calls[0][1:] == [*history, HumanMessage("why didn't you answer?")]
-
-
-def test_prompt_forbids_claimed_actions(chat):
-    llm = ScriptedLLM("Hi!")
-    ConversationPass(chat, llm=llm).run("hello", "s", [])
-    assert "Never say you did, checked, escalated or will do anything" in system_prompt(llm)
 
 
 def test_unanswered_adds_note_and_stays_refused(chat):
