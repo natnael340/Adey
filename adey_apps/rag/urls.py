@@ -14,13 +14,16 @@ from adey_apps.rag.views import (
     WidgetPreferenceViewSet,
     ChatPreferenceAPIView,
     MessagesViewSet,
-    HumanHandOffViewSet
+    HumanHandOffViewSet,
+    SkillCatalogView,
+    ChatSkillViewSet,
 )
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
     path("<str:chat_id>/messages/", MessageListCreateViewSet.as_view(), name="message-list-create"),
+    path("skills/", SkillCatalogView.as_view(), name="skill-catalog"),
     path("chat/", ChatCreateAPIView.as_view(), name="chat-create"),
     path("chat/<slug:slug>/", ChatUpdateAPIView.as_view(), name="chat-update"),
     path("chat/<slug:chat_slug>/build", ChatBotBuildApiView.as_view(), name="chat-bot-build"),
@@ -34,6 +37,7 @@ router.register("chats", ChatViewSet, "chat")
 router.register("messages", MessagesViewSet, "bot-messages")
 router.register(r"(?P<chat_slug>[-\w]+)/(?P<session_id>[-\w]+)/handoff", HumanHandOffViewSet, "human-handoff")
 router.register(r"(?P<chat_slug>[-\w]+)/resource", ResourceViewSet, "resource")
+router.register(r"(?P<chat_slug>[-\w]+)/skills", ChatSkillViewSet, "chat-skill")
 router.register(r"(?P<task_id>[-\w]+)/message", MessageResponseViewSet, "message-status")
 router.register(r"widget/preferences", WidgetPreferenceViewSet, "widget-preference")
 

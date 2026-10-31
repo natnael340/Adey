@@ -1,5 +1,5 @@
 """
-Shared Postgres resources for the vector store and the LangGraph checkpointer.
+Shared Postgres resources for the RAG chunk store.
 
 Each is created lazily once per process, so websocket connections, requests and
 Celery tasks all reuse the same small pools instead of opening their own.
@@ -9,30 +9,15 @@ from functools import lru_cache
 
 import sqlalchemy
 from django.conf import settings
-from django.utils.encoding import force_str
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import PGVector
-from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings as RagOpenAIEmbeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
 from langchain_postgres.v2.hybrid_search_config import HybridSearchConfig
-from langgraph.checkpoint.postgres import PostgresSaver
-from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
 
 RAG_EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIMENSIONS = 1536
 CHUNK_TABLE = "rag_chunks"
 TSV_LANG = "pg_catalog.simple"
-
-# prepare_threshold=None disables server-side prepared statements, which
-# transaction-mode poolers (PgBouncer, Neon/Supabase pooled endpoints) don't support.
-CHECKPOINTER_CONNECTION_KWARGS = {
-    "autocommit": True,
-    "prepare_threshold": None,
-    "row_factory": dict_row,
-}
 
 
 def _sqlalchemy_url(url: str) -> str:
@@ -56,83 +41,6 @@ def get_vector_engine() -> sqlalchemy.engine.Engine:
     return engine
 
 
-@lru_cache(maxsize=1)
-def get_embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings()
-
-
-def get_vectorstore(collection_name) -> PGVector:
-    return _get_vectorstore(force_str(collection_name))
-
-
-@lru_cache(maxsize=None)
-def _get_vectorstore(collection_name: str) -> PGVector:
-    return PGVector(
-        connection_string=settings.PG_VECTOR_DB_URL,
-        collection_name=collection_name,
-        embedding_function=get_embeddings(),
-        connection=get_vector_engine(),
-        # get_vector_engine ensures the extension exists in the vector database.
-        create_extension=False,
-    )
-
-
-def delete_vector_collection(collection_name) -> None:
-    collection_name = force_str(collection_name)
-    try:
-        with get_vector_engine().begin() as connection:
-            tables_exist = connection.execute(
-                sqlalchemy.text("SELECT to_regclass('langchain_pg_collection')")
-            ).scalar_one_or_none()
-            if tables_exist is None:
-                return
-            collection_id = connection.execute(
-                sqlalchemy.text(
-                    "SELECT uuid FROM langchain_pg_collection WHERE name = :name"
-                ),
-                {"name": collection_name},
-            ).scalar_one_or_none()
-            if collection_id is None:
-                return
-            connection.execute(
-                sqlalchemy.text(
-                    "DELETE FROM langchain_pg_embedding WHERE collection_id = :collection_id"
-                ),
-                {"collection_id": collection_id},
-            )
-            connection.execute(
-                sqlalchemy.text("DELETE FROM langchain_pg_collection WHERE uuid = :uuid"),
-                {"uuid": collection_id},
-            )
-    finally:
-        _get_vectorstore.cache_clear()
-
-
-def replace_vector_collection(collection_name, docs: list[Document]) -> None:
-    texts = [d.page_content for d in docs]
-    embeddings = get_embeddings().embed_documents(texts)
-    delete_vector_collection(collection_name)
-    get_vectorstore(collection_name).add_embeddings(texts, embeddings, metadatas=[d.metadata for d in docs])
-
-
-@lru_cache(maxsize=None)
-def get_checkpointer_pool() -> ConnectionPool:
-    return ConnectionPool(
-        conninfo=settings.PG_VECTOR_DB_URL,
-        min_size=1,
-        max_size=settings.CHECKPOINTER_POOL_SIZE,
-        max_idle=300,
-        kwargs=CHECKPOINTER_CONNECTION_KWARGS,
-        # Managed providers drop idle connections (e.g. Neon autosuspend).
-        check=ConnectionPool.check_connection,
-        open=True,
-    )
-
-
-def get_checkpointer() -> PostgresSaver:
-    return PostgresSaver(get_checkpointer_pool())
-
-
 def _async_url(url: str) -> str:
     for scheme in ("postgres://", "postgresql://"):
         if url.startswith(scheme):
@@ -154,7 +62,8 @@ def get_pg_engine() -> PGEngine:
         max_overflow=settings.PG_VECTOR_POOL_MAX_OVERFLOW,
         pool_pre_ping=True,
         pool_recycle=300,
-        connect_args={"prepare_threshold": None},  # transaction-mode poolers, see CHECKPOINTER_CONNECTION_KWARGS
+        # no server-side prepared statements: transaction-mode poolers (PgBouncer, Neon pooled) don't support them
+        connect_args={"prepare_threshold": None},
     )
 
 

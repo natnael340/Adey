@@ -5,7 +5,6 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
-from adey_apps.rag.agent_v2 import Agent
 from adey_apps.rag.models import Chat, Message, MessageTypeChoices
 
 HISTORY_TURNS = 3
@@ -34,10 +33,3 @@ def answer(chat: Chat, session_id: str, question: str) -> PassResult:
     history = recent_history(chat, session_id)
     return import_string(settings.AGENT_PASSES[settings.AGENT_DEFAULT_PASS])(chat).run(question, session_id, history)
 
-
-class LegacyAgentPass:
-    def __init__(self, chat: Chat):
-        self.chat = chat
-
-    def run(self, question: str, session_id: str, history: list[BaseMessage]) -> PassResult:
-        return PassResult(answer=Agent(self.chat).query(question, session_id=session_id))

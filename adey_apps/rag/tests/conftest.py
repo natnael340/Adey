@@ -8,6 +8,7 @@ from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 
 from adey_apps.rag import db as rag_db
+from adey_apps.rag.tests import skills  # noqa: F401  registers the test-only skills
 
 CHAT_DATA = {
         "name": "Customer support",
@@ -39,9 +40,6 @@ CHAT_DATA = {
 
 def _clear_shared_caches():
     rag_db.get_vector_engine.cache_clear()
-    rag_db._get_vectorstore.cache_clear()
-    rag_db.get_embeddings.cache_clear()
-    rag_db.get_checkpointer_pool.cache_clear()
     rag_db.get_pg_engine.cache_clear()
     rag_db.get_chunk_store.cache_clear()
     rag_db.get_rag_embeddings.cache_clear()
@@ -53,8 +51,6 @@ def fresh_shared_resources():
     yield
     if rag_db.get_vector_engine.cache_info().currsize:
         rag_db.get_vector_engine().dispose()
-    if rag_db.get_checkpointer_pool.cache_info().currsize:
-        rag_db.get_checkpointer_pool().close()
     if rag_db.get_pg_engine.cache_info().currsize:
         engine = rag_db.get_pg_engine()
         asyncio.run_coroutine_threadsafe(engine.close(), engine._loop).result()
@@ -91,7 +87,6 @@ def pg_vector_db(transactional_db, settings):
 @pytest.fixture
 def fake_rag_embeddings(mocker):
     mocker.patch.object(rag_db, "get_rag_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
-    mocker.patch.object(rag_db, "get_embeddings", lambda: DeterministicFakeEmbedding(size=1536))
 
 
 class ScriptedLLM:

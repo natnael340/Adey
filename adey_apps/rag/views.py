@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
@@ -17,12 +18,14 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from django_filters import rest_framework as filters
 
 from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
 from adey_apps.rag.filters import MessageFilter
+from adey_apps.rag.skills.base import SkillRegistry, validate_skill_config
 from adey_apps.rag.serializers import (
     ChatSerializer, 
     ChatCreateSerializer, 
@@ -35,12 +38,16 @@ from adey_apps.rag.serializers import (
     MessageListSerializer,
     WidgetPreferenceSerializer,
     HumanHandOffSerializer,
+    SkillCatalogSerializer,
+    ChatSkillSerializer,
+    merge_config,
 )
 from adey_apps.rag.mixins import ChatMixin
-from adey_apps.rag.db import delete_chat_chunks, delete_vector_collection
+from adey_apps.rag.db import delete_chat_chunks
 from adey_apps.rag.ingest import index_chat
 from adey_apps.rag.models import (
     Chat, 
+    ChatSkill,
     Resource, 
     Message, 
     MessageTypeChoices, 
@@ -99,6 +106,46 @@ class ResourceViewSet(ChatMixin, ModelViewSet):
         """
         return Resource.objects.filter(chat=self.request.chat)
        
+
+class SkillCatalogView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response(SkillCatalogSerializer(SkillRegistry.all().values(), many=True).data)
+
+
+class ChatSkillViewSet(ChatMixin, ModelViewSet):
+    serializer_class = ChatSkillSerializer
+    permission_classes = (IsAuthenticated,)
+    http_method_names = ["get", "post", "patch", "delete"]
+    throttle_scope = "skill_validate"
+
+    def get_throttles(self):
+        # POST and PATCH run the skill's live verify() against a third party
+        return [ScopedRateThrottle()] if self.request.method in ("POST", "PATCH") else []
+
+    def get_queryset(self):
+        return ChatSkill.objects.filter(chat=self.request.chat)
+
+    def perform_create(self, serializer):
+        serializer.save(chat=self.request.chat)
+
+    @action(detail=False, methods=["post"], url_path="validate", url_name="validate")
+    def validate_new(self, request, *args, **kwargs):
+        return self._validate(request.data.get("key", ""), request.data.get("config") or {})
+
+    @action(detail=True, methods=["post"], url_path="validate", url_name="validate-saved")
+    def validate_saved(self, request, *args, **kwargs):
+        enrollment = self.get_object()
+        return self._validate(enrollment.key, merge_config(enrollment.key, enrollment.config, request.data.get("config") or {}))
+
+    def _validate(self, key, config):
+        try:
+            validate_skill_config(key, config)
+        except DjangoValidationError as e:
+            return Response({"valid": False, "errors": e.message_dict}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"valid": True})
+
 
 class MessageListCreateViewSet(ListCreateAPIView):
     serializer_class = MessageSerializer
@@ -252,7 +299,6 @@ class ChatToolsAddAPIView(ChatMixin, APIView):
             # Avoid bulk_delete to ensure post_delete signals are sent
             for resource in Resource.objects.filter(chat=chat):
                 resource.delete()
-            delete_vector_collection(chat.identifier)
             delete_chat_chunks(str(chat.identifier))
         
         return Response({"success": True, "message": "Tool removed successfully."}, status=status.HTTP_200_OK)

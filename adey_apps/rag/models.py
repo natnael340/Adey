@@ -6,7 +6,9 @@ from django.template.defaultfilters import slugify
 from uuid import uuid4
 from jsonschema import validate
 from adey_apps.adey_commons.models import BaseModel
+from adey_apps.rag.skills.base import validate_skill_config
 from adey_apps.rag.constants import WIDGET_PREFERENCE_SCHEMA
+from adey_apps.rag.fields import EncryptedJSONField
 
 # Create your models here.
 class MessageTypeChoices(models.TextChoices):
@@ -156,15 +158,32 @@ class AgentTool(BaseModel):
     tool_path = models.CharField(max_length=256, blank=True)
     is_active = models.BooleanField(default=False)
 
-    def _check_tool_path(self):
-        if self.is_active and not self.tool_path:
-            raise ValidationError("Tool path is required when the tool is active.")
-
     def save(self, **kwargs) -> None:
-        self._check_tool_path()
         if not self.slug:
             self.slug = slugify(self.name)
         return super().save(**kwargs)
+
+
+class ChatSkill(BaseModel):
+    chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE)
+    key = models.CharField(max_length=128)
+    config = EncryptedJSONField(default=dict)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("chat", "key"), name="unique_together_chat_and_skill_key")
+        ]
+
+    def clean(self):
+        try:
+            validate_skill_config(self.key, self.config)
+        except ValidationError as e:
+            # non-field errors: the admin form has no config input to attach them to
+            raise ValidationError([f"{field}: {msg}" for field, msgs in e.message_dict.items() for msg in msgs])
+
+    def __str__(self) -> str:
+        return f"{self.chat} - {self.key}"
 
 
 class HumanHandOff(BaseModel):

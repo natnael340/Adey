@@ -22,7 +22,7 @@ class Command(BaseCommand):
             raise CommandError("No such Chat exists with the given slug.")
         if len(chats) > 1:
             raise CommandError("Slug matches more than one chat; use a unique slug.")
-        names = passes or ["rag", "agent"]
+        names = passes or ["router", "rag"]
         unknown = [n for n in names if n not in settings.AGENT_PASSES]
         if unknown:
             raise CommandError(f"Unknown pass {unknown[0]!r}; valid: {', '.join(settings.AGENT_PASSES)}")

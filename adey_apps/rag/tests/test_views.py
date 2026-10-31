@@ -59,3 +59,126 @@ def test_build_endpoint_indexes_chat(chat, logged_in_client, mocker):
     index.assert_called_once_with(chat)
     chat.refresh_from_db()
     assert chat.status == "finished"
+
+
+def _skills_url(chat, pk=None, validate=False):
+    if pk is None:
+        return reverse("chat-skill-validate" if validate else "chat-skill-list", kwargs={"chat_slug": chat.slug})
+    return reverse("chat-skill-validate-saved" if validate else "chat-skill-detail",
+                   kwargs={"chat_slug": chat.slug, "pk": pk})
+
+
+@pytest.fixture
+def echo_enrollment(chat):
+    from adey_apps.rag.models import ChatSkill
+    return ChatSkill.objects.create(chat=chat, key="test.echo_key", config={"api_key": "sk-secret-1234"})
+
+
+def test_catalog_lists_schema(logged_in_client):
+    response = logged_in_client.get(reverse("skill-catalog"))
+    assert response.status_code == 200
+    catalog = {c["key"]: c for c in response.json()}
+    assert catalog["clock.now"]["config_schema"] == {}
+    assert catalog["clock.now"]["default"] is True
+    assert catalog["test.echo_key"]["config_schema"]["properties"]["api_key"]["format"] == "password"
+
+
+def test_enroll_masks_secret(chat, logged_in_client):
+    response = logged_in_client.post(
+        _skills_url(chat),
+        data=json.dumps({"key": "test.echo_key", "config": {"api_key": "sk-secret-1234"}}),
+        content_type="application/json",
+    )
+    assert response.status_code == 201
+    assert response.json()["config"] == {"api_key": "••••1234"}
+    assert "sk-secret" not in logged_in_client.get(_skills_url(chat)).content.decode()
+
+
+def test_patch_without_secret_keeps_it(chat, logged_in_client, echo_enrollment):
+    url = _skills_url(chat, echo_enrollment.id)
+    assert logged_in_client.patch(url, data=json.dumps({"is_active": False}), content_type="application/json").status_code == 200
+    response = logged_in_client.patch(url, data=json.dumps({"config": {"api_key": "••••1234"}}), content_type="application/json")
+    assert response.status_code == 200
+    echo_enrollment.refresh_from_db()
+    assert echo_enrollment.config == {"api_key": "sk-secret-1234"}
+    assert echo_enrollment.is_active is False
+
+
+def test_invalid_config_400(chat, logged_in_client):
+    response = logged_in_client.post(
+        _skills_url(chat), data=json.dumps({"key": "test.echo_key", "config": {}}), content_type="application/json"
+    )
+    assert response.status_code == 400
+    assert "api_key" in response.json()
+
+
+def test_verify_failure_400(chat, logged_in_client, mocker):
+    from django.core.exceptions import ValidationError
+    from adey_apps.rag.tests.skills import EchoKey
+    mocker.patch.object(EchoKey, "verify", side_effect=ValidationError({"api_key": "rejected by Calendly"}))
+    response = logged_in_client.post(
+        _skills_url(chat),
+        data=json.dumps({"key": "test.echo_key", "config": {"api_key": "sk-secret-1234"}}),
+        content_type="application/json",
+    )
+    assert response.status_code == 400
+    assert "rejected by Calendly" in response.content.decode()
+
+
+def test_other_users_bot_404(logged_in_client, chat_factory):
+    other = chat_factory()
+    assert logged_in_client.get(_skills_url(other)).status_code == 404
+
+
+def test_duplicate_enrollment_400(chat, logged_in_client):
+    data = json.dumps({"key": "clock.now"})
+    assert logged_in_client.post(_skills_url(chat), data=data, content_type="application/json").status_code == 201
+    assert logged_in_client.post(_skills_url(chat), data=data, content_type="application/json").status_code == 400
+
+
+def test_validate_ok_saves_nothing(chat, logged_in_client):
+    from adey_apps.rag.models import ChatSkill
+    response = logged_in_client.post(
+        _skills_url(chat, validate=True),
+        data=json.dumps({"key": "test.echo_key", "config": {"api_key": "sk-secret-1234"}}),
+        content_type="application/json",
+    )
+    assert response.status_code == 200
+    assert response.json() == {"valid": True}
+    assert ChatSkill.objects.count() == 0
+
+
+def test_validate_reports_field_errors(chat, logged_in_client, mocker):
+    from django.core.exceptions import ValidationError
+    from adey_apps.rag.tests.skills import EchoKey
+    url = _skills_url(chat, validate=True)
+    response = logged_in_client.post(url, data=json.dumps({"key": "test.echo_key", "config": {}}), content_type="application/json")
+    assert response.status_code == 400
+    assert response.json()["valid"] is False and response.json()["errors"]["api_key"]
+
+    mocker.patch.object(EchoKey, "verify", side_effect=ValidationError({"api_key": "rejected by Calendly"}))
+    response = logged_in_client.post(
+        url, data=json.dumps({"key": "test.echo_key", "config": {"api_key": "sk-x"}}), content_type="application/json"
+    )
+    assert response.status_code == 400
+    assert response.json()["errors"] == {"api_key": ["rejected by Calendly"]}
+
+
+def test_validate_saved_uses_stored_secret(chat, logged_in_client, echo_enrollment, mocker):
+    from adey_apps.rag.tests.skills import EchoKey
+    verify = mocker.patch.object(EchoKey, "verify")
+    response = logged_in_client.post(
+        _skills_url(chat, echo_enrollment.id, validate=True), data=json.dumps({}), content_type="application/json"
+    )
+    assert response.status_code == 200
+    assert verify.call_args.args[0].api_key.get_secret_value() == "sk-secret-1234"
+
+
+def test_patch_is_throttled_like_validate(chat, logged_in_client, echo_enrollment):
+    url = _skills_url(chat, echo_enrollment.id)
+    statuses = [
+        logged_in_client.patch(url, data=json.dumps({"is_active": True}), content_type="application/json").status_code
+        for _ in range(11)
+    ]
+    assert statuses == [200] * 10 + [429]
+    assert logged_in_client.get(url).status_code == 200

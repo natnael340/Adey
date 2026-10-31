@@ -96,18 +96,6 @@ def test_index_chat_is_idempotent_and_drops_removed_resources(pg_vector_db, fake
     assert [d.metadata["resource"] for d in docs] == [keep.slug]
 
 
-def test_index_chat_also_refreshes_the_legacy_agent_index(pg_vector_db, fake_rag_embeddings, chat, resource_factory):
-    resource = resource_factory(chat=chat, document_type="TXT",
-                                document=ContentFile(b"Refunds are issued as store credit.", name="a.txt"))
-    index_chat(chat)
-    index_chat(chat)
-    docs = rag_db.get_vectorstore(chat.identifier).similarity_search("refund", k=10)
-    assert [d.page_content for d in docs] == [f"{resource.name}\n\nRefunds are issued as store credit."]
-    resource.delete()
-    index_chat(chat)
-    assert rag_db.get_vectorstore(chat.identifier).similarity_search("refund", k=10) == []
-
-
 def test_index_chat_leaves_index_untouched_when_a_resource_fails(db, mocker, chat, resource_factory):
     resource_factory(chat=chat)
     mocker.patch("adey_apps.rag.ingest.load_resource", side_effect=OSError("s3 down"))

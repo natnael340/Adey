@@ -42,17 +42,19 @@ PG_VECTOR_DB_URL = env.str("PG_VECTOR_DB_URL", "")
 # Per-process pool sizes; keep (backend + celery processes) * total under the DB connection limit.
 PG_VECTOR_POOL_SIZE = env.int("PG_VECTOR_POOL_SIZE", 3)
 PG_VECTOR_POOL_MAX_OVERFLOW = env.int("PG_VECTOR_POOL_MAX_OVERFLOW", 2)
-CHECKPOINTER_POOL_SIZE = env.int("CHECKPOINTER_POOL_SIZE", 3)
 CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "")
 
-AGENT_TOOL_PATH = "adey_apps.rag.tools"
 RAG_CHAT_MODEL = env.str("RAG_CHAT_MODEL", "gpt-4o-mini")
 RAG_ANSWER_MODEL = env.str("RAG_ANSWER_MODEL", "gpt-4o")
+# shortcut: single key, switch to MultiFernet when the key needs rotating
+TOOL_CONFIG_KEY = env.str("TOOL_CONFIG_KEY")
+JEV_MODEL = env.str("JEV_MODEL", "jev-1.13.0")
+ROUTER_MIN_CONFIDENCE = env.float("ROUTER_MIN_CONFIDENCE", 0.6)
 AGENT_PASSES = {
     "rag": "adey_apps.rag.rag_pass.RagPass",
-    "agent": "adey_apps.rag.passes.LegacyAgentPass",
+    "router": "adey_apps.rag.router.RouterPass",
 }
-AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "agent")
+AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "router")
 
 # Application definition
 
@@ -197,7 +199,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        )
+        ),
+    "DEFAULT_THROTTLE_RATES": {"skill_validate": "10/min"},
 }
 
 UPDATE_LAST_LOGIN = True

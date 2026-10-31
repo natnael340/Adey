@@ -1,7 +1,8 @@
 from langchain_core.messages import AIMessage, HumanMessage
 
-from adey_apps.rag.models import Message, MessageTypeChoices
-from adey_apps.rag.passes import LegacyAgentPass, PassResult, answer, recent_history
+from adey_apps.rag.models import ChatSkill, Message, MessageTypeChoices
+from adey_apps.rag.passes import PassResult, answer, recent_history
+from adey_apps.rag.rag_pass import RagPass
 
 
 class EchoPass:
@@ -27,8 +28,8 @@ def test_answer_runs_the_routed_pass(db, chat, settings):
     assert answer(chat, "s", "hello") == PassResult("hello|0", [{"title": "T", "page": None}])
 
 
-def test_legacy_agent_pass_wraps_agent_v2(db, chat, mocker):
-    agent = mocker.patch("adey_apps.rag.passes.Agent")
-    agent.return_value.query.return_value = "old answer"
-    assert LegacyAgentPass(chat).run("q", "s", []) == PassResult("old answer")
-    agent.return_value.query.assert_called_once_with("q", session_id="s")
+def test_answer_defaults_to_router(db, chat, mocker):
+    ChatSkill.objects.create(chat=chat, key="clock.now", is_active=False)
+    run = mocker.patch.object(RagPass, "run", return_value=PassResult("from rag"))
+    assert answer(chat, "s", "refund policy?") == PassResult("from rag")
+    run.assert_called_once_with("refund policy?", "s", [])
