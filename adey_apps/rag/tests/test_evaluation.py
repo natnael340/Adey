@@ -1,14 +1,17 @@
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.utils.module_loading import import_string
 
-from adey_apps.rag.evaluation import EvalCase, is_refusal, load_cases, run_eval
+from langchain_core.messages import AIMessage, HumanMessage
+
+from adey_apps.rag.evaluation import EvalCase, load_cases, run_eval
 from adey_apps.rag.passes import PassResult
 
 
 class ScriptedPass:
     replies = {"q1": PassResult("Ships in 3 days.", [{"title": "FAQ", "page": None}]),
-               "q2": PassResult("I'm sorry, I don't have information about that."),
+               "q2": PassResult("Sorry, I couldn't find that.", refused=True),
                "q3": PassResult("Made up answer.")}
 
     def __init__(self, chat):
@@ -27,10 +30,55 @@ def test_load_cases_parses_jsonl(tmp_path):
     assert load_cases(str(path)) == [EvalCase("q1", True, ["FAQ"]), EvalCase("q2", False)]
 
 
-def test_is_refusal_matches_both_refusal_styles():
-    assert is_refusal("I'm sorry, I don't have information about that. Ask support.")
-    assert is_refusal("I’m sorry, I don’t have that information.")
-    assert not is_refusal("Sorry for the wait, shipping takes 3 days.")
+def test_load_cases_parses_history_and_route(tmp_path):
+    path = tmp_path / "cases.jsonl"
+    path.write_text('{"question": "and abroad?", "answerable": true, "history": ["shipping time?", "3 days."], '
+                    '"expected_route": "knowledge"}\n')
+    assert load_cases(str(path)) == [
+        EvalCase("and abroad?", True, history=["shipping time?", "3 days."], expected_route="knowledge")
+    ]
+
+
+class RecordingPass:
+    seen = []
+
+    def __init__(self, chat):
+        pass
+
+    def run(self, question, session_id, history):
+        self.seen.append(history)
+        return PassResult("ok")
+
+
+def test_history_is_sent_alternating(db, chat, settings):
+    settings.AGENT_PASSES = {"recording": "adey_apps.rag.tests.test_evaluation.RecordingPass"}
+    recorder = import_string(settings.AGENT_PASSES["recording"])  # the module is also imported as rag.tests.*
+    recorder.seen = []
+    run_eval(chat, [EvalCase("and abroad?", True, history=["shipping time?", "3 days."])], "recording")
+    assert recorder.seen == [[HumanMessage("shipping time?"), AIMessage("3 days.")]]
+
+
+class KnowledgePass:
+    def __init__(self, chat):
+        pass
+
+    def run(self, question, session_id, history):
+        return PassResult("ok", route="knowledge")
+
+
+def test_route_accuracy(db, chat, settings):
+    settings.AGENT_PASSES = {"knowledge": "adey_apps.rag.tests.test_evaluation.KnowledgePass"}
+    cases = [EvalCase("a", True, expected_route="knowledge"), EvalCase("b", True, expected_route="knowledge"),
+             EvalCase("hi", True, expected_route="conversation")]
+    report = run_eval(chat, cases, "knowledge")
+    assert report["route_accuracy"] == 2 / 3
+    assert all(r["route"] == "knowledge" for r in report["rows"])
+
+
+def test_route_accuracy_none_without_routes(db, chat, settings):
+    settings.AGENT_PASSES = {"scripted": "adey_apps.rag.tests.test_evaluation.ScriptedPass"}
+    report = run_eval(chat, [EvalCase("q1", True, expected_route="knowledge")], "scripted")
+    assert report["route_accuracy"] is None
 
 
 def test_run_eval_scores_answers_refusals_and_sources(db, chat, settings):
