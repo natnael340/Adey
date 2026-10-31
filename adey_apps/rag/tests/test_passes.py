@@ -1,5 +1,6 @@
 from langchain_core.messages import AIMessage, HumanMessage
 
+from adey_apps.rag.constants import RAG_REFUSAL
 from adey_apps.rag.models import ChatSkill, Message, MessageTypeChoices
 from adey_apps.rag.passes import PassResult, answer, recent_history
 from adey_apps.rag.rag_pass import RagPass
@@ -33,3 +34,10 @@ def test_answer_defaults_to_router(db, chat, mocker):
     run = mocker.patch.object(RagPass, "run", return_value=PassResult("from rag"))
     assert answer(chat, "s", "refund policy?") == PassResult("from rag")
     run.assert_called_once_with("refund policy?", "s", [])
+
+
+def test_rag_pass_keeps_fixed_refusal(db, chat, settings, mocker):
+    settings.AGENT_DEFAULT_PASS = "rag"
+    mocker.patch("adey_apps.rag.rag_pass.hybrid_search", return_value=[])
+    result = answer(chat, "s", "hello")
+    assert result == PassResult(RAG_REFUSAL.format(company_name=chat.business_name), refused=True)
