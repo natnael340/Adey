@@ -41,6 +41,15 @@ def test_knowledge_key_is_reserved(isolated_registry):
                 return ""
 
 
+def test_conversation_key_is_reserved(isolated_registry):
+    with pytest.raises(ImproperlyConfigured):
+        class Conversation(Skill):
+            key = "conversation"
+
+            def run(self):
+                return ""
+
+
 def test_write_skill_is_rejected(isolated_registry):
     with pytest.raises(ImproperlyConfigured):
         class Book(Skill):

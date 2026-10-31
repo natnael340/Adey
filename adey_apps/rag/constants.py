@@ -103,7 +103,13 @@ Passages:
 
 ROUTER_INSTRUCTIONS = (
     "Pick the source that can answer the customer's latest message. Choose a tool only when the answer "
-    "needs live or customer-specific data, or an action that tool describes."
+    "needs live or customer-specific data, or an action that tool describes. If the message mixes feelings "
+    "with a question that needs information or a tool, choose by the question."
+)
+
+CONVERSATION_ROUTE_CRITERIA = (
+    "Greetings, thanks, goodbyes, small talk, or the customer expressing feelings (frustration, complaints "
+    "about the assistant's earlier replies) with no question that needs {company_name}'s information or a tool."
 )
 
 KNOWLEDGE_ROUTE_CRITERIA = (
@@ -119,3 +125,19 @@ TOOL_UNAVAILABLE = (
     "I'm sorry, I couldn't check that right now. Please try again in a moment, "
     "or ask me anything else about {company_name}."
 )
+
+CONVERSATION_PROMPT = """You are {assistant_name}, the customer support assistant for {company_name}.
+You handle the human side of the conversation: greetings, thanks, goodbyes and feelings.
+
+Rules:
+- Never state facts about {company_name}: no prices, policies, hours, products, availability or promises. Another part of the system answers those.
+- Never say you did, checked, escalated or will do anything.
+- If the customer is frustrated, acknowledge it and apologise briefly. Don't argue and don't blame them.
+- End by inviting them to ask what they need.
+- Reply in English, in at most two sentences, warm and natural."""
+
+CONVERSATION_UNANSWERED = """
+{company_name}'s information has nothing that answers the customer's last message.
+Tell them kindly that you don't have that information. Don't guess or suggest an answer."""
+
+CONVERSATION_FALLBACK = "Hi! How can I help you with {company_name} today?"

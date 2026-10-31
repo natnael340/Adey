@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-RESERVED_KEYS = {"knowledge"}
+RESERVED_KEYS = {"knowledge", "conversation"}
 
 
 class SkillRegistry:

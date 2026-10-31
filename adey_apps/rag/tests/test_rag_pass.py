@@ -17,6 +17,7 @@ def test_run_answers_with_cited_sources(db, chat, mocker):
                       GroundedAnswer(answerable=True, answer="It takes 3 days.", citations=["P1"]))
     result = RagPass(chat, llm=llm).run("how long is shipping?", "s", [])
     assert result == PassResult("It takes 3 days.", [{"title": "FAQ", "page": None}])
+    assert result.refused is False
 
 
 def test_run_refuses_when_nothing_retrieved(db, chat, mocker):
@@ -24,6 +25,7 @@ def test_run_refuses_when_nothing_retrieved(db, chat, mocker):
     llm = ScriptedLLM()
     result = RagPass(chat, llm=llm).run("anything", "s", [])
     assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name) and result.sources == []
+    assert result.refused
     assert llm.calls == []
 
 
@@ -32,6 +34,7 @@ def test_run_refuses_greeting_without_generating(db, chat, mocker):
     llm = ScriptedLLM(PassageSelection(ids=[]))
     result = RagPass(chat, llm=llm).run("hi", "s", [])
     assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
+    assert result.refused
     assert len(llm.calls) == 1
 
 
@@ -47,6 +50,7 @@ def test_run_refuses_invalid_answers(db, chat, mocker, answer):
     result = RagPass(chat, llm=ScriptedLLM(PassageSelection(ids=["P1"]), answer)).run("q", "s", [])
     assert result.answer == RAG_REFUSAL.format(company_name=chat.business_name)
     assert result.sources == []
+    assert result.refused
 
 
 def test_condense_uses_history_only_when_present(db, chat):
