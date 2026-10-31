@@ -52,7 +52,7 @@ JEV_MODEL = env.str("JEV_MODEL", "jev-1.13.0")
 ROUTER_MIN_CONFIDENCE = env.float("ROUTER_MIN_CONFIDENCE", 0.6)
 AGENT_PASSES = {
     "rag": "adey_apps.rag.rag_pass.RagPass",
-    "router": "adey_apps.rag.passes.RouterPass",
+    "router": "adey_apps.rag.router.RouterPass",
 }
 AGENT_DEFAULT_PASS = env.str("AGENT_DEFAULT_PASS", "router")
 

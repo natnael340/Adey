@@ -6,10 +6,10 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 
-from adey_apps.rag.skills.base import Skill
 from adey_apps.rag.constants import TOOL_AGENT_PROMPT, TOOL_UNAVAILABLE
 from adey_apps.rag.models import Chat
 from adey_apps.rag.passes import PassResult
+from adey_apps.rag.skills.base import Skill
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ToolPass:
     def run(self, question: str, session_id: str, history: list[BaseMessage]) -> PassResult:
         agent = create_agent(
             self.llm,
-            tools=[c.as_langchain_tool() for c in self.skills],
+            tools=[s.as_langchain_tool() for s in self.skills],
             system_prompt=TOOL_AGENT_PROMPT.format(
                 assistant_name=self.chat.assistant_name, company_name=self.chat.business_name
             ),

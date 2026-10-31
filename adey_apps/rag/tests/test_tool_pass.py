@@ -38,21 +38,21 @@ def tool_call(name):
 def test_calls_skill_and_answers(chat, mocker):
     run = mocker.spy(ClockNow, "run")
     llm = ToolCallingFake(messages=iter([tool_call("clock_now"), AIMessage("It's Friday.")]))
-    caps = [ClockNow(chat=chat, session_id="s", config=None)]
-    assert ToolPass(chat, caps, llm=llm).run("what day is it?", "s", []) == PassResult("It's Friday.", [])
+    skills = [ClockNow(chat=chat, session_id="s", config=None)]
+    assert ToolPass(chat, skills, llm=llm).run("what day is it?", "s", []) == PassResult("It's Friday.", [])
     assert run.call_count == 1
     assert {t["function"]["name"] for t in llm.tools} == {"clock_now"}
 
 
 def test_answers_without_tool_call(chat):
     llm = ToolCallingFake(messages=iter([AIMessage("Which order number?")]))
-    caps = [ClockNow(chat=chat, session_id="s", config=None)]
-    assert ToolPass(chat, caps, llm=llm).run("where is my order?", "s", []).answer == "Which order number?"
+    skills = [ClockNow(chat=chat, session_id="s", config=None)]
+    assert ToolPass(chat, skills, llm=llm).run("where is my order?", "s", []).answer == "Which order number?"
 
 
 def test_agent_error_returns_unavailable(chat):
-    caps = [ClockNow(chat=chat, session_id="s", config=None)]
-    result = ToolPass(chat, caps, llm=BrokenModel(messages=iter([]))).run("what day is it?", "s", [])
+    skills = [ClockNow(chat=chat, session_id="s", config=None)]
+    result = ToolPass(chat, skills, llm=BrokenModel(messages=iter([]))).run("what day is it?", "s", [])
     assert result == PassResult(TOOL_UNAVAILABLE.format(company_name=chat.business_name))
 
 

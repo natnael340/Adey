@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.db.models import Max
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.views import APIView
@@ -24,8 +25,6 @@ from celery.result import AsyncResult
 from celery_progress.backend import Progress
 
 from adey_apps.rag.filters import MessageFilter
-from django.core.exceptions import ValidationError as DjangoValidationError
-
 from adey_apps.rag.skills.base import SkillRegistry, validate_skill_config
 from adey_apps.rag.serializers import (
     ChatSerializer, 
@@ -112,8 +111,7 @@ class SkillCatalogView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        skills = [c for c in SkillRegistry.all().values() if c.read_only]
-        return Response(SkillCatalogSerializer(skills, many=True).data)
+        return Response(SkillCatalogSerializer(SkillRegistry.all().values(), many=True).data)
 
 
 class ChatSkillViewSet(ChatMixin, ModelViewSet):
@@ -122,17 +120,21 @@ class ChatSkillViewSet(ChatMixin, ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
     throttle_scope = "skill_validate"
 
+    def get_throttles(self):
+        # POST and PATCH run the skill's live verify() against a third party
+        return [ScopedRateThrottle()] if self.request.method in ("POST", "PATCH") else []
+
     def get_queryset(self):
         return ChatSkill.objects.filter(chat=self.request.chat)
 
     def perform_create(self, serializer):
         serializer.save(chat=self.request.chat)
 
-    @action(detail=False, methods=["post"], url_path="validate", url_name="validate", throttle_classes=[ScopedRateThrottle])
+    @action(detail=False, methods=["post"], url_path="validate", url_name="validate")
     def validate_new(self, request, *args, **kwargs):
         return self._validate(request.data.get("key", ""), request.data.get("config") or {})
 
-    @action(detail=True, methods=["post"], url_path="validate", url_name="validate-saved", throttle_classes=[ScopedRateThrottle])
+    @action(detail=True, methods=["post"], url_path="validate", url_name="validate-saved")
     def validate_saved(self, request, *args, **kwargs):
         enrollment = self.get_object()
         return self._validate(enrollment.key, merge_config(enrollment.key, enrollment.config, request.data.get("config") or {}))

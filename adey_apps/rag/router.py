@@ -6,9 +6,12 @@ from django.conf import settings
 from langchain_core.messages import BaseMessage, HumanMessage
 from typesafe_sdk import Choice, RetryPolicy, TypeSafeClient
 
-from adey_apps.rag.skills.base import Skill
 from adey_apps.rag.constants import KNOWLEDGE_ROUTE_CRITERIA, ROUTER_INSTRUCTIONS
 from adey_apps.rag.models import Chat
+from adey_apps.rag.passes import PassResult
+from adey_apps.rag.rag_pass import RagPass
+from adey_apps.rag.skills.base import Skill, enabled_skills
+from adey_apps.rag.tool_pass import ToolPass
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ def route(chat: Chat, question: str, history: list[BaseMessage], skills: list[Sk
         KNOWLEDGE: KNOWLEDGE_ROUTE_CRITERIA.format(
             company_name=chat.business_name, business_description=chat.business_description
         ),
-        **{c.key: c.description for c in skills},
+        **{s.key: s.description for s in skills},
     }
     turns = [f"{'Customer' if isinstance(m, HumanMessage) else 'Assistant'}: {m.content}" for m in history]
     state = "\n".join([*turns, f"Customer: {question}"])
@@ -48,3 +51,16 @@ def route(chat: Chat, question: str, history: list[BaseMessage], skills: list[Sk
     if answer.confidence < settings.ROUTER_MIN_CONFIDENCE:
         return Route(KNOWLEDGE, f"low_confidence:{answer.choice}:{answer.confidence:.2f}")
     return Route("tools", f"chosen:{answer.choice}")
+
+
+class RouterPass:
+    def __init__(self, chat: Chat):
+        self.chat = chat
+
+    def run(self, question: str, session_id: str, history: list[BaseMessage]) -> PassResult:
+        skills = enabled_skills(self.chat, session_id)
+        decision = route(self.chat, question, history, skills)
+        logger.info("router chat=%s route=%s reason=%s", self.chat.pk, decision.name, decision.reason)
+        if decision.name == "tools":
+            return ToolPass(self.chat, skills).run(question, session_id, history)
+        return RagPass(self.chat).run(question, session_id, history)

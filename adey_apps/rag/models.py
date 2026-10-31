@@ -5,9 +5,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.template.defaultfilters import slugify
 from uuid import uuid4
 from jsonschema import validate
-import pydantic
 from adey_apps.adey_commons.models import BaseModel
-from adey_apps.rag.skills.base import SkillRegistry, config_errors
+from adey_apps.rag.skills.base import validate_skill_config
 from adey_apps.rag.constants import WIDGET_PREFERENCE_SCHEMA
 from adey_apps.rag.fields import EncryptedJSONField
 
@@ -177,14 +176,11 @@ class ChatSkill(BaseModel):
         ]
 
     def clean(self):
-        skill = SkillRegistry.get(self.key)
-        if skill is None:
-            raise ValidationError({"key": f"Unknown skill {self.key!r}."})
-        if skill.config_model:
-            try:
-                skill.config_model.model_validate(self.config)
-            except pydantic.ValidationError as e:
-                raise ValidationError({"config": [f"{field}: {msg}" for field, msgs in config_errors(e).items() for msg in msgs]})
+        try:
+            validate_skill_config(self.key, self.config)
+        except ValidationError as e:
+            # non-field errors: the admin form has no config input to attach them to
+            raise ValidationError([f"{field}: {msg}" for field, msgs in e.message_dict.items() for msg in msgs])
 
     def __str__(self) -> str:
         return f"{self.chat} - {self.key}"

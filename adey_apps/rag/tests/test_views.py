@@ -79,10 +79,8 @@ def test_catalog_lists_schema(logged_in_client):
     assert response.status_code == 200
     catalog = {c["key"]: c for c in response.json()}
     assert catalog["clock.now"]["config_schema"] == {}
-    assert catalog["clock.now"]["read_only"] is True
     assert catalog["clock.now"]["default"] is True
     assert catalog["test.echo_key"]["config_schema"]["properties"]["api_key"]["format"] == "password"
-    assert "test.write" not in catalog
 
 
 def test_enroll_masks_secret(chat, logged_in_client):
@@ -174,3 +172,13 @@ def test_validate_saved_uses_stored_secret(chat, logged_in_client, echo_enrollme
     )
     assert response.status_code == 200
     assert verify.call_args.args[0].api_key.get_secret_value() == "sk-secret-1234"
+
+
+def test_patch_is_throttled_like_validate(chat, logged_in_client, echo_enrollment):
+    url = _skills_url(chat, echo_enrollment.id)
+    statuses = [
+        logged_in_client.patch(url, data=json.dumps({"is_active": True}), content_type="application/json").status_code
+        for _ in range(11)
+    ]
+    assert statuses == [200] * 10 + [429]
+    assert logged_in_client.get(url).status_code == 200

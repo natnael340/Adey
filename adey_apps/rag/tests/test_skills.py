@@ -41,6 +41,16 @@ def test_knowledge_key_is_reserved(isolated_registry):
                 return ""
 
 
+def test_write_skill_is_rejected(isolated_registry):
+    with pytest.raises(ImproperlyConfigured):
+        class Book(Skill):
+            key = "test.book"
+            read_only = False
+
+            def run(self):
+                return ""
+
+
 def test_tool_name_mangles_dots(db, chat):
     assert ClockNow(chat=chat, session_id="s", config=None).as_langchain_tool().name == "clock_now"
 
@@ -83,16 +93,15 @@ def test_enabled_skills_skips_bad_rows(db, chat):
         ChatSkill(chat=chat, key="clock.now"),
         ChatSkill(chat=chat, key="test.boom", is_active=False),
         ChatSkill(chat=chat, key="removed.tool"),
-        ChatSkill(chat=chat, key="test.write"),
         ChatSkill(chat=chat, key="test.echo_key", config={}),
     ])
-    caps = enabled_skills(chat, "s")
-    assert [type(c) for c in caps] == [ClockNow]
-    assert caps[0].chat == chat and caps[0].session_id == "s"
+    skills = enabled_skills(chat, "s")
+    assert [type(s) for s in skills] == [ClockNow]
+    assert skills[0].chat == chat and skills[0].session_id == "s"
 
 
 def test_default_skill_is_on_for_every_bot(db, chat):
-    assert [type(c) for c in enabled_skills(chat, "s")] == [ClockNow]
+    assert [type(s) for s in enabled_skills(chat, "s")] == [ClockNow]
 
 
 def test_default_skill_can_be_turned_off(db, chat):

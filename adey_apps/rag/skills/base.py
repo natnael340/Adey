@@ -26,6 +26,8 @@ class SkillRegistry:
         existing = cls._classes.get(skill.key)
         if existing and existing is not skill:
             raise ImproperlyConfigured(f"Skill key {skill.key!r} is already used by {existing.__qualname__}.")
+        if not skill.read_only:
+            raise ImproperlyConfigured(f"Skill {skill.key!r} writes data; write skills need the confirm flow, which isn't built yet.")
         if skill.default and skill.config_model:
             raise ImproperlyConfigured(f"Default skill {skill.key!r} can't require config.")
         cls._classes[skill.key] = skill
@@ -39,29 +41,24 @@ class SkillRegistry:
         return dict(cls._classes)
 
 
-def config_errors(error: pydantic.ValidationError) -> dict[str, list[str]]:
-    errors: dict[str, list[str]] = {}
-    for e in error.errors():
-        errors.setdefault(".".join(str(part) for part in e["loc"]) or "config", []).append(e["msg"])
-    return errors
-
-
-def validate_skill_config(key: str, config: dict) -> pydantic.BaseModel | None:
+def validate_skill_config(key: str, config: dict) -> None:
     """Raises ValidationError with a {field: [messages]} dict; runs the skill's live verify()."""
     cls = SkillRegistry.get(key)
-    if cls is None or not cls.read_only:
+    if cls is None:
         raise ValidationError({"key": [f"Unknown skill {key!r}."]})
     if cls.config_model is None:
-        return None
+        return
     try:
         validated = cls.config_model.model_validate(config)
     except pydantic.ValidationError as e:
-        raise ValidationError(config_errors(e))
+        errors: dict[str, list[str]] = {}
+        for err in e.errors():
+            errors.setdefault(".".join(str(part) for part in err["loc"]) or "config", []).append(err["msg"])
+        raise ValidationError(errors)
     try:
         cls.verify(validated)
     except ValidationError as e:
         raise ValidationError(e.message_dict if hasattr(e, "error_dict") else {"config": e.messages})
-    return validated
 
 
 class Skill:
@@ -121,9 +118,8 @@ def enabled_skills(chat: Chat, session_id: str) -> list[Skill]:
         if not row.is_active:
             continue
         cls = SkillRegistry.get(row.key)
-        if cls is None or not cls.read_only:
-            logger.warning("skill skipped chat=%s key=%s reason=%s", chat.pk, row.key,
-                           "unregistered" if cls is None else "not_read_only")
+        if cls is None:
+            logger.warning("skill skipped chat=%s key=%s reason=unregistered", chat.pk, row.key)
             continue
         try:
             config = cls.config_model.model_validate(row.config) if cls.config_model else None
@@ -133,6 +129,6 @@ def enabled_skills(chat: Chat, session_id: str) -> list[Skill]:
         skills.append(cls(chat=chat, session_id=session_id, config=config))
     enrolled = {row.key for row in rows}
     for cls in SkillRegistry.all().values():
-        if cls.default and cls.read_only and cls.key not in enrolled:
+        if cls.default and cls.key not in enrolled:
             skills.append(cls(chat=chat, session_id=session_id, config=None))
     return skills

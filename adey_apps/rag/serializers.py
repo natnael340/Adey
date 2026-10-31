@@ -437,7 +437,6 @@ def merge_config(key: str, stored: dict, incoming: dict) -> dict:
 class SkillCatalogSerializer(serializers.Serializer):
     key = serializers.CharField()
     description = serializers.CharField()
-    read_only = serializers.BooleanField()
     default = serializers.BooleanField()
     config_schema = serializers.JSONField()
 

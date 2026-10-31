@@ -23,11 +23,3 @@ class Boom(Skill):
     def run(self):
         raise RuntimeError("upstream said sk-secret-1234 is wrong")
 
-
-class WriteThing(Skill):
-    key = "test.write"
-    description = "Writes something."
-    read_only = False
-
-    def run(self):
-        return "written"
