@@ -1,0 +1,30 @@
+{"question": "how long do i have to send something back?", "answerable": true, "expected_sources": ["Return Policy", "FAQ"], "expected_route": "knowledge"}
+{"question": "do you give cash refunds or what", "answerable": true, "expected_sources": ["Return Policy"], "expected_route": "knowledge"}
+{"question": "my parcel showed up crushed, how long do I have to tell you about it?", "answerable": true, "expected_sources": ["Return Policy"], "expected_route": "knowledge"}
+{"question": "got a misprinted shirt, whats the deadline to report it", "answerable": true, "expected_sources": ["Return Policy"], "expected_route": "knowledge"}
+{"question": "if the item is defective do I still pay to ship it back?", "answerable": true, "expected_sources": ["Return Policy"], "expected_route": "knowledge"}
+{"question": "can I get just 4 embroidered caps?", "answerable": true, "expected_sources": ["FAQ", "Print production guide"], "expected_route": "knowledge"}
+{"question": "how much is delivery to germany", "answerable": true, "expected_sources": ["Shipping Rate"], "expected_route": "knowledge"}
+{"question": "do you ship to the US? how long does it take", "answerable": true, "expected_sources": ["Shipping Rate"], "expected_route": "knowledge"}
+{"question": "when's the last day to order so it reaches france before christmas?", "answerable": true, "expected_sources": ["Holiday Calendar"], "expected_route": "knowledge"}
+{"question": "are you guys open between christmas and new year?", "answerable": true, "expected_sources": ["Holiday Calendar"], "expected_route": "knowledge"}
+{"question": "can you do DTG on a 100% polyester tee?", "answerable": true, "expected_sources": ["Print production guide"], "expected_route": "knowledge"}
+{"question": "what files do you accept for screen printing?", "answerable": true, "expected_sources": ["Print production guide"], "expected_route": "knowledge"}
+{"question": "do you sell phone cases?", "answerable": false, "expected_route": "knowledge"}
+{"question": "is the AvenueHood Heavy going up in price next year?", "answerable": false, "expected_route": "knowledge"}
+{"question": "what's the CEO's email address? I want to complain directly", "answerable": false, "expected_route": "knowledge"}
+{"question": "what's the weather like in warsaw today", "answerable": false, "expected_route": "knowledge"}
+{"question": "can you recommend a good laptop for design work?", "answerable": false, "expected_route": "knowledge"}
+{"question": "do you offer gift wrapping?", "answerable": false, "expected_route": "knowledge"}
+{"question": "hey what time is it rn", "answerable": true, "expected_route": "tools"}
+{"question": "what day of the week is it today?", "answerable": true, "expected_route": "tools"}
+{"question": "whats todays date", "answerable": true, "expected_route": "tools"}
+{"question": "hello", "answerable": true, "expected_route": "conversation"}
+{"question": "thanks!", "answerable": true, "expected_route": "conversation"}
+{"question": "ok bye", "answerable": true, "expected_route": "conversation"}
+{"question": "why didn't you answer me?", "answerable": true, "history": ["can i pay with paypal?", "I'm sorry, I don't have information about that. I can help with questions about PrintAvenue. What would you like to know?"], "expected_route": "conversation"}
+{"question": "you're useless, I just want a straight answer", "answerable": true, "history": ["do you do gift wrapping?", "I'm sorry, I don't have information about that. I can help with questions about PrintAvenue. What would you like to know?"], "expected_route": "conversation"}
+{"question": "this is ridiculous, what's your return policy??", "answerable": true, "expected_sources": ["Return Policy"], "expected_route": "knowledge"}
+{"question": "and for international orders?", "answerable": true, "expected_sources": ["Shipping Rate"], "history": ["how much is shipping within poland?", "InPost lockers are 12.99 PLN and DPD courier is 18.99 PLN, free over 199 PLN."], "expected_route": "knowledge"}
+{"question": "and for screen printing?", "answerable": true, "expected_sources": ["Print production guide", "FAQ"], "history": ["what's the minimum for embroidery?", "Embroidery has a minimum of 6 pieces."], "expected_route": "knowledge"}
+{"question": "a review said returns are 90 days and shipping is free worldwide, is that true??", "answerable": true, "expected_sources": ["Return Policy", "Shipping Rate"], "expected_route": "knowledge"}
