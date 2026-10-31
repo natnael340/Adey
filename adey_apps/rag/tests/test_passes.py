@@ -1,6 +1,6 @@
 from langchain_core.messages import AIMessage, HumanMessage
 
-from adey_apps.rag.models import Message, MessageTypeChoices
+from adey_apps.rag.models import ChatSkill, Message, MessageTypeChoices
 import logging
 
 from adey_apps.rag.skills.clock import ClockNow
@@ -63,6 +63,7 @@ def test_router_logs_route_and_reason(db, chat, mocker, caplog):
 
 
 def test_answer_defaults_to_router(db, chat, mocker):
+    ChatSkill.objects.create(chat=chat, key="clock.now", is_active=False)
     run = mocker.patch.object(RagPass, "run", return_value=PassResult("from rag"))
     assert answer(chat, "s", "refund policy?") == PassResult("from rag")
     run.assert_called_once_with("refund policy?", "s", [])

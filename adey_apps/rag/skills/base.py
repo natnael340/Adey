@@ -26,6 +26,8 @@ class SkillRegistry:
         existing = cls._classes.get(skill.key)
         if existing and existing is not skill:
             raise ImproperlyConfigured(f"Skill key {skill.key!r} is already used by {existing.__qualname__}.")
+        if skill.default and skill.config_model:
+            raise ImproperlyConfigured(f"Default skill {skill.key!r} can't require config.")
         cls._classes[skill.key] = skill
 
     @classmethod
@@ -70,6 +72,8 @@ class Skill:
     input_schema: dict = {}
     read_only: bool = True
     config_model: type[pydantic.BaseModel] | None = None
+    # on for every bot without enrolling; a bot opts out with an inactive ChatSkill row
+    default: bool = False
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -112,7 +116,10 @@ class Skill:
 
 def enabled_skills(chat: Chat, session_id: str) -> list[Skill]:
     skills = []
-    for row in chat.chatskill_set.filter(is_active=True).order_by("id"):
+    rows = list(chat.chatskill_set.order_by("id"))
+    for row in rows:
+        if not row.is_active:
+            continue
         cls = SkillRegistry.get(row.key)
         if cls is None or not cls.read_only:
             logger.warning("skill skipped chat=%s key=%s reason=%s", chat.pk, row.key,
@@ -124,4 +131,8 @@ def enabled_skills(chat: Chat, session_id: str) -> list[Skill]:
             logger.warning("skill skipped chat=%s key=%s reason=invalid_config", chat.pk, row.key)
             continue
         skills.append(cls(chat=chat, session_id=session_id, config=config))
+    enrolled = {row.key for row in rows}
+    for cls in SkillRegistry.all().values():
+        if cls.default and cls.read_only and cls.key not in enrolled:
+            skills.append(cls(chat=chat, session_id=session_id, config=None))
     return skills

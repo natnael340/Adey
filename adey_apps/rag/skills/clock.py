@@ -5,6 +5,7 @@ from adey_apps.rag.skills.base import Skill
 
 class ClockNow(Skill):
     key = "clock.now"
+    default = True
     description = (
         "Get the current date and time. Use for questions about today's date, "
         "the current time or the day of the week."

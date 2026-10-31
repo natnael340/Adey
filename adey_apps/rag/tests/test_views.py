@@ -80,6 +80,7 @@ def test_catalog_lists_schema(logged_in_client):
     catalog = {c["key"]: c for c in response.json()}
     assert catalog["clock.now"]["config_schema"] == {}
     assert catalog["clock.now"]["read_only"] is True
+    assert catalog["clock.now"]["default"] is True
     assert catalog["test.echo_key"]["config_schema"]["properties"]["api_key"]["format"] == "password"
     assert "test.write" not in catalog
 

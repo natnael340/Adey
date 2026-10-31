@@ -91,6 +91,28 @@ def test_enabled_skills_skips_bad_rows(db, chat):
     assert caps[0].chat == chat and caps[0].session_id == "s"
 
 
+def test_default_skill_is_on_for_every_bot(db, chat):
+    assert [type(c) for c in enabled_skills(chat, "s")] == [ClockNow]
+
+
+def test_default_skill_can_be_turned_off(db, chat):
+    ChatSkill.objects.create(chat=chat, key="clock.now", is_active=False)
+    assert enabled_skills(chat, "s") == []
+
+
+def test_default_skill_cannot_require_config(isolated_registry):
+    from adey_apps.rag.tests.skills import EchoConfig
+
+    with pytest.raises(ImproperlyConfigured):
+        class NeedsKey(Skill):
+            key = "test.default_with_config"
+            default = True
+            config_model = EchoConfig
+
+            def run(self):
+                return ""
+
+
 def test_clock_now_returns_local_time(db, chat, settings, mocker):
     settings.TIME_ZONE = "Europe/Warsaw"
     mocker.patch("django.utils.timezone.now", return_value=datetime(2026, 10, 31, 13, 5, tzinfo=dt_timezone.utc))
