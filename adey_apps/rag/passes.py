@@ -19,6 +19,8 @@ class Source(TypedDict):
 class PassResult:
     answer: str
     sources: list[Source] = field(default_factory=list)
+    refused: bool = False
+    route: str = ""
 
 
 def recent_history(chat: Chat, session_id: str, turns: int = HISTORY_TURNS) -> list[BaseMessage]:

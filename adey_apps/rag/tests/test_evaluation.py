@@ -1,14 +1,16 @@
+import json
+
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from adey_apps.rag.evaluation import EvalCase, is_refusal, load_cases, run_eval
+from adey_apps.rag.evaluation import EvalCase, load_cases, record, run_eval
 from adey_apps.rag.passes import PassResult
 
 
 class ScriptedPass:
     replies = {"q1": PassResult("Ships in 3 days.", [{"title": "FAQ", "page": None}]),
-               "q2": PassResult("I'm sorry, I don't have information about that."),
+               "q2": PassResult("Sorry, I couldn't find that.", refused=True),
                "q3": PassResult("Made up answer.")}
 
     def __init__(self, chat):
@@ -27,10 +29,50 @@ def test_load_cases_parses_jsonl(tmp_path):
     assert load_cases(str(path)) == [EvalCase("q1", True, ["FAQ"]), EvalCase("q2", False)]
 
 
-def test_is_refusal_matches_both_refusal_styles():
-    assert is_refusal("I'm sorry, I don't have information about that. Ask support.")
-    assert is_refusal("I’m sorry, I don’t have that information.")
-    assert not is_refusal("Sorry for the wait, shipping takes 3 days.")
+def test_load_cases_parses_history_and_route(tmp_path):
+    path = tmp_path / "cases.jsonl"
+    path.write_text('{"question": "and abroad?", "answerable": true, "history": ["shipping time?", "3 days."], '
+                    '"expected_route": "knowledge"}\n')
+    assert load_cases(str(path)) == [
+        EvalCase("and abroad?", True, history=["shipping time?", "3 days."], expected_route="knowledge")
+    ]
+
+
+class EchoHistoryPass:
+    def __init__(self, chat):
+        pass
+
+    def run(self, question, session_id, history):
+        return PassResult(" | ".join(f"{m.type}:{m.content}" for m in history))
+
+
+def test_history_is_sent_alternating(db, chat, settings):
+    settings.AGENT_PASSES = {"echo": "adey_apps.rag.tests.test_evaluation.EchoHistoryPass"}
+    report = run_eval(chat, [EvalCase("and abroad?", True, history=["shipping time?", "3 days."])], "echo")
+    assert report["rows"][0]["answer"] == "human:shipping time? | ai:3 days."
+
+
+class KnowledgePass:
+    def __init__(self, chat):
+        pass
+
+    def run(self, question, session_id, history):
+        return PassResult("ok", route="knowledge")
+
+
+def test_route_accuracy(db, chat, settings):
+    settings.AGENT_PASSES = {"knowledge": "adey_apps.rag.tests.test_evaluation.KnowledgePass"}
+    cases = [EvalCase("a", True, expected_route="knowledge"), EvalCase("b", True, expected_route="knowledge"),
+             EvalCase("hi", True, expected_route="conversation")]
+    report = run_eval(chat, cases, "knowledge")
+    assert report["route_accuracy"] == 2 / 3
+    assert all(r["route"] == "knowledge" for r in report["rows"])
+
+
+def test_route_accuracy_none_without_routes(db, chat, settings):
+    settings.AGENT_PASSES = {"scripted": "adey_apps.rag.tests.test_evaluation.ScriptedPass"}
+    report = run_eval(chat, [EvalCase("q1", True, expected_route="knowledge")], "scripted")
+    assert report["route_accuracy"] is None
 
 
 def test_run_eval_scores_answers_refusals_and_sources(db, chat, settings):
@@ -65,3 +107,36 @@ def test_eval_rag_rejects_unknown_pass(db, chat, tmp_path):
     path.write_text('{"question": "q", "answerable": true}\n')
     with pytest.raises(CommandError, match="rag, router"):
         call_command("eval_rag", chat.slug, str(path), "--pass", "nope")
+
+
+def test_record_appends(db, chat, tmp_path):
+    out = tmp_path / "evals" / "results.jsonl"
+    summary = {"pass": "rag", "answered_rate": 1.0, "rows": [{"question": "q"}]}
+    record(out, summary, chat=chat, cases_path="/x/adey.jsonl")
+    record(out, summary, chat=chat, cases_path="/x/adey.jsonl")
+    lines = out.read_text().splitlines()
+    assert len(lines) == 2
+    line = json.loads(lines[1])
+    assert line["chat"] == chat.slug and line["cases"] == "adey.jsonl" and line["answered_rate"] == 1.0
+    assert "jev_model" in line and "rows" not in line
+
+
+@pytest.fixture
+def scripted_cases(settings, tmp_path):
+    settings.AGENT_PASSES = {"scripted": "adey_apps.rag.tests.test_evaluation.ScriptedPass"}
+    path = tmp_path / "c.jsonl"
+    path.write_text('{"question": "q1", "answerable": true}\n')
+    return str(path)
+
+
+def test_eval_rag_records_summary(db, chat, scripted_cases, tmp_path):
+    out = tmp_path / "results.jsonl"
+    call_command("eval_rag", chat.slug, scripted_cases, "--pass", "scripted", "--results", str(out))
+    lines = out.read_text().splitlines()
+    assert len(lines) == 1 and json.loads(lines[0])["pass"] == "scripted"
+
+
+def test_eval_rag_accepts_chat_id(db, chat, scripted_cases, tmp_path):
+    out = tmp_path / "results.jsonl"
+    call_command("eval_rag", str(chat.pk), scripted_cases, "--pass", "scripted", "--results", str(out))
+    assert json.loads(out.read_text())["chat_id"] == chat.pk

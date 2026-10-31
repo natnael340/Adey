@@ -74,7 +74,7 @@ class RagPass:
             logger.info(
                 "rag chat=%s retrieved=%d selected=%d outcome=%s", self.chat.slug, retrieved, selected, outcome
             )
-            return result or PassResult(answer=RAG_REFUSAL.format(company_name=self.chat.business_name))
+            return result or PassResult(answer=RAG_REFUSAL.format(company_name=self.chat.business_name), refused=True)
 
         query = self.condense(question, history)
         chunks = hybrid_search(str(self.chat.identifier), query)

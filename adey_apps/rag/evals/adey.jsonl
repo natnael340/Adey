@@ -1,0 +1,30 @@
+{"question": "so what is adey exactly?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "how do i sign up", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "is there an api i can use?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "can I put the chatbot on my website?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "do you have an sdk for android?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "can it hook into my CRM?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "what kind of analytics do i get", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "is the chat data encrypted?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "can i change the bot's personality to match our brand?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "is there a visual editor for conversation flows", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "how do i get in touch with support?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "does it do sentiment analysis?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "how much is the pro plan per month?", "answerable": false, "expected_route": "knowledge"}
+{"question": "do you have a free trial?", "answerable": false, "expected_route": "knowledge"}
+{"question": "where are your servers located?", "answerable": false, "expected_route": "knowledge"}
+{"question": "what's the capital of australia?", "answerable": false, "expected_route": "knowledge"}
+{"question": "write me a poem about cats", "answerable": false, "expected_route": "knowledge"}
+{"question": "what's your support phone number?", "answerable": false, "expected_route": "knowledge"}
+{"question": "hey what time is it rn", "answerable": true, "expected_route": "tools"}
+{"question": "what day of the week is it today?", "answerable": true, "expected_route": "tools"}
+{"question": "whats todays date", "answerable": true, "expected_route": "tools"}
+{"question": "hi there", "answerable": true, "expected_route": "conversation"}
+{"question": "thank you, that helps", "answerable": true, "expected_route": "conversation"}
+{"question": "bye!", "answerable": true, "expected_route": "conversation"}
+{"question": "why won't you just answer my question?", "answerable": true, "history": ["how much does adey cost?", "I'm sorry, I don't have information about that. I can help with questions about Adey. What would you like to know?"], "expected_route": "conversation"}
+{"question": "this bot is pointless", "answerable": true, "history": ["do you have a free trial?", "I'm sorry, I don't have information about that. I can help with questions about Adey. What would you like to know?"], "expected_route": "conversation"}
+{"question": "ugh this is so confusing, how do I add the bot to my site??", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
+{"question": "what about my iphone app?", "answerable": true, "expected_sources": ["Adey Documentation"], "history": ["can i use adey on my website?", "Yes, you add a short code snippet to your web pages."], "expected_route": "knowledge"}
+{"question": "where are the docs for it?", "answerable": true, "expected_sources": ["Adey Documentation"], "history": ["is there an api?", "Yes, Adey has an API for integrating the chatbot programmatically."], "expected_route": "knowledge"}
+{"question": "seriously, just tell me: does it work with help desk software or not?", "answerable": true, "expected_sources": ["Adey Documentation"], "expected_route": "knowledge"}
