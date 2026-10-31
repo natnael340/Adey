@@ -44,6 +44,8 @@ jobs:
       AWS_ACCESS_KEY_ID: ci
       AWS_SECRET_ACCESS_KEY: ci
       AWS_STORAGE_BUCKET_NAME: ci
+      TYPESAFE_API_KEY: ci
+      TOOL_CONFIG_KEY: Y2lfdGVzdF9rZXlfZm9yX3Rvb2xfY29uZmlnc18zMmI=
 
     steps:
       - name: Checkout code

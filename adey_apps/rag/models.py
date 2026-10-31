@@ -5,8 +5,11 @@ from django.contrib.postgres.fields import ArrayField
 from django.template.defaultfilters import slugify
 from uuid import uuid4
 from jsonschema import validate
+import pydantic
 from adey_apps.adey_commons.models import BaseModel
+from adey_apps.rag.skills.base import SkillRegistry, config_errors
 from adey_apps.rag.constants import WIDGET_PREFERENCE_SCHEMA
+from adey_apps.rag.fields import EncryptedJSONField
 
 # Create your models here.
 class MessageTypeChoices(models.TextChoices):
@@ -156,15 +159,35 @@ class AgentTool(BaseModel):
     tool_path = models.CharField(max_length=256, blank=True)
     is_active = models.BooleanField(default=False)
 
-    def _check_tool_path(self):
-        if self.is_active and not self.tool_path:
-            raise ValidationError("Tool path is required when the tool is active.")
-
     def save(self, **kwargs) -> None:
-        self._check_tool_path()
         if not self.slug:
             self.slug = slugify(self.name)
         return super().save(**kwargs)
+
+
+class ChatSkill(BaseModel):
+    chat = models.ForeignKey(to=Chat, on_delete=models.CASCADE)
+    key = models.CharField(max_length=128)
+    config = EncryptedJSONField(default=dict)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("chat", "key"), name="unique_together_chat_and_skill_key")
+        ]
+
+    def clean(self):
+        skill = SkillRegistry.get(self.key)
+        if skill is None:
+            raise ValidationError({"key": f"Unknown skill {self.key!r}."})
+        if skill.config_model:
+            try:
+                skill.config_model.model_validate(self.config)
+            except pydantic.ValidationError as e:
+                raise ValidationError({"config": [f"{field}: {msg}" for field, msgs in config_errors(e).items() for msg in msgs]})
+
+    def __str__(self) -> str:
+        return f"{self.chat} - {self.key}"
 
 
 class HumanHandOff(BaseModel):

@@ -63,5 +63,5 @@ def test_run_eval_records_errors_per_case(db, chat, settings):
 def test_eval_rag_rejects_unknown_pass(db, chat, tmp_path):
     path = tmp_path / "c.jsonl"
     path.write_text('{"question": "q", "answerable": true}\n')
-    with pytest.raises(CommandError, match="rag, agent"):
+    with pytest.raises(CommandError, match="rag, router"):
         call_command("eval_rag", chat.slug, str(path), "--pass", "nope")

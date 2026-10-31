@@ -9,9 +9,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from markdownify import markdownify
 from pypdf import PdfReader
 
-from adey_apps.rag.db import (
-    delete_chat_chunks, delete_stale_chat_chunks, delete_vector_collection, get_chunk_store, replace_vector_collection,
-)
+from adey_apps.rag.db import delete_chat_chunks, delete_stale_chat_chunks, get_chunk_store
 from adey_apps.rag.models import Chat, Resource
 from adey_apps.rag.utils import clean_text
 
@@ -146,11 +144,8 @@ def index_chat(chat: Chat) -> int:
     chat_id = str(chat.identifier)
     if not chunks:
         delete_chat_chunks(chat_id)
-        delete_vector_collection(chat_id)
         return 0
     ids = [c.metadata["chunk_id"] for c in chunks]
     get_chunk_store().add_documents(chunks, ids=ids)
     delete_stale_chat_chunks(chat_id, ids)
-    # shortcut: keeps LegacyAgentPass answering while AGENT_DEFAULT_PASS=agent, delete with LegacyAgentPass (rollout step 6)
-    replace_vector_collection(chat_id, chunks)
     return len(chunks)

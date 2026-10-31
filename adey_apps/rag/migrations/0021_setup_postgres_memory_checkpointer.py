@@ -5,12 +5,11 @@ from django.conf import settings
 
 from langgraph.checkpoint.postgres import PostgresSaver
 from psycopg import Connection
-
-from adey_apps.rag.db import CHECKPOINTER_CONNECTION_KWARGS
+from psycopg.rows import dict_row
 
 
 def setup_postgres_saver_checkpointer(apps, schema_editor):
-    with Connection.connect(settings.PG_VECTOR_DB_URL, **CHECKPOINTER_CONNECTION_KWARGS) as conn:
+    with Connection.connect(settings.PG_VECTOR_DB_URL, autocommit=True, prepare_threshold=None, row_factory=dict_row) as conn:
         PostgresSaver(conn).setup()
 
 class Migration(migrations.Migration):

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db. models import JSONField
 
 from prettyjson import PrettyJSONWidget
-from adey_apps.rag.models import Resource, Chat, Message, AgentTool, WidgetPreference
+from adey_apps.rag.models import Resource, Chat, ChatSkill, Message, AgentTool, WidgetPreference
 
 
 
@@ -24,6 +24,12 @@ class MessageAdmin(admin.ModelAdmin):
 @admin.register(AgentTool)
 class AgentToolAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "tool_path")
+
+
+@admin.register(ChatSkill)
+class ChatSkillAdmin(admin.ModelAdmin):
+    list_display = ("chat", "key", "is_active")
+    exclude = ("config",)
 
 
 @admin.register(WidgetPreference)

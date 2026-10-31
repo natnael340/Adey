@@ -10,9 +10,11 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models.functions import TruncDate
 from django.db.models import Count
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import FileExtensionValidator
 
-from adey_apps.rag.models import Chat, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool, WidgetPreference, HumanHandOff
+from adey_apps.rag.skills.base import SkillRegistry, validate_skill_config
+from adey_apps.rag.models import Chat, ChatSkill, Resource, Message, AssistantCharacter, MessageTypeChoices, AgentTool, WidgetPreference, HumanHandOff
 from adey_apps.adey_commons.serializers import ManyToManyListField, SessionDefault, BotDefault
 
 class AssistantCharacterSerializer(serializers.ModelSerializer):
@@ -409,3 +411,66 @@ class HumanHandOffSerializer(serializers.ModelSerializer):
     class Meta:
         model = HumanHandOff
         fields = ("session_id", "bot", "is_handoff")
+
+SECRET_MASK = "••••"
+
+
+def secret_fields(key: str) -> set[str]:
+    skill = SkillRegistry.get(key)
+    properties = skill.config_schema().get("properties", {}) if skill else {}
+    return {name for name, prop in properties.items() if prop.get("format") == "password"}
+
+
+def mask_secret(value: str) -> str:
+    return SECRET_MASK + value[-4:] if len(value) > 8 else SECRET_MASK
+
+
+def merge_config(key: str, stored: dict, incoming: dict) -> dict:
+    """Changed fields over the stored config; a secret sent back masked keeps its stored value."""
+    merged = {**stored, **incoming}
+    for name in secret_fields(key) & stored.keys():
+        if merged[name] == mask_secret(stored[name]):
+            merged[name] = stored[name]
+    return merged
+
+
+class SkillCatalogSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    description = serializers.CharField()
+    read_only = serializers.BooleanField()
+    config_schema = serializers.JSONField()
+
+
+class ChatSkillSerializer(serializers.ModelSerializer):
+    config = serializers.JSONField(required=False)
+
+    class Meta:
+        model = ChatSkill
+        fields = ("id", "key", "is_active", "config")
+
+    def validate_key(self, value):
+        if self.instance and value != self.instance.key:
+            raise serializers.ValidationError("The skill of an enrollment can't be changed.")
+        return value
+
+    def validate(self, attrs):
+        key = self.instance.key if self.instance else attrs["key"]
+        if self.instance is None and ChatSkill.objects.filter(chat=self.context["request"].chat, key=key).exists():
+            raise serializers.ValidationError({"key": ["This skill is already enrolled."]})
+        if self.instance is None or "config" in attrs:
+            config = merge_config(key, self.instance.config if self.instance else {}, attrs.get("config") or {})
+            try:
+                validate_skill_config(key, config)
+            except DjangoValidationError as e:
+                raise serializers.ValidationError(e.message_dict)
+            attrs["config"] = config
+        return attrs
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        secrets = secret_fields(instance.key)
+        data["config"] = {
+            name: mask_secret(value) if name in secrets and isinstance(value, str) else value
+            for name, value in instance.config.items()
+        }
+        return data
