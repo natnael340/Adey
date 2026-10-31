@@ -103,7 +103,13 @@ Passages:
 
 ROUTER_INSTRUCTIONS = (
     "Pick the source that can answer the customer's latest message. Choose a tool only when the answer "
-    "needs live or customer-specific data, or an action that tool describes."
+    "needs live or customer-specific data, or an action that tool describes. If the message mixes feelings "
+    "with a question that needs information or a tool, choose by the question."
+)
+
+CONVERSATION_ROUTE_CRITERIA = (
+    "Greetings, thanks, goodbyes, small talk, or the customer expressing feelings (frustration, complaints "
+    "about the assistant's earlier replies) with no question that needs {company_name}'s information or a tool."
 )
 
 KNOWLEDGE_ROUTE_CRITERIA = (

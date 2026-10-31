@@ -29,19 +29,21 @@ def clock(chat):
     return [ClockNow(chat=chat, session_id="s", config=None)]
 
 
-def test_no_skills_skips_jev(chat, jev):
-    client_cls = jev("clock.now")
-    assert route(chat, "what day is it?", [], []) == Route("knowledge", "no_tools")
-    client_cls.assert_not_called()
+def test_no_skills_still_asks_jev(chat, jev):
+    client_cls = jev("conversation")
+    assert route(chat, "hi", [], []) == Route("conversation", "chosen:conversation")
+    question = client_cls.return_value.system_one.call_args.kwargs["questions"]["route"]
+    assert set(question.criteria) == {"knowledge", "conversation"}
 
 
 def test_tool_choice_routes_to_tools(chat, jev, clock):
     client_cls = jev("clock.now", 0.9)
     assert route(chat, "what day is it?", [], clock) == Route("tools", "chosen:clock.now")
     question = client_cls.return_value.system_one.call_args.kwargs["questions"]["route"]
-    assert set(question.criteria) == {"knowledge", "clock.now"}
+    assert set(question.criteria) == {"knowledge", "conversation", "clock.now"}
     assert question.criteria["clock.now"] == ClockNow.description
     assert chat.business_name in question.criteria["knowledge"]
+    assert chat.business_name in question.criteria["conversation"]
 
 
 def test_knowledge_choice_routes_to_knowledge(chat, jev, clock):
@@ -52,6 +54,18 @@ def test_knowledge_choice_routes_to_knowledge(chat, jev, clock):
 def test_low_confidence_tool_falls_back(chat, jev, clock):
     jev("clock.now", 0.4)
     assert route(chat, "hmm", [], clock) == Route("knowledge", "low_confidence:clock.now:0.40")
+
+
+def test_low_confidence_conversation_falls_back(chat, jev, clock):
+    jev("conversation", 0.4)
+    assert route(chat, "ok", [], clock) == Route("knowledge", "low_confidence:conversation:0.40")
+
+
+def test_instructions_prefer_the_question_over_feelings(chat, jev, clock):
+    client_cls = jev("knowledge")
+    route(chat, "this is ridiculous, what's your return policy??", [], clock)
+    question = client_cls.return_value.system_one.call_args.kwargs["questions"]["route"]
+    assert "choose by the question" in question.instructions
 
 
 def test_jev_error_falls_back(chat, jev, clock):

@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from langchain_core.messages import AIMessage, HumanMessage
 
 from adey_apps.rag.constants import RAG_REFUSAL
@@ -31,6 +33,8 @@ def test_answer_runs_the_routed_pass(db, chat, settings):
 
 def test_answer_defaults_to_router(db, chat, mocker):
     ChatSkill.objects.create(chat=chat, key="clock.now", is_active=False)
+    jev = mocker.patch("adey_apps.rag.router.TypeSafeClient").return_value.system_one
+    jev.return_value = SimpleNamespace(answers={"route": SimpleNamespace(choice="knowledge", confidence=0.9)})
     run = mocker.patch.object(RagPass, "run", return_value=PassResult("from rag"))
     assert answer(chat, "s", "refund policy?") == PassResult("from rag")
     run.assert_called_once_with("refund policy?", "s", [])

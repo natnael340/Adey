@@ -6,7 +6,7 @@ from django.conf import settings
 from langchain_core.messages import BaseMessage, HumanMessage
 from typesafe_sdk import Choice, RetryPolicy, TypeSafeClient
 
-from adey_apps.rag.constants import KNOWLEDGE_ROUTE_CRITERIA, ROUTER_INSTRUCTIONS
+from adey_apps.rag.constants import CONVERSATION_ROUTE_CRITERIA, KNOWLEDGE_ROUTE_CRITERIA, ROUTER_INSTRUCTIONS
 from adey_apps.rag.models import Chat
 from adey_apps.rag.passes import PassResult
 from adey_apps.rag.rag_pass import RagPass
@@ -16,22 +16,22 @@ from adey_apps.rag.tool_pass import ToolPass
 logger = logging.getLogger(__name__)
 
 KNOWLEDGE = "knowledge"
+CONVERSATION = "conversation"
 JEV_TIMEOUT_SECONDS = 2.0
 
 
 @dataclass(frozen=True)
 class Route:
-    name: Literal["knowledge", "tools"]
+    name: Literal["knowledge", "tools", "conversation"]
     reason: str
 
 
 def route(chat: Chat, question: str, history: list[BaseMessage], skills: list[Skill]) -> Route:
-    if not skills:
-        return Route(KNOWLEDGE, "no_tools")
     criteria = {
         KNOWLEDGE: KNOWLEDGE_ROUTE_CRITERIA.format(
             company_name=chat.business_name, business_description=chat.business_description
         ),
+        CONVERSATION: CONVERSATION_ROUTE_CRITERIA.format(company_name=chat.business_name),
         **{s.key: s.description for s in skills},
     }
     turns = [f"{'Customer' if isinstance(m, HumanMessage) else 'Assistant'}: {m.content}" for m in history]
@@ -50,6 +50,8 @@ def route(chat: Chat, question: str, history: list[BaseMessage], skills: list[Sk
         return Route(KNOWLEDGE, f"chosen:{KNOWLEDGE}")
     if answer.confidence < settings.ROUTER_MIN_CONFIDENCE:
         return Route(KNOWLEDGE, f"low_confidence:{answer.choice}:{answer.confidence:.2f}")
+    if answer.choice == CONVERSATION:
+        return Route(CONVERSATION, f"chosen:{CONVERSATION}")
     return Route("tools", f"chosen:{answer.choice}")
 
 
