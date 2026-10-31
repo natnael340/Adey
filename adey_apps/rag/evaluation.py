@@ -2,9 +2,11 @@ import json
 import math
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from uuid import uuid4
 
 from django.conf import settings
+from django.utils import timezone
 from django.utils.module_loading import import_string
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -71,3 +73,18 @@ def run_eval(chat: Chat, cases: list[EvalCase], pass_name: str) -> dict:
         "p95_ms": _nearest_rank_percentile(times, 0.95),
         "rows": rows,
     }
+
+
+def record(path: Path, summary: dict, *, chat: Chat, cases_path: str) -> None:
+    line = {k: v for k, v in summary.items() if k != "rows"} | {
+        "at": timezone.now().isoformat(timespec="seconds"),
+        "chat": chat.slug,
+        "chat_id": chat.pk,
+        "cases": Path(cases_path).name,
+        "jev_model": settings.JEV_MODEL,
+        "chat_model": settings.RAG_CHAT_MODEL,
+        "answer_model": settings.RAG_ANSWER_MODEL,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(line) + "\n")

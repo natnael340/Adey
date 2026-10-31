@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -5,7 +7,7 @@ from django.utils.module_loading import import_string
 
 from langchain_core.messages import AIMessage, HumanMessage
 
-from adey_apps.rag.evaluation import EvalCase, load_cases, run_eval
+from adey_apps.rag.evaluation import EvalCase, load_cases, record, run_eval
 from adey_apps.rag.passes import PassResult
 
 
@@ -113,3 +115,36 @@ def test_eval_rag_rejects_unknown_pass(db, chat, tmp_path):
     path.write_text('{"question": "q", "answerable": true}\n')
     with pytest.raises(CommandError, match="rag, router"):
         call_command("eval_rag", chat.slug, str(path), "--pass", "nope")
+
+
+def test_record_appends(db, chat, tmp_path):
+    out = tmp_path / "evals" / "results.jsonl"
+    summary = {"pass": "rag", "answered_rate": 1.0, "rows": [{"question": "q"}]}
+    record(out, summary, chat=chat, cases_path="/x/adey.jsonl")
+    record(out, summary, chat=chat, cases_path="/x/adey.jsonl")
+    lines = out.read_text().splitlines()
+    assert len(lines) == 2
+    line = json.loads(lines[1])
+    assert line["chat"] == chat.slug and line["cases"] == "adey.jsonl" and line["answered_rate"] == 1.0
+    assert "jev_model" in line and "rows" not in line
+
+
+@pytest.fixture
+def scripted_cases(settings, tmp_path):
+    settings.AGENT_PASSES = {"scripted": "adey_apps.rag.tests.test_evaluation.ScriptedPass"}
+    path = tmp_path / "c.jsonl"
+    path.write_text('{"question": "q1", "answerable": true}\n')
+    return str(path)
+
+
+def test_eval_rag_records_summary(db, chat, scripted_cases, tmp_path):
+    out = tmp_path / "results.jsonl"
+    call_command("eval_rag", chat.slug, scripted_cases, "--pass", "scripted", "--results", str(out))
+    lines = out.read_text().splitlines()
+    assert len(lines) == 1 and json.loads(lines[0])["pass"] == "scripted"
+
+
+def test_eval_rag_accepts_chat_id(db, chat, scripted_cases, tmp_path):
+    out = tmp_path / "results.jsonl"
+    call_command("eval_rag", str(chat.pk), scripted_cases, "--pass", "scripted", "--results", str(out))
+    assert json.loads(out.read_text())["chat_id"] == chat.pk
