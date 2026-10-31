@@ -20,9 +20,10 @@ class PassageSelection(BaseModel):
 
 
 class GroundedAnswer(BaseModel):
-    answerable: bool
+    # answer first: the model fills fields in order, and deciding answerable up front made it refuse clear answers
     answer: str
     citations: list[str]
+    answerable: bool
 
 
 def label_passages(chunks: list[Chunk]) -> dict[str, Chunk]:
@@ -37,11 +38,15 @@ def render_passages(chunks: list[Chunk]) -> str:
 class RagPass:
     def __init__(self, chat: Chat, llm: BaseChatModel | None = None):
         self.chat = chat
+        answer_llm = llm
         if llm is None:
             from langchain_openai import ChatOpenAI
 
             llm = ChatOpenAI(model=settings.RAG_CHAT_MODEL, temperature=0)
+            # only the answer step needs the stronger model; rewrite and selection work fine on the cheap one
+            answer_llm = ChatOpenAI(model=settings.RAG_ANSWER_MODEL, temperature=0)
         self.llm = llm
+        self.answer_llm = answer_llm
 
     def condense(self, question: str, history: list[BaseMessage]) -> str:
         if not any(isinstance(m, HumanMessage) for m in history):
@@ -64,7 +69,7 @@ class RagPass:
             company_name=self.chat.business_name,
             passages=render_passages(chunks),
         )
-        return self.llm.with_structured_output(GroundedAnswer).invoke(
+        return self.answer_llm.with_structured_output(GroundedAnswer).invoke(
             [SystemMessage(system), *history, HumanMessage(question)]
         )
 

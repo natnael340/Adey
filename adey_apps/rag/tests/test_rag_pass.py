@@ -88,3 +88,10 @@ def test_run_sends_question_passages_and_company_to_model(db, chat, mocker):
     for messages in llm.calls:
         for m in messages:
             assert not any(p in m.content for p in ("{company_name}", "{passages}", "{question}", "{assistant_name}"))
+
+
+def test_answer_step_uses_its_own_model(db, chat, settings, mocker):
+    settings.RAG_CHAT_MODEL, settings.RAG_ANSWER_MODEL = "cheap-model", "strong-model"
+    mocker.patch("langchain_openai.ChatOpenAI", side_effect=lambda model, temperature: model)
+    rag = RagPass(chat)
+    assert (rag.llm, rag.answer_llm) == ("cheap-model", "strong-model")
